@@ -1,73 +1,89 @@
-# Welcome to your Lovable project
+# Burger House - Aplicación de Hamburguería
 
-## Project info
+Una aplicación completa de hamburguería con panel administrativo, desarrollada en React con diseño minimalista oscuro.
 
-**URL**: https://lovable.dev/projects/4258bdc4-3ea6-4142-ba0a-ecb9159d190e
+## 🚀 Características
 
-## How can I edit this code?
+### Frontend Público
+- **Home**: Landing page con hero y CTA
+- **Carta/Menú**: Lista de productos con filtros y búsqueda
+- **Detalle de Producto**: Galería de imágenes y descripción completa
+- **Carrito**: Persistente en localStorage, widget flotante
+- **Checkout**: Formulario completo con integración WhatsApp
 
-There are several ways of editing your application.
+### Panel Administrativo
+- **Dashboard**: Estadísticas y resumen
+- **Gestión de Menú**: CRUD completo de hamburguesas
+- **Categorías**: Administración de categorías
+- **Pedidos**: Listado de órdenes recibidas
+- **Configuración**: Editor de tema y colores
 
-**Use Lovable**
+## 🛠️ Tecnologías
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/4258bdc4-3ea6-4142-ba0a-ecb9159d190e) and start prompting.
+- React 18+ (JavaScript, no TypeScript)
+- React Router para navegación
+- Tailwind CSS con diseño system personalizado
+- Shadcn/UI para componentes
+- Context API para estado global
+- LocalStorage para persistencia
 
-Changes made via Lovable will be committed automatically to this repo.
+## ⚡ Inicio Rápido
 
-**Use your preferred IDE**
+```bash
+# Instalar dependencias
+npm install
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+# Configurar variables de entorno
+cp .env.example .env
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Iniciar servidor de desarrollo
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## 🎨 Diseño
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+- **Tema**: Oscuro por defecto con acentos naranjas/amarillos
+- **Tipografía**: Inter font family
+- **Responsive**: Mobile-first approach
+- **Animaciones**: Transiciones suaves y hover effects
 
-**Use GitHub Codespaces**
+## 🔐 Acceso Administrativo
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+**Credenciales de prueba:**
+- Email: `admin@burger.com`
+- Contraseña: `admin123`
 
-## What technologies are used for this project?
+Ruta: `/auth`
 
-This project is built with:
+## 📱 Flujo de Compra
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+1. Explorar carta → Agregar al carrito
+2. Revisar pedido → Checkout
+3. Completar datos → Confirmar
+4. Ver información de pago → WhatsApp con comprobante
 
-## How can I deploy this project?
+## 🔧 Configuración API
 
-Simply open [Lovable](https://lovable.dev/projects/4258bdc4-3ea6-4142-ba0a-ecb9159d190e) and click on Share -> Publish.
+La app está preparada para conectar con un backend REST. Configurar `REACT_APP_API_URL` en `.env`.
 
-## Can I connect a custom domain to my Lovable project?
+Mock data incluido para desarrollo sin backend.
 
-Yes, you can!
+## 📦 Estructura del Proyecto
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+```
+src/
+├── components/          # Componentes reutilizables
+├── contexts/           # Context providers (Auth, Cart, Theme)
+├── hooks/              # Custom hooks
+├── pages/              # Páginas principales
+│   ├── admin/          # Panel administrativo
+├── services/           # API service
+└── lib/                # Utilidades
+```
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## 🌟 Próximos Pasos
+
+- Integrar con backend real
+- Añadir sistema de pagos
+- Implementar notificaciones push
+- Dashboard de analytics avanzado
