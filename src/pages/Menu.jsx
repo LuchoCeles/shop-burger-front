@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { Search, Filter, SlidersHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
@@ -17,7 +15,6 @@ import ProductCard from '@/components/ProductCard';
 import CartWidget from '@/components/CartWidget';
 import { useCart } from '@/contexts/CartContext';
 import apiService from '@/services/api';
-import { set } from 'date-fns';
 
 const Menu = () => {
   const [products, setProducts] = useState([]);
@@ -43,7 +40,6 @@ const Menu = () => {
         apiService.getProducts(),
         apiService.getCategories()
       ]);
-
       setProducts(productsData?.data || []);
       setCategories(categoriesData?.data || []);
     } catch (error) {

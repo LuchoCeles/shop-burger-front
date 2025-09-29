@@ -24,8 +24,8 @@ const Product = () => {
 
   const loadProduct = async () => {
     try {
-      const data = await apiService.getProduct(id);
-      setProduct(data.product);
+      const product = await apiService.getProduct();
+      setProduct(product.data);
     } catch (error) {
       console.error('Error loading product:', error);
       // Mock data for development

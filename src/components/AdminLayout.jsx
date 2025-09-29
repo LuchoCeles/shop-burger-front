@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { 
-  ChefHat, 
-  LayoutDashboard, 
-  Package, 
-  ShoppingCart, 
-  Tags, 
-  LogOut, 
-  Menu, 
+import {
+  ChefHat,
+  LayoutDashboard,
+  Package,
+  ShoppingCart,
+  Tags,
+  LogOut,
+  Menu,
   X,
   Home
 } from 'lucide-react';
@@ -31,10 +31,10 @@ const AdminLayout = ({ children }) => {
   };
 
   const menuItems = [
-    { name: 'Dashboard', path: '/admin', icon: LayoutDashboard },
-    { name: 'Gestionar Menú', path: '/admin/menu', icon: Package },
-    { name: 'Pedidos', path: '/admin/ordenes', icon: ShoppingCart },
-    { name: 'Categorías', path: '/admin/categorias', icon: Tags }
+    { nombre: 'Dashboard', path: '/admin', icon: LayoutDashboard },
+    { nombre: 'Gestionar Menú', path: '/admin/menu', icon: Package },
+    { nombre: 'Pedidos', path: '/admin/ordenes', icon: ShoppingCart },
+    { nombre: 'Categorías', path: '/admin/categorias', icon: Tags }
   ];
 
   const isActive = (path) => location.pathname === path;
@@ -65,15 +65,12 @@ const AdminLayout = ({ children }) => {
               <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                   <span className="text-sm font-medium">
-                    {user?.name?.charAt(0) || user?.email?.charAt(0) || 'A'}
+                    {user?.nombre?.charAt(0).toUpperCase()}
                   </span>
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium truncate">
-                    {user?.name || 'Administrador'}
-                  </p>
-                  <p className="text-xs text-muted-foreground truncate">
-                    {user?.email || 'admin@burger.com'}
+                    {user?.nombre}
                   </p>
                 </div>
               </div>
@@ -89,14 +86,14 @@ const AdminLayout = ({ children }) => {
                     to={item.path}
                     className={`
                       flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors
-                      ${isActive(item.path) 
-                        ? 'bg-primary text-primary-foreground' 
+                      ${isActive(item.path)
+                        ? 'bg-primary text-primary-foreground'
                         : 'text-foreground/60 hover:text-foreground hover:bg-accent'
                       }
                     `}
                   >
                     <Icon className="w-4 h-4" />
-                    <span>{item.name}</span>
+                    <span>{item.nombre}</span>
                   </Link>
                 );
               })}
@@ -115,7 +112,7 @@ const AdminLayout = ({ children }) => {
                   Ver Sitio Web
                 </Link>
               </Button>
-              
+
               <Button
                 variant="ghost"
                 size="sm"
@@ -143,9 +140,9 @@ const AdminLayout = ({ children }) => {
               <Menu className="w-5 h-5" />
             </Button>
           )}
-          
+
           <div className="flex-1" />
-          
+
           <div className="flex items-center space-x-4">
             <span className="text-sm text-muted-foreground">
               Panel Administrativo
