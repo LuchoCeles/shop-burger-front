@@ -34,9 +34,8 @@ const AdminLayout = ({ children }) => {
   const menuItems = [
     { name: 'Dashboard', path: '/admin', icon: LayoutDashboard },
     { name: 'Gestionar Menú', path: '/admin/menu', icon: Package },
-    { name: 'Pedidos', path: '/admin/orders', icon: ShoppingCart },
-    { name: 'Categorías', path: '/admin/categories', icon: Tags },
-    { name: 'Configuración', path: '/admin/theme', icon: Palette },
+    { name: 'Pedidos', path: '/admin/ordenes', icon: ShoppingCart },
+    { name: 'Categorías', path: '/admin/categorias', icon: Tags }
   ];
 
   const isActive = (path) => location.pathname === path;

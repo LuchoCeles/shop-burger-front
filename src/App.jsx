@@ -50,12 +50,12 @@ const App = () => (
                     <MenuManager />
                   </ProtectedRoute>
                 } />
-                <Route path="/admin/categories" element={
+                <Route path="/admin/categorias" element={
                   <ProtectedRoute>
                     <Categories />
                   </ProtectedRoute>
                 } />
-                <Route path="/admin/orders" element={
+                <Route path="/admin/ordenes" element={
                   <ProtectedRoute>
                     <Orders />
                   </ProtectedRoute>
