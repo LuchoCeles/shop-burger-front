@@ -34,8 +34,8 @@ const Navbar = () => {
               <Link
                 key={link.path}
                 to={link.path}
-                className={`text-sm font-medium transition-colors hover:text-primary ${
-                  isActive(link.path) ? 'text-primary font-semibold' : 'text-foreground hover:text-foreground/80'
+                className={`text-sm font-medium transition-colors hover:text-primary px-3 py-2 rounded-md ${
+                  isActive(link.path) ? 'text-primary font-semibold bg-primary/10' : 'text-foreground hover:text-foreground/80 hover:bg-accent/50'
                 }`}
               >
                 {link.name}
@@ -74,13 +74,13 @@ const Navbar = () => {
         {/* Mobile Navigation */}
         {isOpen && (
           <div className="md:hidden py-4 border-t border-border">
-            <div className="flex flex-col space-y-2">
+            <div className="flex flex-col space-y-1">
               {navLinks.map((link) => (
                 <Link
                   key={link.path}
                   to={link.path}
-                  className={`py-2 px-4 text-sm font-medium transition-colors hover:text-primary ${
-                    isActive(link.path) ? 'text-primary font-semibold' : 'text-foreground hover:text-foreground/80'
+                  className={`py-3 px-4 text-sm font-medium transition-colors hover:text-primary rounded-md ${
+                    isActive(link.path) ? 'text-primary font-semibold bg-primary/10' : 'text-foreground hover:text-foreground/80 hover:bg-accent/50'
                   }`}
                   onClick={() => setIsOpen(false)}
                 >
