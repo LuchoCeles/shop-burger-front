@@ -34,9 +34,8 @@ const Navbar = () => {
               <Link
                 key={link.path}
                 to={link.path}
-                className={`text-sm font-medium transition-colors hover:text-primary px-3 py-2 rounded-md ${
-                  isActive(link.path) ? 'text-primary font-semibold bg-primary/10' : 'text-foreground hover:text-foreground/80 hover:bg-accent/50'
-                }`}
+                className={`text-sm font-medium transition-colors hover:text-primary px-3 py-2 rounded-md ${isActive(link.path) ? 'text-primary font-semibold bg-primary/10' : 'text-foreground hover:text-foreground/80 hover:bg-accent/50'
+                  }`}
               >
                 {link.name}
               </Link>
@@ -79,9 +78,8 @@ const Navbar = () => {
                 <Link
                   key={link.path}
                   to={link.path}
-                  className={`py-3 px-4 text-sm font-medium transition-colors hover:text-primary rounded-md ${
-                    isActive(link.path) ? 'text-primary font-semibold bg-primary/10' : 'text-foreground hover:text-foreground/80 hover:bg-accent/50'
-                  }`}
+                  className={`py-3 px-4 text-sm font-medium transition-colors hover:text-primary rounded-md ${isActive(link.path) ? 'text-primary font-semibold bg-primary/10' : 'text-foreground hover:text-foreground/80 hover:bg-accent/50'
+                    }`}
                   onClick={() => setIsOpen(false)}
                 >
                   {link.name}
