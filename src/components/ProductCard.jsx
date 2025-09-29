@@ -75,7 +75,7 @@ const ProductCard = ({ product, onAddToCart }) => {
             asChild
             className="flex-1"
           >
-            <Link to={`/product/${product.id}`}>
+            <Link to={`/producto/${product.id}`}>
               Ver Detalles
             </Link>
           </Button>

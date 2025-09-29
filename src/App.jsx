@@ -18,7 +18,6 @@ import Auth from "./pages/Auth";
 import Dashboard from "./pages/admin/Dashboard";
 import MenuManager from "./pages/admin/MenuManager";
 import Categories from "./pages/admin/Categories";
-import ThemeSettings from "./pages/admin/ThemeSettings";
 import Orders from "./pages/admin/Orders";
 import NotFound from "./pages/NotFound";
 
@@ -37,7 +36,7 @@ const App = () => (
                 <Routes>
                   <Route path="/" element={<Home />} />
                   <Route path="/menu" element={<Menu />} />
-                  <Route path="/product/:id" element={<Product />} />
+                  <Route path="/producto/:id" element={<Product />} />
                   <Route path="/cart" element={<Cart />} />
                   <Route path="/checkout" element={<Checkout />} />
                   <Route path="/auth" element={<Auth />} />
@@ -56,11 +55,6 @@ const App = () => (
                   <Route path="/admin/categories" element={
                     <ProtectedRoute>
                       <Categories />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/admin/theme" element={
-                    <ProtectedRoute>
-                      <ThemeSettings />
                     </ProtectedRoute>
                   } />
                   <Route path="/admin/orders" element={
