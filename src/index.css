@@ -120,13 +120,18 @@
     @apply border-border;
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+
   body {
     @apply bg-background text-foreground font-inter antialiased;
     font-feature-settings: "cv11", "ss01";
     font-variation-settings: "opsz" 32;
-  }
-
-  html {
-    scroll-behavior: smooth;
+    line-height: 1.6;
   }
 }

@@ -19,7 +19,7 @@ const Navbar = () => {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <nav className="fixed top-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-b border-border z-50">
+    <nav className="fixed top-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-b border-border z-50 shadow-sm">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -34,8 +34,8 @@ const Navbar = () => {
               <Link
                 key={link.path}
                 to={link.path}
-                className={`text-sm font-medium text-primary transition-colors hover:text-primary ${
-                  isActive(link.path) ? 'text-primary' : 'text-foreground/60'
+                className={`text-sm font-medium transition-colors hover:text-primary ${
+                  isActive(link.path) ? 'text-primary font-semibold' : 'text-foreground hover:text-foreground/80'
                 }`}
               >
                 {link.name}
@@ -80,7 +80,7 @@ const Navbar = () => {
                   key={link.path}
                   to={link.path}
                   className={`py-2 px-4 text-sm font-medium transition-colors hover:text-primary ${
-                    isActive(link.path) ? 'text-primary' : 'text-foreground/60'
+                    isActive(link.path) ? 'text-primary font-semibold' : 'text-foreground hover:text-foreground/80'
                   }`}
                   onClick={() => setIsOpen(false)}
                 >
