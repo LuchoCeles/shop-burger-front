@@ -5,7 +5,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { CartProvider } from "./contexts/CartContext";
-import { ThemeProvider } from "./contexts/ThemeContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 // Pages
@@ -25,53 +24,51 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <ThemeProvider>
-      <AuthProvider>
-        <CartProvider>
-          <TooltipProvider>
-            <div className="dark">
-              <Toaster />
-              <Sonner />
-              <BrowserRouter>
-                <Routes>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/menu" element={<Menu />} />
-                  <Route path="/producto/:id" element={<Product />} />
-                  <Route path="/cart" element={<Cart />} />
-                  <Route path="/checkout" element={<Checkout />} />
-                  <Route path="/auth" element={<Auth />} />
-                  
-                  {/* Admin Routes */}
-                  <Route path="/admin" element={
-                    <ProtectedRoute>
-                      <Dashboard />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/admin/menu" element={
-                    <ProtectedRoute>
-                      <MenuManager />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/admin/categories" element={
-                    <ProtectedRoute>
-                      <Categories />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/admin/orders" element={
-                    <ProtectedRoute>
-                      <Orders />
-                    </ProtectedRoute>
-                  } />
-                  
-                  {/* 404 Route */}
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </BrowserRouter>
-            </div>
-          </TooltipProvider>
-        </CartProvider>
-      </AuthProvider>
-    </ThemeProvider>
+    <AuthProvider>
+      <CartProvider>
+        <TooltipProvider>
+          <div className="dark">
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/menu" element={<Menu />} />
+                <Route path="/producto/:id" element={<Product />} />
+                <Route path="/cart" element={<Cart />} />
+                <Route path="/checkout" element={<Checkout />} />
+                <Route path="/auth" element={<Auth />} />
+
+                {/* Admin Routes */}
+                <Route path="/admin" element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                } />
+                <Route path="/admin/menu" element={
+                  <ProtectedRoute>
+                    <MenuManager />
+                  </ProtectedRoute>
+                } />
+                <Route path="/admin/categories" element={
+                  <ProtectedRoute>
+                    <Categories />
+                  </ProtectedRoute>
+                } />
+                <Route path="/admin/orders" element={
+                  <ProtectedRoute>
+                    <Orders />
+                  </ProtectedRoute>
+                } />
+
+                {/* 404 Route */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </div>
+        </TooltipProvider>
+      </CartProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 

@@ -6,7 +6,7 @@ const CartContext = createContext();
 export const useCart = () => {
   const context = useContext(CartContext);
   if (!context) {
-    throw new Error('useCart must be used within a CartProvider');
+    throw new Error('useCart debe utilizarse dentro de un CartProvider');
   }
   return context;
 };
@@ -15,7 +15,7 @@ export const CartProvider = ({ children }) => {
   const [items, setItems] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
 
-  // Load cart from localStorage on mount
+  // Cargar el carrito desde localStorage al iniciar la aplicación
   useEffect(() => {
     const savedCart = localStorage.getItem('cart');
     if (savedCart) {
@@ -23,7 +23,7 @@ export const CartProvider = ({ children }) => {
     }
   }, []);
 
-  // Save cart to localStorage whenever items change
+  // Guardar el carrito en localStorage cada vez que cambien los artículos.
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(items));
   }, [items]);

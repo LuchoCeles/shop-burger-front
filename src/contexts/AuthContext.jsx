@@ -6,7 +6,7 @@ const AuthContext = createContext();
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error('useAuth debe utilizarse dentro de un AuthProvider.');
   }
   return context;
 };
@@ -18,7 +18,7 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
 
-    // Check for stored token on app start
+    // Comprobar si hay un token almacenado al iniciar la aplicación.
     const storedToken = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
 
