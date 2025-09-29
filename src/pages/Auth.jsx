@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -49,13 +50,13 @@ const Auth = () => {
 
     try {
       const response = await apiService.login(formData.nombre, formData.password);
-
-      if (response.token) {
-        login(response.token);
-
+      if (response.data.token) {
+        login(response.data.token);
+        const userData = jwtDecode(response.data.token);
+        setLoading(false);
         toast({
           title: "Bienvenido",
-          description: `Hola ${response.user.name}`,
+          description: `Hola ${userData.nombre}`,
         });
 
         // Redirect to intended page or dashboard

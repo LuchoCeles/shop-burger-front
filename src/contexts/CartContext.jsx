@@ -6,7 +6,7 @@ const CartContext = createContext();
 export const useCart = () => {
   const context = useContext(CartContext);
   if (!context) {
-    throw new Error('useCart must be used within a CartProvider');
+    throw new Error('useCart debe utilizarse dentro de un CartProvider');
   }
   return context;
 };
@@ -15,7 +15,7 @@ export const CartProvider = ({ children }) => {
   const [items, setItems] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
 
-  // Load cart from localStorage on mount
+  // Cargar el carrito desde localStorage al iniciar la aplicación
   useEffect(() => {
     const savedCart = localStorage.getItem('cart');
     if (savedCart) {
@@ -23,7 +23,7 @@ export const CartProvider = ({ children }) => {
     }
   }, []);
 
-  // Save cart to localStorage whenever items change
+  // Guardar el carrito en localStorage cada vez que cambien los artículos.
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(items));
   }, [items]);
@@ -35,7 +35,7 @@ export const CartProvider = ({ children }) => {
       if (existingItem) {
         toast({
           title: "Producto actualizado",
-          description: `${product.name} - cantidad: ${existingItem.quantity + quantity}`,
+          description: `${product.nombre} - cantidad: ${existingItem.quantity + quantity}`,
         });
         
         return currentItems.map(item =>
@@ -46,7 +46,7 @@ export const CartProvider = ({ children }) => {
       } else {
         toast({
           title: "Producto agregado",
-          description: `${product.name} agregado al carrito`,
+          description: `${product.nombre} agregado al carrito`,
         });
         
         return [...currentItems, { ...product, quantity }];
@@ -60,7 +60,7 @@ export const CartProvider = ({ children }) => {
       if (item) {
         toast({
           title: "Producto eliminado",
-          description: `${item.name} eliminado del carrito`,
+          description: `${item.nombre} eliminado del carrito`,
         });
       }
       return currentItems.filter(item => item.id !== productId);
@@ -89,7 +89,7 @@ export const CartProvider = ({ children }) => {
   };
 
   const getTotal = () => {
-    return items.reduce((total, item) => total + (item.price * item.quantity), 0);
+    return items.reduce((total, item) => total + (item.precio * item.quantity), 0);
   };
 
   const getItemsCount = () => {
