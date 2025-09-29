@@ -70,7 +70,7 @@ const Product = () => {
   }
 
   const isOutOfStock = product.stock === 0;
-  const images = product.images || [product.image || '/api/placeholder/600/400'];
+  const images = [product.url_imagen];
 
   return (
     <div className="min-h-screen bg-background">
@@ -95,7 +95,7 @@ const Product = () => {
               <div className="aspect-square overflow-hidden rounded-lg bg-muted">
                 <img
                   src={images[selectedImage]}
-                  alt={product.name}
+                  alt={product.nombre}
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -114,7 +114,7 @@ const Product = () => {
                     >
                       <img
                         src={image}
-                        alt={`${product.name} ${index + 1}`}
+                        alt={`${product.nombre} ${index + 1}`}
                         className="w-full h-full object-cover"
                       />
                     </button>
@@ -127,30 +127,25 @@ const Product = () => {
             <div className="space-y-6">
               <div>
                 <div className="flex items-center gap-2 mb-2">
-                  {product.category && (
-                    <Badge variant="secondary">{product.category}</Badge>
+                  {product.categoria && (
+                    <Badge variant="secondary">{product.categoria}</Badge>
                   )}
                   {isOutOfStock && (
                     <Badge variant="destructive">Sin Stock</Badge>
                   )}
                 </div>
                 
-                <h1 className="text-3xl font-bold mb-4">{product.name}</h1>
+                <h1 className="text-3xl font-bold mb-4">{product.nombre}</h1>
                 
                 <div className="flex items-center gap-4 mb-4">
                   <div className="text-3xl font-bold text-primary">
-                    ${product.price?.toFixed(2)}
+                    ${product.precio?.toFixed(2)}
                   </div>
                   
                   {product.rating && (
                     <div className="flex items-center">
                       <Star className="w-4 h-4 fill-yellow-400 text-yellow-400 mr-1" />
                       <span className="text-sm font-medium">{product.rating}</span>
-                      {product.reviews && (
-                        <span className="text-sm text-muted-foreground ml-1">
-                          ({product.reviews} reseñas)
-                        </span>
-                      )}
                     </div>
                   )}
                 </div>
@@ -160,25 +155,10 @@ const Product = () => {
                 <CardContent className="p-6">
                   <h3 className="font-semibold mb-3">Descripción</h3>
                   <p className="text-muted-foreground leading-relaxed">
-                    {product.description}
+                    {product.descripcion}
                   </p>
                 </CardContent>
               </Card>
-
-              {product.ingredients && (
-                <Card>
-                  <CardContent className="p-6">
-                    <h3 className="font-semibold mb-3">Ingredientes</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {product.ingredients.map((ingredient, index) => (
-                        <Badge key={index} variant="outline">
-                          {ingredient}
-                        </Badge>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
 
               {/* Add to Cart */}
               <Card>

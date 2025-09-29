@@ -7,11 +7,7 @@ import AdminLayout from '@/components/AdminLayout';
 import { toast } from '@/hooks/use-toast';
 
 const Categories = () => {
-  const [categories, setCategories] = useState([
-    { id: 1, name: 'Clásicas' },
-    { id: 2, name: 'Premium' },
-    { id: 3, name: 'Vegetarianas' }
-  ]);
+  const [categories, setCategories] = useState([]);
   const [newCategory, setNewCategory] = useState('');
 
   const handleAdd = () => {
@@ -24,7 +20,7 @@ const Categories = () => {
     
     setCategories([...categories, category]);
     setNewCategory('');
-    toast({ title: "Categoría agregada", description: category.name });
+    toast({ title: "Categoría agregada", description: category.nombre });
   };
 
   const handleDelete = (id) => {
@@ -54,7 +50,7 @@ const Categories = () => {
             <div className="space-y-2">
               {categories.map(category => (
                 <div key={category.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                  <span className="font-medium">{category.name}</span>
+                  <span className="font-medium">{category.nombre}</span>
                   <Button
                     variant="ghost"
                     size="sm"

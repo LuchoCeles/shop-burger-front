@@ -66,7 +66,7 @@ const Menu = () => {
 
     // Filter by category
     if (selectedCategory !== 'all') {
-      filtered = filtered.filter(product => product.idCategoria === selectedCategory);
+      filtered = filtered.filter(product => product.categoria === selectedCategory);
     }
 
     // Sort products

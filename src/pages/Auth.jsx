@@ -16,7 +16,7 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
-    email: '',
+    nombre: '',
     password: ''
   });
 
@@ -35,8 +35,8 @@ const Auth = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!formData.email || !formData.password) {
+
+    if (!formData.nombre || !formData.password) {
       toast({
         title: "Error",
         description: "Por favor completa todos los campos",
@@ -48,14 +48,14 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      const response = await apiService.login(formData.email, formData.password);
-      
-      if (response.user && response.token) {
-        login(response.user, response.token);
-        
+      const response = await apiService.login(formData.nombre, formData.password);
+
+      if (response.token) {
+        login(response.token);
+
         toast({
           title: "Bienvenido",
-          description: `Hola ${response.user.name || response.user.email}`,
+          description: `Hola ${response.user.name}`,
         });
 
         // Redirect to intended page or dashboard
@@ -64,33 +64,6 @@ const Auth = () => {
       }
     } catch (error) {
       console.error('Login error:', error);
-      
-      // For development, allow demo login
-      if (formData.email === 'admin@burger.com' && formData.password === 'admin123') {
-        const demoUser = {
-          id: 1,
-          email: 'admin@burger.com',
-          name: 'Administrador',
-          role: 'admin'
-        };
-        const demoToken = 'demo-token-12345';
-        
-        login(demoUser, demoToken);
-        
-        toast({
-          title: "Bienvenido (Demo)",
-          description: "Sesión iniciada correctamente",
-        });
-        
-        navigate('/admin', { replace: true });
-      } else {
-        toast({
-          title: "Error de autenticación",
-          description: "Email o contraseña incorrectos",
-          variant: "destructive"
-        });
-      }
-    } finally {
       setLoading(false);
     }
   };
@@ -113,22 +86,22 @@ const Auth = () => {
               Iniciar Sesión
             </CardTitle>
           </CardHeader>
-          
+
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="nombre">Nombre</Label>
                 <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  value={formData.email}
+                  id="nombre"
+                  name="nombre"
+                  type="text"
+                  value={formData.nombre}
                   onChange={handleInputChange}
-                  placeholder="admin@burger.com"
+                  placeholder="Tu Usuario"
                   required
                 />
               </div>
-              
+
               <div>
                 <Label htmlFor="password">Contraseña</Label>
                 <div className="relative">
@@ -156,7 +129,7 @@ const Auth = () => {
                   </Button>
                 </div>
               </div>
-              
+
               <Button
                 type="submit"
                 disabled={loading}
@@ -166,19 +139,19 @@ const Auth = () => {
                 {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
               </Button>
             </form>
-            
+
             <div className="mt-6 p-4 bg-muted/50 rounded-lg">
               <p className="text-xs text-muted-foreground mb-2">
                 <strong>Credenciales de prueba:</strong>
               </p>
               <p className="text-xs text-muted-foreground">
-                Email: admin@burger.com<br />
+                Nombre: admin<br />
                 Contraseña: admin123
               </p>
             </div>
           </CardContent>
         </Card>
-        
+
         <div className="text-center mt-6">
           <Button variant="ghost" onClick={() => navigate('/')}>
             Volver al sitio

@@ -19,11 +19,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Upload, 
+import {
+  Plus,
+  Edit,
+  Trash2,
+  Upload,
   Search,
   Eye,
   EyeOff
@@ -40,12 +40,12 @@ const MenuManager = () => {
   const [editingProduct, setEditingProduct] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    price: '',
-    category: '',
+    nombre: '',
+    descipcion: '',
+    precio: '',
+    idCategoria: '',
     stock: '',
-    image: ''
+    imagen: ''
   });
 
   useEffect(() => {
@@ -58,7 +58,7 @@ const MenuManager = () => {
         apiService.getProducts(),
         apiService.getCategories()
       ]);
-      
+
       setProducts(productsData?.data || []);
       setCategories(categoriesData?.data || []);
     } catch (error) {
@@ -78,8 +78,8 @@ const MenuManager = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!formData.name || !formData.price || !formData.category) {
+
+    if (!formData.name || !formData.precio || !formData.idCategoria) {
       toast({
         title: "Error",
         description: "Por favor completa todos los campos obligatorios",
@@ -90,14 +90,14 @@ const MenuManager = () => {
 
     const productData = {
       ...formData,
-      price: parseFloat(formData.price),
+      precio: parseFloat(formData.precio),
       stock: parseInt(formData.stock) || 0
     };
 
     try {
       if (editingProduct) {
         await apiService.updateProduct(editingProduct.id, productData);
-        setProducts(prev => prev.map(p => 
+        setProducts(prev => prev.map(p =>
           p.id === editingProduct.id ? { ...p, ...productData } : p
         ));
         toast({
@@ -112,7 +112,7 @@ const MenuManager = () => {
           description: "El producto se creó correctamente",
         });
       }
-      
+
       resetForm();
       setDialogOpen(false);
     } catch (error) {
@@ -128,12 +128,12 @@ const MenuManager = () => {
   const handleEdit = (product) => {
     setEditingProduct(product);
     setFormData({
-      name: product.name,
-      description: product.description,
-      price: product.price.toString(),
-      category: product.category,
+      nombre: product.nombre,
+      descipcion: product.descipcion,
+      precio: product.precio.toString(),
+      idCategoria: product.idCategoria,
       stock: product.stock.toString(),
-      image: product.image || ''
+      imagen: product.imagen || ''
     });
     setDialogOpen(true);
   };
@@ -162,10 +162,10 @@ const MenuManager = () => {
 
   const toggleStock = (productId, currentStock) => {
     const newStock = currentStock > 0 ? 0 : 10;
-    setProducts(prev => prev.map(p => 
+    setProducts(prev => prev.map(p =>
       p.id === productId ? { ...p, stock: newStock } : p
     ));
-    
+
     toast({
       title: newStock > 0 ? "Producto habilitado" : "Producto deshabilitado",
       description: `Stock actualizado a ${newStock}`,
@@ -174,19 +174,19 @@ const MenuManager = () => {
 
   const resetForm = () => {
     setFormData({
-      name: '',
-      description: '',
-      price: '',
-      category: '',
+      nombre: '',
+      descipcion: '',
+      precio: '',
+      idCategoria: '',
       stock: '',
-      image: ''
+      imagen: ''
     });
     setEditingProduct(null);
   };
 
   const filteredProducts = products.filter(product =>
-    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.category.toLowerCase().includes(searchTerm.toLowerCase())
+    product.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    product.categoria.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (loading) {
@@ -210,7 +210,7 @@ const MenuManager = () => {
               Administra los productos de tu carta
             </p>
           </div>
-          
+
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
               <Button onClick={resetForm}>
@@ -218,39 +218,39 @@ const MenuManager = () => {
                 Nuevo Producto
               </Button>
             </DialogTrigger>
-            
+
             <DialogContent className="max-w-md">
               <DialogHeader>
                 <DialogTitle>
                   {editingProduct ? 'Editar Producto' : 'Nuevo Producto'}
                 </DialogTitle>
               </DialogHeader>
-              
+
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <Label htmlFor="name">Nombre *</Label>
                   <Input
                     id="name"
                     name="name"
-                    value={formData.name}
+                    value={formData.nombre}
                     onChange={handleInputChange}
                     placeholder="Nombre del producto"
                     required
                   />
                 </div>
-                
+
                 <div>
                   <Label htmlFor="description">Descripción</Label>
                   <Textarea
                     id="description"
                     name="description"
-                    value={formData.description}
+                    value={formData.descipcion}
                     onChange={handleInputChange}
                     placeholder="Descripción del producto"
                     rows={3}
                   />
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="price">Precio *</Label>
@@ -259,13 +259,13 @@ const MenuManager = () => {
                       name="price"
                       type="number"
                       step="0.01"
-                      value={formData.price}
+                      value={formData.precio}
                       onChange={handleInputChange}
                       placeholder="0.00"
                       required
                     />
                   </div>
-                  
+
                   <div>
                     <Label htmlFor="stock">Stock</Label>
                     <Input
@@ -278,44 +278,44 @@ const MenuManager = () => {
                     />
                   </div>
                 </div>
-                
+
                 <div>
                   <Label htmlFor="category">Categoría *</Label>
-                  <Select 
-                    value={formData.category} 
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
+                  <Select
+                    value={formData.idCategoria}
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, idCategoria: value }))}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Selecciona una categoría" />
                     </SelectTrigger>
                     <SelectContent>
                       {categories.map(category => (
-                        <SelectItem key={category.id} value={category.name}>
-                          {category.name}
+                        <SelectItem key={category.id} value={category.nombre}>
+                          {category.nombre}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
-                
+
                 <div>
-                  <Label htmlFor="image">URL de Imagen</Label>
+                  <Label htmlFor="image">Imagen</Label>
                   <Input
                     id="image"
                     name="image"
-                    value={formData.image}
+                    value={formData.imagen}
                     onChange={handleInputChange}
-                    placeholder="https://..."
+                    type="file"
                   />
                 </div>
-                
+
                 <div className="flex space-x-2 pt-4">
                   <Button type="submit" className="flex-1">
                     {editingProduct ? 'Actualizar' : 'Crear'}
                   </Button>
-                  <Button 
-                    type="button" 
-                    variant="outline" 
+                  <Button
+                    type="button"
+                    variant="outline"
                     onClick={() => setDialogOpen(false)}
                   >
                     Cancelar
@@ -347,34 +347,34 @@ const MenuManager = () => {
             <Card key={product.id} className="overflow-hidden">
               <div className="aspect-video relative bg-muted">
                 <img
-                  src={product.image || '/api/placeholder/300/200'}
-                  alt={product.name}
+                  src={product.url_imagen}
+                  alt={product.nombre}
                   className="object-cover w-full h-full"
                 />
-                
+
                 <div className="absolute top-2 right-2 flex space-x-1">
                   <Badge variant={product.stock > 0 ? "default" : "destructive"}>
                     {product.stock > 0 ? `Stock: ${product.stock}` : 'Sin Stock'}
                   </Badge>
                 </div>
-                
+
                 <div className="absolute top-2 left-2">
-                  <Badge variant="secondary">{product.category}</Badge>
+                  <Badge variant="secondary">{product.categoria}</Badge>
                 </div>
               </div>
-              
+
               <CardContent className="p-4">
-                <h3 className="font-semibold text-lg mb-2">{product.name}</h3>
+                <h3 className="font-semibold text-lg mb-2">{product.nombre}</h3>
                 <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
-                  {product.description}
+                  {product.descripcion}
                 </p>
-                
+
                 <div className="flex items-center justify-between mb-4">
                   <div className="text-2xl font-bold text-primary">
-                    ${product.price?.toFixed(2)}
+                    ${product.precio?.toFixed(2)}
                   </div>
                 </div>
-                
+
                 <div className="flex space-x-2">
                   <Button
                     variant="outline"
@@ -385,7 +385,7 @@ const MenuManager = () => {
                     <Edit className="w-4 h-4 mr-1" />
                     Editar
                   </Button>
-                  
+
                   <Button
                     variant="outline"
                     size="sm"
@@ -393,7 +393,7 @@ const MenuManager = () => {
                   >
                     {product.stock > 0 ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </Button>
-                  
+
                   <Button
                     variant="outline"
                     size="sm"

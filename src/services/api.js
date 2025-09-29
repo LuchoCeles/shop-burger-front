@@ -72,7 +72,7 @@ class ApiService {
 
   // Products endpoints
   async getProducts() {
-    const rsp = await this.GET('api/');
+    const rsp = await this.GET('api/producto/');
     return rsp.json();
   }
 
@@ -98,28 +98,28 @@ class ApiService {
 
   // Categories endpoints
   async getCategories() {
-    const rsp = await this.GET('api/categorias');
+    const rsp = await this.GET('api/categoria/');
     return rsp.json();
   }
 
   async createCategory(nombre) {
-    const rsp = await this.POST('api/categorias', { nombre });
+    const rsp = await this.POST('api/categoria', { nombre });
     return rsp.json();
   }
 
   async updateCategory(id, nombre) {
-    const rsp = await this.PATCH(`api/categorias/${id}`, { nombre });
+    const rsp = await this.PATCH(`api/categoria/${id}`, { nombre });
     return rsp.json();
   }
 
   async deleteCategory(id) {
-    const rsp = await this.DELETE(`api/categorias/${id}`);
+    const rsp = await this.DELETE(`api/categoria/${id}`);
     return rsp.json();
   }
 
   // Orders endpoints
   async getOrders() {
-    const rsp = await this.GET('api/ordenes');
+    const rsp = await this.GET('api/ordenes/');
     return rsp.json();
   }
 
