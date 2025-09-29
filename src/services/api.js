@@ -1,4 +1,4 @@
-const API_URL = process.env.REACT_APP_API_URL;
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/';
 
 class ApiService {
   constructor() {
@@ -66,59 +66,71 @@ class ApiService {
 
   // Auth endpoints
   async login(nombre, password) {
-    return this.POST('admin/login', { nombre, password });
+    const rsp = await this.POST('admin/login', { nombre, password });
+    return rsp.json();
   }
 
   // Products endpoints
-  async getProducts(filters = {}) {
-    const params = new URLSearchParams(filters);
-    return this.GET('api/productos', params);
+  async getProducts() {
+    const rsp = await this.GET('api/');
+    return rsp.json();
   }
 
   async getProduct(id) {
-    return this.GET(`api/producto/${id}`);
+    const rsp = await this.GET(`api/producto/${id}`);
+    return rsp.json();
   }
 
   async createProduct(productData) {
-    return this.POST('api/producto', productData, true);
+    const rsp = await this.POST('api/producto', productData, true);
+    return rsp.json();
   }
 
   async updateProduct(id, productData) {
-    return this.PATCH(`api/${id}`, productData, true);
+    const rsp = await this.PATCH(`api/${id}`, productData, true);
+    return rsp.json();
   }
 
   async deleteProduct(id) {
-    return this.DELETE(`api/producto/${id}`);
+    const rsp = await this.DELETE(`api/producto/${id}`);
+    return rsp.json();
   }
 
   // Categories endpoints
   async getCategories() {
-    return this.GET('api/categorias');
+    const rsp = await this.GET('api/categorias');
+    return rsp.json();
   }
 
   async createCategory(nombre) {
-    return this.POST('api/categorias', { nombre });
+    const rsp = await this.POST('api/categorias', { nombre });
+    return rsp.json();
   }
 
   async updateCategory(id, nombre) {
-    return this.PATCH(`api/categorias/${id}`, { nombre });
+    const rsp = await this.PATCH(`api/categorias/${id}`, { nombre });
+    return rsp.json();
   }
 
   async deleteCategory(id) {
-    return this.DELETE(`api/categorias/${id}`);
+    const rsp = await this.DELETE(`api/categorias/${id}`);
+    return rsp.json();
   }
 
   // Orders endpoints
   async getOrders() {
-    return this.GET('api/ordenes');
+    const rsp = await this.GET('api/ordenes');
+    return rsp.json();
   }
 
   async updateOrder(orderData) {
-    return this.PATCH(`api/ordenes/${orderData.id}`, orderData);
+    const rsp = await this.PATCH(`api/ordenes/${orderData.id}`, orderData);
+    return rsp.json();
   }
 
   async deleteOrder(id) {
-    return this.DELETE(`api/ordenes/${id}`);
+    const rsp = await this.DELETE(`api/ordenes/${id}`);
+    return rsp.json();
   }
 
 }

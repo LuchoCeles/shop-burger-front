@@ -59,13 +59,10 @@ const MenuManager = () => {
         apiService.getCategories()
       ]);
       
-      setProducts(productsData?.products || []);
-      setCategories(categoriesData?.categories || []);
+      setProducts(productsData?.data || []);
+      setCategories(categoriesData?.data || []);
     } catch (error) {
       console.error('Error loading data:', error);
-      // Mock data for development
-      setProducts(mockProducts);
-      setCategories(mockCategories);
     } finally {
       setLoading(false);
     }
@@ -427,42 +424,5 @@ const MenuManager = () => {
     </AdminLayout>
   );
 };
-
-// Mock data
-const mockProducts = [
-  {
-    id: 1,
-    name: 'Hamburguesa Clásica',
-    description: 'Carne de res, lechuga, tomate, cebolla, pickles y salsa especial',
-    price: 12.99,
-    category: 'Clásicas',
-    stock: 10,
-    image: '/api/placeholder/300/200'
-  },
-  {
-    id: 2,
-    name: 'Burger Bacon Cheese',
-    description: 'Doble carne, bacon crujiente, queso cheddar, lechuga y tomate',
-    price: 15.99,
-    category: 'Premium',
-    stock: 8,
-    image: '/api/placeholder/300/200'
-  },
-  {
-    id: 3,
-    name: 'Veggie Deluxe',
-    description: 'Hamburguesa vegetal, aguacate, brotes, tomate y salsa verde',
-    price: 11.99,
-    category: 'Vegetarianas',
-    stock: 0,
-    image: '/api/placeholder/300/200'
-  }
-];
-
-const mockCategories = [
-  { id: 1, name: 'Clásicas' },
-  { id: 2, name: 'Premium' },
-  { id: 3, name: 'Vegetarianas' }
-];
 
 export default MenuManager;

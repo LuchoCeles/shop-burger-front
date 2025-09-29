@@ -17,6 +17,7 @@ import ProductCard from '@/components/ProductCard';
 import CartWidget from '@/components/CartWidget';
 import { useCart } from '@/contexts/CartContext';
 import apiService from '@/services/api';
+import { set } from 'date-fns';
 
 const Menu = () => {
   const [products, setProducts] = useState([]);
@@ -42,14 +43,11 @@ const Menu = () => {
         apiService.getProducts(),
         apiService.getCategories()
       ]);
-      
-      setProducts(productsData?.products || []);
-      setCategories(categoriesData?.categories || []);
+
+      setProducts(productsData?.data || []);
+      setCategories(categoriesData?.data || []);
     } catch (error) {
       console.error('Error loading data:', error);
-      // Mock data for development
-      setProducts(mockProducts);
-      setCategories(mockCategories);
     } finally {
       setLoading(false);
     }
@@ -61,27 +59,27 @@ const Menu = () => {
     // Filter by search term
     if (searchTerm) {
       filtered = filtered.filter(product =>
-        product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        product.description.toLowerCase().includes(searchTerm.toLowerCase())
+        product.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.descipcion.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
     // Filter by category
     if (selectedCategory !== 'all') {
-      filtered = filtered.filter(product => product.category === selectedCategory);
+      filtered = filtered.filter(product => product.idCategoria === selectedCategory);
     }
 
     // Sort products
     filtered.sort((a, b) => {
       switch (sortBy) {
-        case 'price':
-          return a.price - b.price;
-        case 'price-desc':
-          return b.price - a.price;
+        case 'precio':
+          return a.precio - b.precio;
+        case 'precio-desc':
+          return b.price - a.precio;
         case 'popularity':
           return (b.popularity || 0) - (a.popularity || 0);
         default:
-          return a.name.localeCompare(b.name);
+          return a.nombre.localeCompare(b.nombre);
       }
     });
 
@@ -103,7 +101,7 @@ const Menu = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       <CartWidget />
-      
+
       <main className="pt-24 pb-8">
         <div className="container mx-auto px-4">
           {/* Header */}
@@ -137,9 +135,9 @@ const Menu = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Todas las categorías</SelectItem>
-                    {categories.map(category => (
-                      <SelectItem key={category.id} value={category.name}>
-                        {category.name}
+                    {categories.map(categoria => (
+                      <SelectItem key={categoria.id} value={categoria.nombre}>
+                        {categoria.nombre}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -194,45 +192,5 @@ const Menu = () => {
     </div>
   );
 };
-
-// Mock data for development
-const mockProducts = [
-  {
-    id: 1,
-    name: 'Hamburguesa Clásica',
-    description: 'Carne de res, lechuga, tomate, cebolla, pickles y salsa especial',
-    price: 12.99,
-    category: 'Clásicas',
-    image: '/api/placeholder/300/200',
-    stock: 10,
-    popularity: 95
-  },
-  {
-    id: 2,
-    name: 'Burger Bacon Cheese',
-    description: 'Doble carne, bacon crujiente, queso cheddar, lechuga y tomate',
-    price: 15.99,
-    category: 'Premium',
-    image: '/api/placeholder/300/200',
-    stock: 8,
-    popularity: 88
-  },
-  {
-    id: 3,
-    name: 'Veggie Deluxe',
-    description: 'Hamburguesa vegetal, aguacate, brotes, tomate y salsa verde',
-    price: 11.99,
-    category: 'Vegetarianas',
-    image: '/api/placeholder/300/200',
-    stock: 15,
-    popularity: 75
-  }
-];
-
-const mockCategories = [
-  { id: 1, name: 'Clásicas' },
-  { id: 2, name: 'Premium' },
-  { id: 3, name: 'Vegetarianas' }
-];
 
 export default Menu;
