@@ -25,7 +25,7 @@ const Menu = () => {
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [sortBy, setSortBy] = useState('name');
+  const [sortBy, setSortBy] = useState('nombre');
   const [loading, setLoading] = useState(true);
   const { addItem } = useCart();
 
