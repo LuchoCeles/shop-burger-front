@@ -21,7 +21,7 @@ const Cart = () => {
       <div className="min-h-screen bg-background">
         <Navbar />
         
-        <main className="pt-24 pb-8">
+        <main className="pt-32 pb-8">
           <div className="container mx-auto px-4">
             <div className="max-w-2xl mx-auto text-center py-12">
               <ShoppingCart className="w-16 h-16 mx-auto mb-6 text-muted-foreground" />
@@ -47,7 +47,7 @@ const Cart = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <main className="pt-24 pb-8">
+      <main className="pt-32 pb-8">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             {/* Header */}

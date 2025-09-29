@@ -102,7 +102,7 @@ const Menu = () => {
       <Navbar />
       <CartWidget />
 
-      <main className="pt-28 pb-8">
+      <main className="pt-32 pb-8">
         <div className="container mx-auto px-4">
           {/* Header */}
           <div className="mb-8">

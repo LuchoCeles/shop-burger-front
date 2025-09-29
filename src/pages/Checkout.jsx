@@ -122,7 +122,7 @@ ${formData.notes ? `📝 *Notas:* ${formData.notes}` : ''}
       <div className="min-h-screen bg-background">
         <Navbar />
         
-        <main className="pt-24 pb-8">
+        <main className="pt-32 pb-8">
           <div className="container mx-auto px-4">
             <div className="max-w-2xl mx-auto text-center py-12">
               <h1 className="text-3xl font-bold mb-4">No hay productos en el carrito</h1>
@@ -144,7 +144,7 @@ ${formData.notes ? `📝 *Notas:* ${formData.notes}` : ''}
       <div className="min-h-screen bg-background">
         <Navbar />
         
-        <main className="pt-24 pb-8">
+        <main className="pt-32 pb-8">
           <div className="container mx-auto px-4">
             <div className="max-w-2xl mx-auto">
               <Card>
@@ -203,7 +203,7 @@ ${formData.notes ? `📝 *Notas:* ${formData.notes}` : ''}
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <main className="pt-24 pb-8">
+      <main className="pt-32 pb-8">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             {/* Header */}
