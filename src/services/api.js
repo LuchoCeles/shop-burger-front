@@ -1,134 +1,126 @@
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
+const API_URL = process.env.REACT_APP_API_URL;
 
 class ApiService {
   constructor() {
     this.baseURL = API_URL;
   }
 
-  getAuthHeaders() {
-    const token = localStorage.getItem('token');
-    return token ? { Authorization: `Bearer ${token}` } : {};
-  }
-
-  async request(endpoint, options = {}) {
-    const url = `${this.baseURL}${endpoint}`;
+  async POST(url, data, isFormData = false) {
     const config = {
+      method: 'POST',
+      mode: 'cors',
       headers: {
-        'Content-Type': 'application/json',
-        ...this.getAuthHeaders(),
-        ...options.headers,
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
       },
-      ...options,
+      body: isFormData ? data : JSON.stringify(data)
     };
 
-    try {
-      const response = await fetch(url, config);
-      
-      if (!response.ok) {
-        if (response.status === 401) {
-          // Token expired or invalid
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          window.location.href = '/auth';
-          return;
-        }
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error('API request failed:', error);
-      throw error;
+    if (!isFormData) {
+      config.headers['Content-Type'] = 'application/json';
     }
+
+    return await fetch(this.baseURL + url, config);
   }
 
-  // Auth endpoints
-  async login(email, password) {
-    return this.request('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify({ email, password }),
+  async GET(url, data) {
+    const queryString = data ? `?${new URLSearchParams(data).toString()}` : "";
+
+    return await fetch(this.baseURL + url + queryString, {
+      method: 'GET',
+      mode: 'cors',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
     });
+  };
+
+  async PATCH(url, data, isFormData = false) {
+    const config = {
+      method: 'PATCH',
+      mode: 'cors',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      },
+      body: isFormData ? data : JSON.stringify(data)
+    };
+
+    if (!isFormData) {
+      config.headers['Content-Type'] = 'application/json';
+    }
+
+    return await fetch(this.baseURL + url, config);
+  }
+
+  async DELETE(url, data) {
+    const objString = '?' + new URLSearchParams(data).toString();
+
+    return await fetch(this.baseURL + url + objString, {
+      method: 'DELETE',
+      mode: 'cors',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      },
+    });
+  }
+
+
+  // Auth endpoints
+  async login(nombre, password) {
+    return this.POST('admin/login', { nombre, password });
   }
 
   // Products endpoints
   async getProducts(filters = {}) {
     const params = new URLSearchParams(filters);
-    return this.request(`/products?${params}`);
+    return this.GET('api/productos', params);
   }
 
   async getProduct(id) {
-    return this.request(`/products/${id}`);
+    return this.GET(`api/producto/${id}`);
   }
 
   async createProduct(productData) {
-    return this.request('/products', {
-      method: 'POST',
-      body: JSON.stringify(productData),
-    });
+    return this.POST('api/producto', productData, true);
   }
 
   async updateProduct(id, productData) {
-    return this.request(`/products/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(productData),
-    });
+    return this.PATCH(`api/${id}`, productData, true);
   }
 
   async deleteProduct(id) {
-    return this.request(`/products/${id}`, {
-      method: 'DELETE',
-    });
+    return this.DELETE(`api/producto/${id}`);
   }
 
   // Categories endpoints
   async getCategories() {
-    return this.request('/categories');
+    return this.GET('api/categorias');
   }
 
-  async createCategory(categoryData) {
-    return this.request('/categories', {
-      method: 'POST',
-      body: JSON.stringify(categoryData),
-    });
+  async createCategory(nombre) {
+    return this.POST('api/categorias', { nombre });
   }
 
-  async updateCategory(id, categoryData) {
-    return this.request(`/categories/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(categoryData),
-    });
+  async updateCategory(id, nombre) {
+    return this.PATCH(`api/categorias/${id}`, { nombre });
   }
 
   async deleteCategory(id) {
-    return this.request(`/categories/${id}`, {
-      method: 'DELETE',
-    });
+    return this.DELETE(`api/categorias/${id}`);
   }
 
   // Orders endpoints
   async getOrders() {
-    return this.request('/orders');
+    return this.GET('api/ordenes');
   }
 
-  async createOrder(orderData) {
-    return this.request('/orders', {
-      method: 'POST',
-      body: JSON.stringify(orderData),
-    });
+  async updateOrder(orderData) {
+    return this.PATCH(`api/ordenes/${orderData.id}`, orderData);
   }
 
-  // Image upload
-  async uploadImage(formData) {
-    return this.request('/upload', {
-      method: 'POST',
-      headers: {
-        ...this.getAuthHeaders(),
-        // Don't set Content-Type for FormData, let the browser set it
-      },
-      body: formData,
-    });
+  async deleteOrder(id) {
+    return this.DELETE(`api/ordenes/${id}`);
   }
+
 }
 
 export default new ApiService();
