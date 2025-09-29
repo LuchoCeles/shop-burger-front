@@ -41,7 +41,7 @@ const MenuManager = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [formData, setFormData] = useState({
     nombre: '',
-    descipcion: '',
+    descripcion: '',
     precio: '',
     idCategoria: '',
     stock: '',
@@ -129,10 +129,10 @@ const MenuManager = () => {
     setEditingProduct(product);
     setFormData({
       nombre: product.nombre,
-      descipcion: product.descipcion,
-      precio: product.precio.toString(),
+      descripcion: product.descripcion,
+      precio: product.precio,
       idCategoria: product.idCategoria,
-      stock: product.stock.toString(),
+      stock: product.stock,
       imagen: product.imagen || ''
     });
     setDialogOpen(true);
@@ -160,22 +160,25 @@ const MenuManager = () => {
     }
   };
 
-  const toggleStock = (productId, currentStock) => {
-    const newStock = currentStock > 0 ? 0 : 10;
-    setProducts(prev => prev.map(p =>
-      p.id === productId ? { ...p, stock: newStock } : p
-    ));
+  const toggleStock = async (productId, product) => {
+    if(product.estado === true){
+      product.estado = false;
+    }else{
+      product.estado = true;
+    }
+    console.log(product);
+    const p = await apiService.updateProduct(productId, product);
 
+    console.log(p);
     toast({
-      title: newStock > 0 ? "Producto habilitado" : "Producto deshabilitado",
-      description: `Stock actualizado a ${newStock}`,
+      title: p.data.estado == true ? "Producto habilitado" : "Producto deshabilitado",
     });
   };
 
   const resetForm = () => {
     setFormData({
       nombre: '',
-      descipcion: '',
+      descripcion: '',
       precio: '',
       idCategoria: '',
       stock: '',
@@ -244,7 +247,7 @@ const MenuManager = () => {
                   <Textarea
                     id="description"
                     name="description"
-                    value={formData.descipcion}
+                    value={formData.descripcion}
                     onChange={handleInputChange}
                     placeholder="Descripción del producto"
                     rows={3}
@@ -371,7 +374,7 @@ const MenuManager = () => {
 
                 <div className="flex items-center justify-between mb-4">
                   <div className="text-2xl font-bold text-primary">
-                    ${product.precio?.toFixed(2)}
+                    ${product.precio}
                   </div>
                 </div>
 
@@ -389,7 +392,7 @@ const MenuManager = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => toggleStock(product.id, product.stock)}
+                    onClick={() => toggleStock(product.id, product)}
                   >
                     {product.stock > 0 ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </Button>
