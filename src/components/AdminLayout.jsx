@@ -45,14 +45,14 @@ const AdminLayout = ({ children }) => {
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div 
-          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       {/* Sidebar */}
-      <div className={`
-        fixed top-0 left-0 z-50 h-screen w-64 bg-card border-r transform transition-transform duration-200 ease-in-out
+      <aside className={`
+        fixed top-0 left-0 h-screen w-64 bg-card border-r z-50 transform transition-transform duration-200 ease-in-out
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
         lg:translate-x-0
       `}>
@@ -141,7 +141,7 @@ const AdminLayout = ({ children }) => {
             </Button>
           </div>
         </div>
-      </div>
+      </aside>
 
       {/* Main content */}
       <div className="lg:pl-64">

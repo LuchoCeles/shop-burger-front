@@ -21,9 +21,9 @@ const CartWidget = () => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50" onClick={() => setIsOpen(false)}>
+    <div className="fixed inset-0 bg-black/50 z-[60]" onClick={() => setIsOpen(false)}>
       <div 
-        className="fixed right-0 top-0 h-full w-full max-w-md bg-card border-l shadow-2xl"
+        className="fixed right-0 top-0 h-screen w-full max-w-md bg-card border-l shadow-2xl z-[60]"
         onClick={(e) => e.stopPropagation()}
       >
         <Card className="h-full rounded-none border-0">
