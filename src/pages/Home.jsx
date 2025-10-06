@@ -1,8 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent } from '@/components/ui/card';
-import { ChefHat, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChefHat, ChevronLeft, ChevronRight } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import ProductCard from '@/components/ProductCard';
 import CartWidget from '@/components/CartWidget';
@@ -13,7 +11,6 @@ const Home = () => {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [loading, setLoading] = useState(true);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
@@ -27,7 +24,7 @@ const Home = () => {
 
   useEffect(() => {
     filterProducts();
-  }, [products, searchTerm, selectedCategory]);
+  }, [products, selectedCategory]);
 
   useEffect(() => {
     checkScrollButtons();
@@ -51,13 +48,6 @@ const Home = () => {
 
   const filterProducts = () => {
     let filtered = [...products];
-
-    if (searchTerm) {
-      filtered = filtered.filter(product =>
-        product.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        product.descripcion.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
 
     if (selectedCategory !== 'all') {
       filtered = filtered.filter(product => product.categoria === selectedCategory);
@@ -116,21 +106,6 @@ const Home = () => {
               Descubre nuestras deliciosas hamburguesas artesanales
             </p>
           </div>
-
-          {/* Search Bar */}
-          <Card className="mb-8">
-            <CardContent className="p-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
-                <Input
-                  placeholder="Buscar hamburguesas..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 h-12 text-base"
-                />
-              </div>
-            </CardContent>
-          </Card>
 
           {/* Category Carousel */}
           <div className="mb-8 relative">
@@ -201,11 +176,8 @@ const Home = () => {
           ) : (
             <div className="text-center py-12">
               <p className="text-muted-foreground mb-4">No se encontraron productos</p>
-              <Button onClick={() => {
-                setSearchTerm('');
-                setSelectedCategory('all');
-              }}>
-                Limpiar filtros
+              <Button onClick={() => setSelectedCategory('all')}>
+                Ver todas las categorías
               </Button>
             </div>
           )}
