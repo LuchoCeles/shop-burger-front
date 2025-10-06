@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
 import ApiService from '../../services/api';
+import { Category } from 'src/intefaces/interfaz';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import {
@@ -13,9 +14,9 @@ import {
 import { toast } from 'sonner';
 
 const CategoriasManager = () => {
-  const [categorias, setCategorias] = useState<any[]>([]);
+  const [categorias, setCategorias] = useState<Category[]>([]);
   const [showDialog, setShowDialog] = useState(false);
-  const [editingCategory, setEditingCategory] = useState<any>(null);
+  const [editingCategory, setEditingCategory] = useState<Category>(null);
   const [nombre, setNombre] = useState('');
   const [estado, setEstado] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -49,7 +50,7 @@ const CategoriasManager = () => {
       setNombre('');
       setEditingCategory(null);
       loadCategorias();
-    } catch (error: any) {
+    } catch (error) {
       toast.error(error.message || 'Error al guardar');
     } finally {
       setLoading(false);
@@ -63,12 +64,12 @@ const CategoriasManager = () => {
       await ApiService.deleteCategoria(id);
       toast.success('Categoría eliminada');
       loadCategorias();
-    } catch (error: any) {
+    } catch (error) {
       toast.error(error.message || 'Error al eliminar');
     }
   };
 
-  const handleEdit = (category: any) => {
+  const handleEdit = (category: Category) => {
     setEditingCategory(category);
     setNombre(category.nombre);
     setShowDialog(true);

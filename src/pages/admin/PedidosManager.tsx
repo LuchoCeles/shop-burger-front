@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import ApiService from '../../services/api';
+import { Orders, Product } from 'src/intefaces/interfaz';
 import { Button } from '../../components/ui/button';
 import {
   Select,
@@ -11,7 +12,7 @@ import {
 import { toast } from 'sonner';
 
 const PedidosManager = () => {
-  const [pedidos, setPedidos] = useState<any[]>([]);
+  const [pedidos, setPedidos] = useState<Orders[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -34,7 +35,7 @@ const PedidosManager = () => {
       await ApiService.updatePedidoEstado(id, estado);
       toast.success('Estado actualizado');
       loadPedidos();
-    } catch (error: any) {
+    } catch (error) {
       toast.error(error.message || 'Error al actualizar');
     }
   };
@@ -42,8 +43,6 @@ const PedidosManager = () => {
   const getEstadoColor = (estado: string) => {
     const colors: Record<string, string> = {
       pendiente: 'text-yellow-500',
-      preparando: 'text-blue-500',
-      enviado: 'text-purple-500',
       entregado: 'text-green-500',
       cancelado: 'text-red-500',
     };
@@ -72,15 +71,6 @@ const PedidosManager = () => {
                   <h3 className="text-lg font-semibold text-foreground">
                     Pedido #{pedido.id}
                   </h3>
-                  <p className="text-sm text-muted-foreground">
-                    {new Date(pedido.fecha_pedido).toLocaleDateString('es-AR', {
-                      day: 'numeric',
-                      month: 'long',
-                      year: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                  </p>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className={`font-medium ${getEstadoColor(pedido.estado)}`}>
@@ -95,8 +85,6 @@ const PedidosManager = () => {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="pendiente">Pendiente</SelectItem>
-                      <SelectItem value="preparando">Preparando</SelectItem>
-                      <SelectItem value="enviado">Enviado</SelectItem>
                       <SelectItem value="entregado">Entregado</SelectItem>
                       <SelectItem value="cancelado">Cancelado</SelectItem>
                     </SelectContent>
@@ -124,7 +112,7 @@ const PedidosManager = () => {
               <div className="border-t border-border pt-4">
                 <p className="mb-2 font-medium text-foreground">Productos:</p>
                 <div className="space-y-1 text-sm">
-                  {pedido.productos?.map((prod: any, idx: number) => (
+                  {pedido.productos?.map((prod, idx: number) => (
                     <p key={idx} className="text-muted-foreground">
                       {prod.nombre} x{prod.cantidad} - ${prod.precio * prod.cantidad}
                     </p>

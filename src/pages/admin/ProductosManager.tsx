@@ -4,6 +4,7 @@ import ApiService from '../../services/api';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Textarea } from '../../components/ui/textarea';
+import { Product,Category } from 'src/intefaces/interfaz';
 import {
   Dialog,
   DialogContent,
@@ -21,16 +22,16 @@ import {
 import { toast } from 'sonner';
 
 const ProductosManager = () => {
-  const [productos, setProductos] = useState<any[]>([]);
-  const [categorias, setCategorias] = useState<any[]>([]);
+  const [productos, setProductos] = useState<Product[]>([]);
+  const [categorias, setCategorias] = useState<Category[]>([]);
   const [showDialog, setShowDialog] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<any>(null);
+  const [editingProduct, setEditingProduct] = useState<Product>(null);
   const [formData, setFormData] = useState({
     nombre: '',
     descripcion: '',
     precio: '',
     stock: '',
-    id_categoria: '',
+    idCategoria: '',
   });
   const [imagen, setImagen] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
@@ -59,7 +60,7 @@ const ProductosManager = () => {
       formDataToSend.append('descripcion', formData.descripcion);
       formDataToSend.append('precio', formData.precio);
       formDataToSend.append('stock', formData.stock);
-      formDataToSend.append('id_categoria', formData.id_categoria);
+      formDataToSend.append('idCategoria', formData.idCategoria);
       if (imagen) {
         formDataToSend.append('imagen', imagen);
       }
@@ -75,7 +76,7 @@ const ProductosManager = () => {
       setShowDialog(false);
       resetForm();
       loadData();
-    } catch (error: any) {
+    } catch (error) {
       toast.error(error.message || 'Error al guardar producto');
     } finally {
       setLoading(false);
@@ -89,19 +90,19 @@ const ProductosManager = () => {
       await ApiService.deleteProducto(id);
       toast.success('Producto eliminado');
       loadData();
-    } catch (error: any) {
+    } catch (error) {
       toast.error(error.message || 'Error al eliminar');
     }
   };
 
-  const handleEdit = (product: any) => {
+  const handleEdit = (product: Product) => {
     setEditingProduct(product);
     setFormData({
       nombre: product.nombre,
       descripcion: product.descripcion || '',
       precio: product.precio.toString(),
       stock: product.stock?.toString() || '',
-      id_categoria: product.id_categoria?.toString() || '',
+      idCategoria: product.idCategoria?.toString() || '',
     });
     setShowDialog(true);
   };
@@ -113,7 +114,7 @@ const ProductosManager = () => {
       descripcion: '',
       precio: '',
       stock: '',
-      id_categoria: '',
+      idCategoria: '',
     });
     setImagen(null);
   };
@@ -227,8 +228,8 @@ const ProductosManager = () => {
             <div>
               <label className="mb-2 block text-sm font-medium text-foreground">Categoría</label>
               <Select
-                value={formData.id_categoria}
-                onValueChange={(value) => setFormData({ ...formData, id_categoria: value })}
+                value={formData.idCategoria}
+                onValueChange={(value) => setFormData({ ...formData, idCategoria: value })}
               >
                 <SelectTrigger className="bg-background">
                   <SelectValue placeholder="Selecciona una categoría" />

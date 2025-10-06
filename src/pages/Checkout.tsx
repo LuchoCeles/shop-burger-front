@@ -66,7 +66,7 @@ const Checkout = () => {
         window.open(`https://wa.me/5491122334455?text=${whatsappMessage}`, '_blank');
         navigate('/');
       }, 1500);
-    } catch (error: any) {
+    } catch (error) {
       toast.error(error.message || 'Error al crear el pedido');
     } finally {
       setLoading(false);

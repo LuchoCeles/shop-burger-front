@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { Button } from './ui/button';
 import { toast } from 'sonner';
+import { CartModalProps } from 'src/intefaces/interfaz';
 import {
   Dialog,
   DialogContent,
@@ -10,11 +11,6 @@ import {
   DialogTitle,
   DialogFooter,
 } from './ui/dialog';
-
-interface CartModalProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
 
 const CartModal: React.FC<CartModalProps> = ({ open, onOpenChange }) => {
   const { cart, removeFromCart, updateQuantity, total } = useCart();

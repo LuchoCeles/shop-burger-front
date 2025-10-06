@@ -8,7 +8,6 @@ import { Product } from '../intefaces/interfaz';
 const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
   const { addToCart, cart } = useCart();
 
-
   const handleAddToCart = () => {
     if (product.stock !== undefined && product.stock <= 0) {
       toast.error('Producto sin stock');
