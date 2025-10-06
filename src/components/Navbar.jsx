@@ -12,7 +12,6 @@ const Navbar = () => {
 
   const navLinks = [
     { name: 'Inicio', path: '/' },
-    { name: 'Carta', path: '/menu' },
     { name: 'Carrito', path: '/cart' },
   ];
 

@@ -9,8 +9,6 @@ import ProtectedRoute from "./components/ProtectedRoute";
 
 // Pages
 import Home from "./pages/Home";
-import Menu from "./pages/Menu";
-import Product from "./pages/Product";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import Auth from "./pages/Auth";
@@ -33,8 +31,6 @@ const App = () => (
             <BrowserRouter>
               <Routes>
                 <Route path="/" element={<Home />} />
-                <Route path="/menu" element={<Menu />} />
-                <Route path="/producto/:id" element={<Product />} />
                 <Route path="/cart" element={<Cart />} />
                 <Route path="/checkout" element={<Checkout />} />
                 <Route path="/auth" element={<Auth />} />
