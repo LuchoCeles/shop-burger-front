@@ -103,12 +103,12 @@ class ApiService {
   }
 
   async createCategory(nombre) {
-    const rsp = await this.POST('api/categoria', { nombre });
+    const rsp = await this.POST('api/categoria', nombre);
     return rsp.json();
   }
 
-  async updateCategory(id, nombre) {
-    const rsp = await this.PATCH(`api/categoria/${id}`, { nombre });
+  async updateCategory(id, nombre, estado) {
+    const rsp = await this.PATCH(`api/categoria/${id}`, { nombre: nombre, estado: estado });
     return rsp.json();
   }
 
@@ -119,7 +119,7 @@ class ApiService {
 
   // Orders endpoints
   async getOrders() {
-    const rsp = await this.GET('api/ordenes/');
+    const rsp = await this.GET('admin/pedidos/');
     return rsp.json();
   }
 

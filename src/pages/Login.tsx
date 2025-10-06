@@ -29,7 +29,7 @@ const Login = () => {
       const response = await ApiService.login(formData.nombre, formData.password);
 
       if (response.data) {
-        authLogin(response.data, formData.nombre);
+        authLogin(response.data.token, formData.nombre);
         toast.success('Bienvenido');
         navigate('/admin');
       }

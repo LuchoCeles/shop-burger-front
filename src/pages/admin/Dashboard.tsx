@@ -1,10 +1,11 @@
-import { Link, Outlet, useLocation } from 'react-router-dom';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Package, FolderKanban, ShoppingBag, LogOut } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../../components/ui/button';
 import { cn } from '@/lib/utils';
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const { logout, user } = useAuth();
   const location = useLocation();
 
@@ -17,11 +18,12 @@ const Dashboard = () => {
 
   return (
     <div className="flex min-h-screen bg-background">
-      <aside className="w-64 border-r border-border bg-card">
+      <aside className="w-64 border-r border-border bg-card flex flex-col">
         <div className="flex h-16 items-center border-b border-border px-6">
           <h2 className="text-xl font-bold text-foreground">Admin Panel</h2>
         </div>
-        <nav className="space-y-2 p-4">
+
+        <nav className="space-y-2 p-4 flex-1">
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.path;
@@ -41,11 +43,24 @@ const Dashboard = () => {
             );
           })}
         </nav>
-        <div className="absolute bottom-4 left-4 right-4">
-          <div className="mb-4 rounded-lg bg-muted p-4">
-            <p className="text-sm font-medium text-foreground">{user?.nombre}</p>
+
+        <div className="p-4 border-t border-border">
+          <div className="mb-2 rounded-lg bg-muted p-4">
+            <p className="text-sm font-medium text-foreground">
+              {user?.nombre?.toUpperCase()}
+            </p>
             <p className="text-xs text-muted-foreground">Administrador</p>
           </div>
+          <Button
+            onClick={() => navigate('/')}
+            variant="ghost"
+            className="w-full"
+          >
+            Volver a la tienda
+          </Button>
+        </div>
+
+        <div className="p-4 border-t border-border">
           <Button
             variant="outline"
             className="w-full"
@@ -55,8 +70,8 @@ const Dashboard = () => {
             Cerrar Sesión
           </Button>
         </div>
-      </aside>
 
+      </aside>
       <main className="flex-1 p-8">
         <Outlet />
       </main>

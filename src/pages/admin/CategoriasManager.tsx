@@ -17,6 +17,7 @@ const CategoriasManager = () => {
   const [showDialog, setShowDialog] = useState(false);
   const [editingCategory, setEditingCategory] = useState<any>(null);
   const [nombre, setNombre] = useState('');
+  const [estado, setEstado] = useState(true);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -25,8 +26,8 @@ const CategoriasManager = () => {
 
   const loadCategorias = async () => {
     try {
-      const data = await ApiService.getCategorias();
-      setCategorias(data);
+      const data = await ApiService.getCategories();
+      setCategorias(data.data || []);
     } catch (error) {
       toast.error('Error al cargar categorías');
     }
@@ -35,14 +36,13 @@ const CategoriasManager = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!nombre.trim()) return;
-
     setLoading(true);
     try {
       if (editingCategory) {
-        await ApiService.updateCategoria(editingCategory.id, { nombre });
+        await ApiService.updateCategory(editingCategory.id, nombre, estado);
         toast.success('Categoría actualizada');
       } else {
-        await ApiService.createCategoria({ nombre });
+        await ApiService.createCategoria(nombre);
         toast.success('Categoría creada');
       }
       setShowDialog(false);
@@ -126,6 +126,17 @@ const CategoriasManager = () => {
                 required
                 className="bg-background"
               />
+            </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium text-foreground">Estado</label>
+              <select
+                value={estado ? 'true' : 'false'}
+                onChange={(e) => setEstado(e.target.value === 'true')}
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+              >
+                <option value="true">Activo</option>
+                <option value="false">Inactivo</option>
+              </select>
             </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setShowDialog(false)}>

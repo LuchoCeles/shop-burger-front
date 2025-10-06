@@ -20,8 +20,8 @@ const PedidosManager = () => {
 
   const loadPedidos = async () => {
     try {
-      const data = await ApiService.getPedidos();
-      setPedidos(data);
+      const pedido = await ApiService.getOrders();
+      setPedidos((pedido.data) || []);
     } catch (error) {
       toast.error('Error al cargar pedidos');
     } finally {

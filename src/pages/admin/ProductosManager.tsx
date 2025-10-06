@@ -41,9 +41,9 @@ const ProductosManager = () => {
 
   const loadData = async () => {
     try {
-      const [prodData, catData] = await Promise.all([ApiService.getProductos(), ApiService.getCategorias()]);
-      setProductos(prodData);
-      setCategorias(catData);
+      const [prodData, catData] = await Promise.all([ApiService.getProducts(), ApiService.getCategories()]);
+      setProductos(prodData.data);
+      setCategorias(catData.data);
     } catch (error) {
       toast.error('Error al cargar datos');
     }
@@ -65,10 +65,10 @@ const ProductosManager = () => {
       }
 
       if (editingProduct) {
-        await ApiService.updateProducto(editingProduct.id, formDataToSend);
+        await ApiService.updateProduct(editingProduct.id, formDataToSend);
         toast.success('Producto actualizado');
       } else {
-        await ApiService.createProducto(formDataToSend);
+        await ApiService.createProduct(formDataToSend);
         toast.success('Producto creado');
       }
 

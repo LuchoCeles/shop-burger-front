@@ -17,14 +17,14 @@ const DashboardHome = () => {
   const loadStats = async () => {
     try {
       const [productos, categorias, pedidos] = await Promise.all([
-        ApiService.getProductos(),
-        ApiService.getCategorias(),
-        ApiService.getPedidos(),
+        ApiService.getProducts(),
+        ApiService.getCategories(),
+        ApiService.getOrders(),
       ]);
       setStats({
-        productos: productos.length,
-        categorias: categorias.length,
-        pedidos: pedidos.length,
+        productos: productos.data.length,
+        categorias: categorias.data.length,
+        pedidos: pedidos.data.length,
       });
     } catch (error) {
       console.error('Error loading stats:', error);
