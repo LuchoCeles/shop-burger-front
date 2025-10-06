@@ -6,12 +6,18 @@ import { toast } from 'sonner';
 import { Product } from '../intefaces/interfaz';
 
 const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
-  const { addToCart } = useCart();
-  
+  const { addToCart, cart } = useCart();
+
 
   const handleAddToCart = () => {
     if (product.stock !== undefined && product.stock <= 0) {
       toast.error('Producto sin stock');
+      return;
+    }
+    // Verificar si ya está en el carrito y validar stock
+    const itemInCart = cart.find(item => item.id === product.id);
+    if (itemInCart && product.stock !== undefined && itemInCart.cantidad >= product.stock) {
+      toast.error(`Solo hay ${product.stock} unidades disponibles`);
       return;
     }
     addToCart({
@@ -19,6 +25,7 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
       nombre: product.nombre,
       precio: product.precio,
       url_imagen: product.url_imagen,
+      stock: product.stock,
     });
     toast.success('Agregado al carrito');
   };

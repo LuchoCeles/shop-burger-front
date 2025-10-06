@@ -8,6 +8,15 @@ export interface Product {
   idCategoria?: number;
 }
 
+export interface CartItem {
+  id: number;
+  nombre: string;
+  precio: number;
+  cantidad: number;
+  url_imagen?: string;
+  stock?: number;
+}
+
 export interface Category {
   id: number;
   nombre: string;

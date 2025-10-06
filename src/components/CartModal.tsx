@@ -2,6 +2,7 @@ import { Minus, Plus, Trash2, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { Button } from './ui/button';
+import { toast } from 'sonner';
 import {
   Dialog,
   DialogContent,
@@ -24,6 +25,13 @@ const CartModal: React.FC<CartModalProps> = ({ open, onOpenChange }) => {
     navigate('/checkout');
   };
 
+  const handleIncrement = (id: number, currentCantidad: number, stock?: number) => {
+    if (stock !== undefined && currentCantidad >= stock) {
+      toast.error(`Solo hay ${stock} unidades disponibles`);
+      return;
+    }
+    updateQuantity(id, currentCantidad + 1);
+  };
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl bg-card">
@@ -38,54 +46,60 @@ const CartModal: React.FC<CartModalProps> = ({ open, onOpenChange }) => {
             </div>
           ) : (
             cart.map((item) => (
-              <div
-                key={item.id}
-                className="flex items-center gap-4 rounded-lg border border-border bg-muted/30 p-4"
-              >
-                <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-md bg-muted">
-                  {item.url_imagen ? (
-                    <img
-                      src={item.url_imagen}
-                      alt={item.nombre}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center text-2xl">
-                      🍽️
+              <div key={item.id} className="space-y-2">
+                <div className="flex items-center gap-4 rounded-lg border border-border bg-muted/30 p-4">
+                  <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-md bg-muted">
+                    {item.url_imagen ? (
+                      <img
+                        src={item.url_imagen}
+                        alt={item.nombre}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-2xl">
+                        🍽️
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-foreground">{item.nombre}</h4>
+                    <p className="text-lg font-bold text-primary">${item.precio}</p>
+                  </div>
+                  <div className="flex flex-col items-end gap-2">
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => updateQuantity(item.id, item.cantidad - 1)}
+                      >
+                        <Minus className="h-4 w-4" />
+                      </Button>
+                      <span className="w-8 text-center font-semibold">{item.cantidad}</span>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => handleIncrement(item.id, item.cantidad, item.stock)}
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                        onClick={() => removeFromCart(item.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
-                  )}
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <h4 className="font-semibold text-foreground">{item.nombre}</h4>
-                  <p className="text-lg font-bold text-primary">${item.precio}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={() => updateQuantity(item.id, item.cantidad - 1)}
-                  >
-                    <Minus className="h-4 w-4" />
-                  </Button>
-                  <span className="w-8 text-center font-semibold">{item.cantidad}</span>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={() => updateQuantity(item.id, item.cantidad + 1)}
-                  >
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-destructive hover:bg-destructive/10"
-                    onClick={() => removeFromCart(item.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
+                {item.stock !== undefined && item.cantidad >= item.stock && (
+                  <div className="text-center -mt-2">
+                    <span className="text-xs text-destructive font-medium">Stock máximo alcanzado</span>
+                  </div>
+                )}
               </div>
             ))
           )}
