@@ -1,0 +1,100 @@
+import { useState, useEffect } from 'react';
+import Navbar from '../components/Navbar';
+import CategoryCarousel from '../components/CategoryCarousel';
+import ProductCard from '../components/ProductCard';
+import ApiService from '../services/api';
+import { toast } from 'sonner';
+import { Product, Category } from '../intefaces/interfaz';
+
+const Home = () => {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    try {
+      const [productsData, categoriesData] = await Promise.all([
+        ApiService.getProducts(),
+        ApiService.getCategories(),
+      ]);
+      setProducts(Array.isArray(productsData.data) ? productsData.data : []);
+      setCategories(Array.isArray(categoriesData.data) ? categoriesData.data : []);
+    } catch (error) {
+      toast.error('Error al cargar los datos');
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+  const filteredProducts = selectedCategory
+    ? (products || []).filter((p) => p.idCategoria === selectedCategory)
+    : products || [];
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Navbar />
+
+      <main className="container mx-auto px-4 py-8">
+        <section className="mb-12">
+          <div className="mb-8 text-center">
+            <h1 className="mb-4 text-4xl font-bold text-foreground md:text-5xl">
+              Bienvenido a{' '}
+              <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                Gourmet
+              </span>
+            </h1>
+            <p className="text-lg text-muted-foreground">
+              Descubre nuestra selección de productos premium
+            </p>
+          </div>
+
+          <CategoryCarousel
+            categories={categories}
+            selectedCategory={selectedCategory}
+            onSelectCategory={setSelectedCategory}
+          />
+        </section>
+
+        <section>
+          {loading ? (
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {[...Array(8)].map((_, i) => (
+                <div
+                  key={i}
+                  className="h-96 animate-pulse rounded-lg bg-card"
+                />
+              ))}
+            </div>
+          ) : filteredProducts.length === 0 ? (
+            <div className="py-20 text-center">
+              <p className="text-xl text-muted-foreground">
+                No hay productos disponibles en esta categoría
+              </p>
+            </div>
+          ) : (
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {filteredProducts.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          )}
+        </section>
+      </main>
+
+      <footer className="border-t border-border bg-card py-8">
+        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
+          <p>&copy; 2025 Gourmet. Todos los derechos reservados.</p>
+        </div>
+      </footer>
+    </div>
+  );
+};
+
+export default Home;
