@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Plus, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, Eye, EyeOff } from 'lucide-react';
 import ApiService from '../../services/api';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Textarea } from '../../components/ui/textarea';
 import { Product,Category } from 'src/intefaces/interfaz';
+import ImageEditor from '../../components/ImageEditor';
 import {
   Dialog,
   DialogContent,
@@ -34,6 +35,7 @@ const ProductosManager = () => {
     idCategoria: '',
   });
   const [imagen, setImagen] = useState<File | null>(null);
+  const [imagenParaEditar, setImagenParaEditar] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -107,6 +109,24 @@ const ProductosManager = () => {
     setShowDialog(true);
   };
 
+  const handleToggleEstado = async (product: Product) => {
+    try {
+      const formDataToSend = new FormData();
+      formDataToSend.append('nombre', product.nombre);
+      formDataToSend.append('descripcion', product.descripcion || '');
+      formDataToSend.append('precio', product.precio.toString());
+      formDataToSend.append('stock', product.stock?.toString() || '0');
+      formDataToSend.append('idCategoria', product.idCategoria?.toString() || '');
+      formDataToSend.append('estado', (!product.estado).toString());
+      
+      await ApiService.updateProduct(product.id, formDataToSend);
+      toast.success(`Producto ${!product.estado ? 'activado' : 'desactivado'}`);
+      loadData();
+    } catch (error) {
+      toast.error(error.message || 'Error al cambiar estado');
+    }
+  };
+
   const resetForm = () => {
     setEditingProduct(null);
     setFormData({
@@ -117,6 +137,23 @@ const ProductosManager = () => {
       idCategoria: '',
     });
     setImagen(null);
+    setImagenParaEditar(null);
+  };
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    if (file) {
+      setImagenParaEditar(file);
+    }
+  };
+
+  const handleImageSave = (croppedImage: File) => {
+    setImagen(croppedImage);
+    setImagenParaEditar(null);
+  };
+
+  const handleImageCancel = () => {
+    setImagenParaEditar(null);
   };
 
   return (
@@ -145,7 +182,7 @@ const ProductosManager = () => {
               <img
                 src={product.url_imagen}
                 alt={product.nombre}
-                className="h-48 w-full object-cover"
+                className="h-48 w-full object-contain bg-muted"
               />
             )}
             <div className="p-4">
@@ -156,6 +193,14 @@ const ProductosManager = () => {
               <p className="mb-2 text-lg font-bold text-primary">${product.precio}</p>
               <p className="mb-4 text-xs text-muted-foreground">Stock: {product.stock || 'N/A'}</p>
               <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleToggleEstado(product)}
+                  title={product.estado ? 'Desactivar' : 'Activar'}
+                >
+                  {product.estado ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
+                </Button>
                 <Button
                   variant="outline"
                   size="sm"
@@ -248,9 +293,19 @@ const ProductosManager = () => {
               <Input
                 type="file"
                 accept="image/*"
-                onChange={(e) => setImagen(e.target.files?.[0] || null)}
+                onChange={handleImageSelect}
                 className="bg-background"
               />
+              {imagen && !imagenParaEditar && (
+                <div className="mt-2">
+                  <p className="text-xs text-muted-foreground mb-1">Vista previa:</p>
+                  <img
+                    src={URL.createObjectURL(imagen)}
+                    alt="Vista previa"
+                    className="h-32 w-32 object-contain rounded border border-border"
+                  />
+                </div>
+              )}
             </div>
             <DialogFooter>
               <Button
@@ -271,6 +326,12 @@ const ProductosManager = () => {
           </form>
         </DialogContent>
       </Dialog>
+
+      <ImageEditor
+        file={imagenParaEditar}
+        onSave={handleImageSave}
+        onCancel={handleImageCancel}
+      />
     </div>
   );
 };

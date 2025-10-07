@@ -7,6 +7,7 @@ export interface Product {
   imagen?: File | null;
   stock?: number;
   idCategoria?: number;
+  estado?: boolean;
 }
 
 export interface CartItem {
@@ -21,6 +22,7 @@ export interface CartItem {
 export interface Category {
   id: number;
   nombre: string;
+  estado?: boolean;
 }
 
 export interface BankData {

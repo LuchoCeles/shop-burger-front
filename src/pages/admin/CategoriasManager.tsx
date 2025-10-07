@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, Eye, EyeOff } from 'lucide-react';
 import ApiService from '../../services/api';
 import { Category } from 'src/intefaces/interfaz';
 import { Button } from '../../components/ui/button';
@@ -72,7 +72,18 @@ const CategoriasManager = () => {
   const handleEdit = (category: Category) => {
     setEditingCategory(category);
     setNombre(category.nombre);
+    setEstado(category.estado);
     setShowDialog(true);
+  };
+
+  const handleToggleEstado = async (category: Category) => {
+    try {
+      await ApiService.updateCategory(category.id, category.nombre, !category.estado);
+      toast.success(`Categoría ${!category.estado ? 'activada' : 'desactivada'}`);
+      loadCategorias();
+    } catch (error) {
+      toast.error(error.message || 'Error al cambiar estado');
+    }
   };
 
   return (
@@ -100,6 +111,14 @@ const CategoriasManager = () => {
           >
             <span className="font-medium text-foreground">{cat.nombre}</span>
             <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => handleToggleEstado(cat)}
+                title={cat.estado ? 'Desactivar' : 'Activar'}
+              >
+                {cat.estado ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
+              </Button>
               <Button variant="outline" size="sm" onClick={() => handleEdit(cat)}>
                 <Pencil className="h-3 w-3" />
               </Button>

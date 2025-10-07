@@ -36,7 +36,7 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
           <img
             src={product.url_imagen}
             alt={product.nombre}
-            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
+            className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-110"
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-muted to-card">
