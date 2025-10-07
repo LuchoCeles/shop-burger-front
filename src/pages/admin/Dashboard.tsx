@@ -52,6 +52,11 @@ const Dashboard = () => {
             <p className="text-xs text-muted-foreground">Administrador</p>
           </div>
           <Button
+            onAuxClick={(e) => {
+              if (e.button === 1) {
+                window.open('/', '_blank');
+              }
+            }}
             onClick={() => navigate('/')}
             variant="ghost"
             className="w-full"
