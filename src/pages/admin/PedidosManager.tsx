@@ -69,7 +69,7 @@ const PedidosManager = () => {
               <div className="mb-4 flex items-start justify-between">
                 <div>
                   <h3 className="text-lg font-semibold text-foreground">
-                    Pedido #{pedido.id}
+                    PEDIDO #{pedido.id}
                   </h3>
                 </div>
                 <div className="flex items-center gap-2">
@@ -94,17 +94,17 @@ const PedidosManager = () => {
 
               <div className="mb-4 grid gap-2 text-sm">
                 <p className="text-foreground">
-                  <span className="font-medium">Cliente:</span> {pedido.idCliente || 'N/A'}
+                  <span className="font-medium">Cliente:</span> {pedido.cliente.id || 'N/A'}
                 </p>
                 <p className="text-foreground">
-                  <span className="font-medium">Teléfono:</span> {pedido.telefono || 'N/A'}
+                  <span className="font-medium">Teléfono:</span> {pedido.cliente.telefono || 'N/A'}
                 </p>
                 <p className="text-foreground">
-                  <span className="font-medium">Dirección:</span> {pedido.direccion || 'N/A'}
+                  <span className="font-medium">Dirección:</span> {pedido.cliente.direccion.toUpperCase() || 'N/A'}
                 </p>
                 {pedido.descripcion && (
-                  <p className="text-foreground">
-                    <span className="font-medium">Notas:</span> {pedido.descripcion || 'N/A'}
+                  <p className="text-foreground font-bold">
+                    <span className="font-medium">Notas:</span> {pedido.descripcion.toUpperCase() || 'N/A'}
                   </p>
                 )}
               </div>

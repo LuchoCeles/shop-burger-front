@@ -36,14 +36,15 @@ export interface BankData {
 
 export interface Orders {
   id: number;
-  idCliente: number;
-  telefono: string;
-  direccion: string;
-  descripcion?: string;
   estado: 'pendiente' | 'entregado' | 'cancelado';
   precioTotal: number;
-  productos: {
+  descripcion?: string;
+  cliente: {
     id: number;
+    telefono: string;
+    direccion: string;
+  }
+  productos: {
     nombre: string;
     precio: number;
     cantidad: number;
