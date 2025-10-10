@@ -34,6 +34,12 @@ export interface BankData {
   nombre: string;
 }
 
+export interface Cliente {
+  id?: number;
+  telefono: string;
+  direccion: string;
+}
+
 export interface Orders {
   id: number;
   estado: 'pendiente' | 'entregado' | 'cancelado';

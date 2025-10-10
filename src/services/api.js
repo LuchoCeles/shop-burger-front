@@ -124,7 +124,7 @@ class ApiService {
   }
 
   async createOrder(productData) {
-    const rsp = await this.POST('admin/pedido', productData, true);
+    const rsp = await this.POST('admin/pedido', productData);
     return rsp.json();
   }
 

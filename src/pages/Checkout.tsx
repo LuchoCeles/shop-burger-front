@@ -8,21 +8,22 @@ import { Textarea } from '../components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { toast } from 'sonner';
 import Navbar from '../components/Navbar';
+import { Cliente } from '@/intefaces/interfaz';
 
 const Checkout = () => {
   const { cart, total, clearCart } = useCart();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [orderData, setOrderData] = useState({
-    descripcion: '',
+  const [cliente, setCliente] = useState<Cliente>({
     telefono: '',
     direccion: '',
   });
+  const [descripcion, setDescripcion] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!orderData.telefono || !orderData.direccion) {
+
+    if (!cliente.telefono || !cliente.direccion) {
       toast.error('Completa todos los campos requeridos');
       return;
     }
@@ -35,23 +36,27 @@ const Checkout = () => {
     setLoading(true);
     try {
       const pedido = {
-        ...orderData,
+        cliente: {
+          telefono: cliente.telefono,
+          direccion: cliente.direccion,
+        },
+        descripcion,
         productos: cart.map((item) => ({
-          id_producto: item.id,
+          id: item.id,
           cantidad: item.cantidad,
         })),
-        total,
       };
 
-      const response = await ApiService.createProduct(pedido);
-      
+      console.log('Pedido a enviar:', pedido);
+      const response = await ApiService.createOrder(pedido);
+
       clearCart();
-      
+
       // Simulated payment info
       const alias = 'GOURMET.PAGO';
       const cbu = '0000003100000000000000';
       const pedidoId = response.id || Math.floor(Math.random() * 10000);
-      
+
       const whatsappMessage = encodeURIComponent(
         `¡Hola! Te paso el comprobante de mi pedido #${pedidoId}.\n\n` +
         `Total: $${total.toFixed(2)}\n` +
@@ -61,7 +66,7 @@ const Checkout = () => {
       );
 
       toast.success('Pedido creado exitosamente');
-      
+
       setTimeout(() => {
         window.open(`https://wa.me/5491122334455?text=${whatsappMessage}`, '_blank');
         navigate('/');
@@ -100,14 +105,14 @@ const Checkout = () => {
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label className="mb-2 block text-sm font-medium text-foreground">
-                    Teléfono *
+                    Teléfono
                   </label>
                   <Input
                     type="tel"
                     placeholder="+54 9 11 1234-5678"
-                    value={orderData.telefono}
+                    value={cliente.telefono}
                     onChange={(e) =>
-                      setOrderData({ ...orderData, telefono: e.target.value })
+                      setCliente({ ...cliente, telefono: e.target.value })
                     }
                     required
                     className="bg-background"
@@ -115,14 +120,14 @@ const Checkout = () => {
                 </div>
                 <div>
                   <label className="mb-2 block text-sm font-medium text-foreground">
-                    Dirección *
+                    Dirección
                   </label>
                   <Input
                     type="text"
                     placeholder="Calle 123, Ciudad"
-                    value={orderData.direccion}
+                    value={cliente.direccion}
                     onChange={(e) =>
-                      setOrderData({ ...orderData, direccion: e.target.value })
+                      setCliente({ ...cliente, direccion: e.target.value })
                     }
                     required
                     className="bg-background"
@@ -130,13 +135,13 @@ const Checkout = () => {
                 </div>
                 <div>
                   <label className="mb-2 block text-sm font-medium text-foreground">
-                    Notas adicionales
+                    Notas adicionales (Opcional)
                   </label>
                   <Textarea
-                    placeholder="Agregar instrucciones de entrega..."
-                    value={orderData.descripcion}
+                    placeholder="Agregar instrucciones de entrega o notas adicionales..."
+                    value={descripcion}
                     onChange={(e) =>
-                      setOrderData({ ...orderData, descripcion: e.target.value })
+                      setDescripcion(e.target.value)
                     }
                     className="bg-background"
                   />
