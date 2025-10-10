@@ -94,7 +94,7 @@ const PedidosManager = () => {
 
               <div className="mb-4 grid gap-2 text-sm">
                 <p className="text-foreground">
-                  <span className="font-medium">Cliente:</span> {pedido.nombre_cliente || 'N/A'}
+                  <span className="font-medium">Cliente:</span> {pedido.idCliente || 'N/A'}
                 </p>
                 <p className="text-foreground">
                   <span className="font-medium">Teléfono:</span> {pedido.telefono || 'N/A'}
@@ -104,7 +104,7 @@ const PedidosManager = () => {
                 </p>
                 {pedido.descripcion && (
                   <p className="text-foreground">
-                    <span className="font-medium">Notas:</span> {pedido.descripcion}
+                    <span className="font-medium">Notas:</span> {pedido.descripcion || 'N/A'}
                   </p>
                 )}
               </div>
@@ -119,7 +119,7 @@ const PedidosManager = () => {
                   ))}
                 </div>
                 <p className="mt-4 text-right text-xl font-bold text-primary">
-                  Total: ${pedido.total?.toFixed(2)}
+                  Total: ${pedido.precioTotal}
                 </p>
               </div>
             </div>

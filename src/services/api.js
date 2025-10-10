@@ -119,7 +119,7 @@ class ApiService {
 
   // Orders endpoints
   async getOrders() {
-    const rsp = await this.GET('admin/pedidos/');
+    const rsp = await this.GET('admin/pedidos');
     return rsp.json();
   }
 
