@@ -103,7 +103,7 @@ class ApiService {
   }
 
   async createCategory(nombre) {
-    const rsp = await this.POST('api/categoria', nombre);
+    const rsp = await this.POST('api/categoria', { nombre: nombre });
     return rsp.json();
   }
 
