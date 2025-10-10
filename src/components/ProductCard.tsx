@@ -8,7 +8,6 @@ import { Product } from '../intefaces/interfaz';
 const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
   const { addToCart, cart } = useCart();
 
-
   const handleAddToCart = () => {
     if (product.stock !== undefined && product.stock <= 0) {
       toast.error('Producto sin stock');
@@ -37,7 +36,7 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
           <img
             src={product.url_imagen}
             alt={product.nombre}
-            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
+            className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-110"
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-muted to-card">
@@ -51,11 +50,6 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
           <p className="mb-3 line-clamp-2 text-sm text-muted-foreground">{product.descripcion}</p>
         )}
         <p className="text-2xl font-bold text-primary">${product.precio}</p>
-        {product.stock !== undefined && product.stock <= 5 && (
-          <p className="mt-1 text-xs text-destructive">
-            {product.stock === 0 ? 'Sin stock' : `Últimas ${product.stock} unidades`}
-          </p>
-        )}
       </CardContent>
       <CardFooter className="p-4 pt-0">
         <Button
@@ -67,6 +61,13 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
           Agregar al carrito
         </Button>
       </CardFooter>
+      <div className="ml-4 mb-4 flex">
+        {product.stock !== undefined && product.stock <= 5 && (
+          <p className="mt-1 text-xs text-destructive">
+            {product.stock === 0 ? 'Sin stock' : `Últimas ${product.stock} unidades`}
+          </p>
+        )}
+      </div>
     </Card>
   );
 };

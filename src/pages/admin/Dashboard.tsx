@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Package, FolderKanban, ShoppingBag, LogOut } from 'lucide-react';
+import { LayoutDashboard, Package, FolderKanban, ShoppingBag, Settings, LogOut } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../../components/ui/button';
 import { cn } from '@/lib/utils';
@@ -14,6 +14,7 @@ const Dashboard = () => {
     { icon: Package, label: 'Productos', path: '/admin/productos' },
     { icon: FolderKanban, label: 'Categorías', path: '/admin/categorias' },
     { icon: ShoppingBag, label: 'Pedidos', path: '/admin/pedidos' },
+    { icon: Settings, label: 'Configuración', path: '/admin/configuracion' },
   ];
 
   return (
@@ -52,6 +53,11 @@ const Dashboard = () => {
             <p className="text-xs text-muted-foreground">Administrador</p>
           </div>
           <Button
+            onAuxClick={(e) => {
+              if (e.button === 1) {
+                window.open('/', '_blank');
+              }
+            }}
             onClick={() => navigate('/')}
             variant="ghost"
             className="w-full"

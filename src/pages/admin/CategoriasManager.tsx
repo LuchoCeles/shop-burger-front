@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Plus, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, Eye, EyeOff } from 'lucide-react';
 import ApiService from '../../services/api';
+import { Category } from 'src/intefaces/interfaz';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import {
@@ -10,15 +11,26 @@ import {
   DialogTitle,
   DialogFooter,
 } from '../../components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '../../components/ui/alert-dialog';
 import { toast } from 'sonner';
 
 const CategoriasManager = () => {
-  const [categorias, setCategorias] = useState<any[]>([]);
+  const [categorias, setCategorias] = useState<Category[]>([]);
   const [showDialog, setShowDialog] = useState(false);
-  const [editingCategory, setEditingCategory] = useState<any>(null);
+  const [editingCategory, setEditingCategory] = useState<Category>(null);
   const [nombre, setNombre] = useState('');
   const [estado, setEstado] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [categoryToDelete, setCategoryToDelete] = useState<number | null>(null);
 
   useEffect(() => {
     loadCategorias();
@@ -49,29 +61,42 @@ const CategoriasManager = () => {
       setNombre('');
       setEditingCategory(null);
       loadCategorias();
-    } catch (error: any) {
+    } catch (error) {
       toast.error(error.message || 'Error al guardar');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (!confirm('¿Eliminar esta categoría?')) return;
+  const handleDelete = async () => {
+    if (!categoryToDelete) return;
 
     try {
-      await ApiService.deleteCategoria(id);
+      await ApiService.deleteCategoria(categoryToDelete);
       toast.success('Categoría eliminada');
       loadCategorias();
-    } catch (error: any) {
+    } catch (error) {
       toast.error(error.message || 'Error al eliminar');
+    } finally {
+      setCategoryToDelete(null);
     }
   };
 
-  const handleEdit = (category: any) => {
+  const handleEdit = (category: Category) => {
     setEditingCategory(category);
     setNombre(category.nombre);
+    setEstado(category.estado);
     setShowDialog(true);
+  };
+
+  const handleToggleEstado = async (category: Category) => {
+    try {
+      await ApiService.updateCategory(category.id, category.nombre, !category.estado);
+      toast.success(`Categoría ${!category.estado ? 'activada' : 'desactivada'}`);
+      loadCategorias();
+    } catch (error) {
+      toast.error(error.message || 'Error al cambiar estado');
+    }
   };
 
   return (
@@ -99,10 +124,18 @@ const CategoriasManager = () => {
           >
             <span className="font-medium text-foreground">{cat.nombre}</span>
             <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleToggleEstado(cat)}
+                title={cat.estado ? 'Desactivar' : 'Activar'}
+              >
+                {cat.estado ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
+              </Button>
               <Button variant="outline" size="sm" onClick={() => handleEdit(cat)}>
                 <Pencil className="h-3 w-3" />
               </Button>
-              <Button variant="destructive" size="sm" onClick={() => handleDelete(cat.id)}>
+              <Button variant="destructive" size="sm" onClick={() => setCategoryToDelete(cat.id)}>
                 <Trash2 className="h-3 w-3" />
               </Button>
             </div>
@@ -153,6 +186,27 @@ const CategoriasManager = () => {
           </form>
         </DialogContent>
       </Dialog>
+      <AlertDialog open={!!categoryToDelete} onOpenChange={() => setCategoryToDelete(null)}>
+        <AlertDialogContent className="bg-card">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-foreground">¿Eliminar esta categoría?</AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground">
+              Esta acción no se puede deshacer. La categoría será eliminada permanentemente.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="bg-background text-foreground hover:bg-accent">
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

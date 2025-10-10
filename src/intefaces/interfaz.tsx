@@ -4,8 +4,10 @@ export interface Product {
   descripcion?: string;
   precio: number;
   url_imagen?: string;
+  imagen?: File | null;
   stock?: number;
   idCategoria?: number;
+  estado?: boolean;
 }
 
 export interface CartItem {
@@ -20,6 +22,7 @@ export interface CartItem {
 export interface Category {
   id: number;
   nombre: string;
+  estado?: boolean;
 }
 
 export interface BankData {
@@ -31,8 +34,30 @@ export interface BankData {
   nombre: string;
 }
 
+export interface Orders {
+  id: number;
+  nombre_cliente: string;
+  telefono: string;
+  direccion: string;
+  descripcion?: string;
+  estado: 'pendiente' | 'entregado' | 'cancelado';
+  total: number;
+  productos: {
+    id: number;
+    nombre: string;
+    precio: number;
+    cantidad: number;
+  }[];
+}
+
+
 export interface Admin {
   id: number;
   name: string;
   password: string;
+}
+
+export interface CartModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }

@@ -14,6 +14,7 @@ import DashboardHome from "./pages/admin/DashboardHome";
 import ProductosManager from "./pages/admin/ProductosManager";
 import CategoriasManager from "./pages/admin/CategoriasManager";
 import PedidosManager from "./pages/admin/PedidosManager";
+import ConfiguracionManager from "./pages/admin/ConfiguracionManager";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,7 +26,7 @@ const App = () => (
         <CartProvider>
           <Toaster />
           <Sonner />
-          <BrowserRouter>
+          <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/checkout" element={<Checkout />} />
@@ -43,6 +44,7 @@ const App = () => (
                 <Route path="productos" element={<ProductosManager />} />
                 <Route path="categorias" element={<CategoriasManager />} />
                 <Route path="pedidos" element={<PedidosManager />} />
+                <Route path="configuracion" element={<ConfiguracionManager />} />
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>

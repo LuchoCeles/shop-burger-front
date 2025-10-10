@@ -1,11 +1,7 @@
 import { useRef } from 'react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
-
-interface Category {
-  id: number;
-  nombre: string;
-}
+import { Category } from 'src/intefaces/interfaz';
 
 interface CategoryCarouselProps {
   categories: Category[];
