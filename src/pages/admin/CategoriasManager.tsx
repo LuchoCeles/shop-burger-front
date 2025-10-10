@@ -54,7 +54,8 @@ const CategoriasManager = () => {
         await ApiService.updateCategory(editingCategory.id, nombre, estado);
         toast.success('Categoría actualizada');
       } else {
-        await ApiService.createCategoria(nombre);
+        
+        await ApiService.createCategory(nombre);
         toast.success('Categoría creada');
       }
       setShowDialog(false);
@@ -160,7 +161,7 @@ const CategoriasManager = () => {
                 className="bg-background"
               />
             </div>
-            <div>
+            {editingCategory && (<div>
               <label className="mb-2 block text-sm font-medium text-foreground">Estado</label>
               <select
                 value={estado ? 'true' : 'false'}
@@ -170,7 +171,7 @@ const CategoriasManager = () => {
                 <option value="true">Activo</option>
                 <option value="false">Inactivo</option>
               </select>
-            </div>
+            </div>)}
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setShowDialog(false)}>
                 Cancelar
