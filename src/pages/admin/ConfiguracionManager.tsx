@@ -32,7 +32,7 @@ const ConfiguracionManager = () => {
     try {
       setLoading(true);
       const response = await api.GET('admin/banco/');
-      if (response.ok) {
+      if (setLoading) {
         const data = await response.json();
         setBankData(data);
         setFormData({

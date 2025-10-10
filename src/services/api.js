@@ -123,13 +123,19 @@ class ApiService {
     return rsp.json();
   }
 
+  async createOrder(productData) {
+    const rsp = await this.POST('admin/pedido', productData, true);
+    return rsp.json();
+  }
+
+
   async updateOrder(orderData) {
-    const rsp = await this.PATCH(`api/ordenes/${orderData.id}`, orderData);
+    const rsp = await this.PATCH(`admin/pedido/${orderData.id}`, orderData);
     return rsp.json();
   }
 
   async deleteOrder(id) {
-    const rsp = await this.DELETE(`api/ordenes/${id}`);
+    const rsp = await this.DELETE(`admin/pedido/${id}`);
     return rsp.json();
   }
 

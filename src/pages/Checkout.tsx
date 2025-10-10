@@ -43,7 +43,7 @@ const Checkout = () => {
         total,
       };
 
-      const response = await ApiService.createPedido(pedido);
+      const response = await ApiService.createProduct(pedido);
       
       clearCart();
       
