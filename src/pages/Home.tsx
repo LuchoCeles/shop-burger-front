@@ -5,6 +5,7 @@ import ProductCard from '../components/ProductCard';
 import ApiService from '../services/api';
 import { toast } from 'sonner';
 import { Product, Category } from '../intefaces/interfaz';
+import { MessageCircle, Instagram, Facebook } from 'lucide-react';
 
 const Home = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -88,9 +89,42 @@ const Home = () => {
         </section>
       </main>
 
-      <footer className="border-t border-border bg-card py-8">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>&copy; 2025 Gourmet. Todos los derechos reservados.</p>
+          <footer className="border-t border-border bg-card py-8">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col items-center justify-between gap-4 md:flex-row md:items-start">
+            <div className="text-sm text-muted-foreground">
+              <p>&copy; 2025 Gourmet. Todos los derechos reservados.</p>
+            </div>
+            <div className="flex items-center gap-9">
+              <a
+                href="https://wa.me/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-muted-foreground transition-colors hover:text-primary"
+              >
+                <MessageCircle className="h-5 w-5" />
+                <span className="text-sm">WhatsApp</span>
+              </a>
+              <a
+                href="https://instagram.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-muted-foreground transition-colors hover:text-primary"
+              >
+                <Instagram className="h-5 w-5" />
+                <span className="text-sm">Instagram</span>
+              </a>
+              <a
+                href="https://facebook.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-muted-foreground transition-colors hover:text-primary"
+              >
+                <Facebook className="h-5 w-5" />
+                <span className="text-sm">Facebook</span>
+              </a>
+            </div>
+          </div>
         </div>
       </footer>
     </div>
