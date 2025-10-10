@@ -4,7 +4,7 @@ import ApiService from '../../services/api';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Textarea } from '../../components/ui/textarea';
-import { Product,Category } from 'src/intefaces/interfaz';
+import { Product, Category } from 'src/intefaces/interfaz';
 import ImageEditor from '../../components/ImageEditor';
 import {
   Dialog,
@@ -21,6 +21,17 @@ import {
   SelectValue,
 } from '../../components/ui/select';
 import { toast } from 'sonner';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '../../components/ui/alert-dialog';
+
 
 const ProductosManager = () => {
   const [productos, setProductos] = useState<Product[]>([]);
@@ -37,6 +48,7 @@ const ProductosManager = () => {
   const [imagen, setImagen] = useState<File | null>(null);
   const [imagenParaEditar, setImagenParaEditar] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<number | null>(null);
 
   useEffect(() => {
     loadData();
@@ -85,15 +97,17 @@ const ProductosManager = () => {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (!confirm('¿Eliminar este producto?')) return;
+  const handleDelete = async () => {
+    if (!productToDelete) return;
 
     try {
-      await ApiService.deleteProducto(id);
+      await ApiService.deleteProducto(productToDelete);
       toast.success('Producto eliminado');
       loadData();
     } catch (error) {
       toast.error(error.message || 'Error al eliminar');
+    } finally {
+      setProductToDelete(null);
     }
   };
 
@@ -118,7 +132,7 @@ const ProductosManager = () => {
       formDataToSend.append('stock', product.stock?.toString() || '0');
       formDataToSend.append('idCategoria', product.idCategoria?.toString() || '');
       formDataToSend.append('estado', (!product.estado).toString());
-      
+
       await ApiService.updateProduct(product.id, formDataToSend);
       toast.success(`Producto ${!product.estado ? 'activado' : 'desactivado'}`);
       loadData();
@@ -213,7 +227,7 @@ const ProductosManager = () => {
                 <Button
                   variant="destructive"
                   size="sm"
-                  onClick={() => handleDelete(product.id)}
+                  onClick={() => setProductToDelete(product.id)}
                 >
                   <Trash2 className="h-3 w-3" />
                 </Button>
@@ -332,6 +346,27 @@ const ProductosManager = () => {
         onSave={handleImageSave}
         onCancel={handleImageCancel}
       />
+      <AlertDialog open={!!productToDelete} onOpenChange={() => setProductToDelete(null)}>
+        <AlertDialogContent className="bg-card">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-foreground">¿Eliminar este producto?</AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground">
+              Esta acción no se puede deshacer. El producto será eliminado permanentemente.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="bg-background text-foreground hover:bg-accent">
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

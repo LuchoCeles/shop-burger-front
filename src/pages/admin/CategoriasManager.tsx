@@ -11,6 +11,16 @@ import {
   DialogTitle,
   DialogFooter,
 } from '../../components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '../../components/ui/alert-dialog';
 import { toast } from 'sonner';
 
 const CategoriasManager = () => {
@@ -20,6 +30,7 @@ const CategoriasManager = () => {
   const [nombre, setNombre] = useState('');
   const [estado, setEstado] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [categoryToDelete, setCategoryToDelete] = useState<number | null>(null);
 
   useEffect(() => {
     loadCategorias();
@@ -57,15 +68,17 @@ const CategoriasManager = () => {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (!confirm('¿Eliminar esta categoría?')) return;
+  const handleDelete = async () => {
+    if (!categoryToDelete) return;
 
     try {
-      await ApiService.deleteCategoria(id);
+      await ApiService.deleteCategoria(categoryToDelete);
       toast.success('Categoría eliminada');
       loadCategorias();
     } catch (error) {
       toast.error(error.message || 'Error al eliminar');
+    } finally {
+      setCategoryToDelete(null);
     }
   };
 
@@ -111,9 +124,9 @@ const CategoriasManager = () => {
           >
             <span className="font-medium text-foreground">{cat.nombre}</span>
             <div className="flex gap-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => handleToggleEstado(cat)}
                 title={cat.estado ? 'Desactivar' : 'Activar'}
               >
@@ -122,7 +135,7 @@ const CategoriasManager = () => {
               <Button variant="outline" size="sm" onClick={() => handleEdit(cat)}>
                 <Pencil className="h-3 w-3" />
               </Button>
-              <Button variant="destructive" size="sm" onClick={() => handleDelete(cat.id)}>
+              <Button variant="destructive" size="sm" onClick={() => setCategoryToDelete(cat.id)}>
                 <Trash2 className="h-3 w-3" />
               </Button>
             </div>
@@ -173,6 +186,27 @@ const CategoriasManager = () => {
           </form>
         </DialogContent>
       </Dialog>
+      <AlertDialog open={!!categoryToDelete} onOpenChange={() => setCategoryToDelete(null)}>
+        <AlertDialogContent className="bg-card">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-foreground">¿Eliminar esta categoría?</AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground">
+              Esta acción no se puede deshacer. La categoría será eliminada permanentemente.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="bg-background text-foreground hover:bg-accent">
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
