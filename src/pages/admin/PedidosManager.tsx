@@ -33,11 +33,11 @@ const PedidosManager = () => {
   const handleEstadoChange = async (id: number, estado: string) => {
     try {
       const r = await ApiService.updateOrder({ id: id, estado: estado });
-      if (r.success) {
+      if (r.suscess) {
         toast.success('Estado actualizado');
         loadPedidos();
       } else {
-        toast.error('Error al actualizar');
+        toast.error(r.error || 'Error al actualizar');
       }
     } catch (error) {
       toast.error(error.message || 'Error al actualizar');
@@ -78,14 +78,16 @@ const PedidosManager = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <span className={`font-medium ${getEstadoColor(pedido.estado)}`}>
-                    {pedido.estado}
+                    {pedido.estado.charAt(0).toUpperCase() + pedido.estado.slice(1)}
                   </span>
+
                   <Select
                     value={pedido.estado}
                     onValueChange={(value) => handleEstadoChange(pedido.id, value)}
+                    disabled={pedido.estado === "entregado" || pedido.estado === "cancelado"}
                   >
                     <SelectTrigger className="w-40 bg-background">
-                      <SelectValue />
+                      <SelectValue placeholder="Seleccionar estado" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="pendiente">Pendiente</SelectItem>
