@@ -32,9 +32,13 @@ const PedidosManager = () => {
 
   const handleEstadoChange = async (id: number, estado: string) => {
     try {
-      await ApiService.updatePedidoEstado(id, estado);
-      toast.success('Estado actualizado');
-      loadPedidos();
+      const r = await ApiService.updateOrder({ id: id, estado: estado });
+      if (r.suscess) {
+        toast.success('Estado actualizado');
+        loadPedidos();
+      } else {
+        toast.error(r.error || 'Error al actualizar');
+      }
     } catch (error) {
       toast.error(error.message || 'Error al actualizar');
     }
@@ -69,19 +73,21 @@ const PedidosManager = () => {
               <div className="mb-4 flex items-start justify-between">
                 <div>
                   <h3 className="text-lg font-semibold text-foreground">
-                    Pedido #{pedido.id}
+                    PEDIDO #{pedido.id}
                   </h3>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className={`font-medium ${getEstadoColor(pedido.estado)}`}>
-                    {pedido.estado}
+                    {pedido.estado.charAt(0).toUpperCase() + pedido.estado.slice(1)}
                   </span>
+
                   <Select
                     value={pedido.estado}
                     onValueChange={(value) => handleEstadoChange(pedido.id, value)}
+                    disabled={pedido.estado === "entregado" || pedido.estado === "cancelado"}
                   >
                     <SelectTrigger className="w-40 bg-background">
-                      <SelectValue />
+                      <SelectValue placeholder="Seleccionar estado" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="pendiente">Pendiente</SelectItem>
@@ -94,17 +100,17 @@ const PedidosManager = () => {
 
               <div className="mb-4 grid gap-2 text-sm">
                 <p className="text-foreground">
-                  <span className="font-medium">Cliente:</span> {pedido.nombre_cliente || 'N/A'}
+                  <span className="font-medium">Cliente:</span> {pedido.cliente.id || 'N/A'}
                 </p>
                 <p className="text-foreground">
-                  <span className="font-medium">Teléfono:</span> {pedido.telefono || 'N/A'}
+                  <span className="font-medium">Teléfono:</span> {pedido.cliente.telefono || 'N/A'}
                 </p>
                 <p className="text-foreground">
-                  <span className="font-medium">Dirección:</span> {pedido.direccion || 'N/A'}
+                  <span className="font-medium">Dirección:</span> {pedido.cliente.direccion.toUpperCase() || 'N/A'}
                 </p>
                 {pedido.descripcion && (
-                  <p className="text-foreground">
-                    <span className="font-medium">Notas:</span> {pedido.descripcion}
+                  <p className="text-foreground font-bold">
+                    <span className="font-medium">Notas:</span> {pedido.descripcion.toUpperCase() || 'N/A'}
                   </p>
                 )}
               </div>
@@ -119,7 +125,7 @@ const PedidosManager = () => {
                   ))}
                 </div>
                 <p className="mt-4 text-right text-xl font-bold text-primary">
-                  Total: ${pedido.total?.toFixed(2)}
+                  Total: ${pedido.precioTotal}
                 </p>
               </div>
             </div>

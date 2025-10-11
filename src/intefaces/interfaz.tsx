@@ -34,16 +34,23 @@ export interface BankData {
   nombre: string;
 }
 
-export interface Orders {
-  id: number;
-  nombre_cliente: string;
+export interface Cliente {
+  id?: number;
   telefono: string;
   direccion: string;
-  descripcion?: string;
+}
+
+export interface Orders {
+  id: number;
   estado: 'pendiente' | 'entregado' | 'cancelado';
-  total: number;
-  productos: {
+  precioTotal: number;
+  descripcion?: string;
+  cliente: {
     id: number;
+    telefono: string;
+    direccion: string;
+  }
+  productos: {
     nombre: string;
     precio: number;
     cantidad: number;

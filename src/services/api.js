@@ -119,23 +119,22 @@ class ApiService {
 
   // Orders endpoints
   async getOrders() {
-    const rsp = await this.GET('admin/pedidos/');
+    const rsp = await this.GET('admin/pedidos');
     return rsp.json();
   }
 
   async createOrder(productData) {
-    const rsp = await this.POST('admin/pedido', productData, true);
+    const rsp = await this.POST('admin/pedidos', productData);
     return rsp.json();
   }
 
-
   async updateOrder(orderData) {
-    const rsp = await this.PATCH(`admin/pedido/${orderData.id}`, orderData);
+    const rsp = await this.PATCH(`admin/pedidos/estado`, orderData);
     return rsp.json();
   }
 
   async deleteOrder(id) {
-    const rsp = await this.DELETE(`admin/pedido/${id}`);
+    const rsp = await this.DELETE(`admin/pedidos/${id}`);
     return rsp.json();
   }
 
