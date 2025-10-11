@@ -32,9 +32,13 @@ const PedidosManager = () => {
 
   const handleEstadoChange = async (id: number, estado: string) => {
     try {
-      await ApiService.updatePedidoEstado(id, estado);
-      toast.success('Estado actualizado');
-      loadPedidos();
+      const r = await ApiService.updateOrder({ id: id, estado: estado });
+      if (r.success) {
+        toast.success('Estado actualizado');
+        loadPedidos();
+      } else {
+        toast.error('Error al actualizar');
+      }
     } catch (error) {
       toast.error(error.message || 'Error al actualizar');
     }
