@@ -163,12 +163,12 @@ const PedidosManager = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmar cambio de estado</AlertDialogTitle>
             <AlertDialogDescription>
-              <p>
+              <div>
                 ¿Estás seguro de que quieres marcar este pedido como "{confirmDialog.nuevoEstado}"?
-              </p>
-              <p>
+              </div>
+              <div>
                 Esta acción cambiará el estado del pedido #{confirmDialog.pedidoId}.
-              </p>
+              </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
