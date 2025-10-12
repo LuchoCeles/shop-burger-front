@@ -1,3 +1,5 @@
+import { io, Socket } from 'socket.io-client';
+
 export interface Product {
   id: number;
   nombre: string;
@@ -67,4 +69,11 @@ export interface Admin {
 export interface CartModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+}
+
+export interface SocketContextType {
+  socket: Socket | null;
+  connected: boolean;
+  newOrderCount: number;
+  clearNewOrderCount: () => void;
 }

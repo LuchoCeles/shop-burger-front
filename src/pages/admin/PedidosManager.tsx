@@ -40,7 +40,6 @@ const PedidosManager = () => {
   useEffect(() => {
     if (socket) {
       socket.on('nuevoPedido', () => {
-        console.log('Nuevo pedido detectado, recargando lista...');
         loadPedidos();
         toast.success('¡Nuevo pedido recibido!');
       });

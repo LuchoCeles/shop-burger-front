@@ -1,13 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useAuth } from './AuthContext';
-
-interface SocketContextType {
-  socket: Socket | null;
-  connected: boolean;
-  newOrderCount: number;
-  clearNewOrderCount: () => void;
-}
+import { SocketContextType } from '../intefaces/interfaz';
 
 const SocketContext = createContext<SocketContextType | undefined>(undefined);
 
@@ -40,8 +34,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         setConnected(false);
       });
 
-      newSocket.on('nuevoPedido', (data) => {
-        console.log('Nuevo pedido recibido:', data);
+      newSocket.on('nuevoPedido', () => {
         setNewOrderCount(prev => prev + 1);
       });
 
