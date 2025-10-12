@@ -5,7 +5,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { CartProvider } from "./context/CartContext";
 import { AuthProvider } from "./context/AuthContext";
+import { SocketProvider } from "./context/SocketContext";
 import ProtectedRoute from "./routes/ProtectedRoute";
+import OrderNotification from "./components/OrderNotification";
 import Home from "./pages/Home";
 import Checkout from "./pages/Checkout";
 import Login from "./pages/Login";
@@ -23,33 +25,36 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <AuthProvider>
-        <CartProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/checkout" element={<Checkout />} />
-              <Route path="/auth" element={<Login />} />
-              <Route path="/login" element={<Navigate to="/auth" replace />} />
-              <Route
-                path="/admin"
-                element={
-                  <ProtectedRoute>
-                    <Dashboard />
-                  </ProtectedRoute>
-                }
-              >
-                <Route index element={<DashboardHome />} />
-                <Route path="productos" element={<ProductosManager />} />
-                <Route path="categorias" element={<CategoriasManager />} />
-                <Route path="pedidos" element={<PedidosManager />} />
-                <Route path="configuracion" element={<ConfiguracionManager />} />
-              </Route>
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </CartProvider>
+        <SocketProvider>
+          <CartProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+              <OrderNotification />
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/checkout" element={<Checkout />} />
+                <Route path="/auth" element={<Login />} />
+                <Route path="/login" element={<Navigate to="/auth" replace />} />
+                <Route
+                  path="/admin"
+                  element={
+                    <ProtectedRoute>
+                      <Dashboard />
+                    </ProtectedRoute>
+                  }
+                >
+                  <Route index element={<DashboardHome />} />
+                  <Route path="productos" element={<ProductosManager />} />
+                  <Route path="categorias" element={<CategoriasManager />} />
+                  <Route path="pedidos" element={<PedidosManager />} />
+                  <Route path="configuracion" element={<ConfiguracionManager />} />
+                </Route>
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </CartProvider>
+        </SocketProvider>
       </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>

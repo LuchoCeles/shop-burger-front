@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import ApiService from '../../services/api';
 import { Orders } from 'src/intefaces/interfaz';
+import { useSocket } from '../../context/SocketContext';
 import {
   Select,
   SelectContent,
@@ -30,10 +31,25 @@ const PedidosManager = () => {
     pedidoId: 0,
     nuevoEstado: '',
   });
+  const { socket } = useSocket();
 
   useEffect(() => {
     loadPedidos();
   }, []);
+
+  useEffect(() => {
+    if (socket) {
+      socket.on('nuevoPedido', () => {
+        console.log('Nuevo pedido detectado, recargando lista...');
+        loadPedidos();
+        toast.success('¡Nuevo pedido recibido!');
+      });
+
+      return () => {
+        socket.off('nuevoPedido');
+      };
+    }
+  }, [socket]);
 
   const loadPedidos = async () => {
     try {
