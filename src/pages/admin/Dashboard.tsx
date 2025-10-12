@@ -18,13 +18,13 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="flex min-h-screen bg-background">
-      <aside className="w-64 border-r border-border bg-card flex flex-col">
-        <div className="flex h-16 items-center border-b border-border px-6">
+    <div className="flex h-screen bg-background overflow-hidden">
+      <aside className="w-64 border-r border-border bg-card flex flex-col h-full">
+        <div className="flex h-16 items-center border-b border-border px-6 flex-shrink-0">
           <h2 className="text-xl font-bold text-foreground">Admin Panel</h2>
         </div>
 
-        <nav className="space-y-2 p-4 flex-1">
+        <nav className="space-y-2 p-4 flex-1 overflow-y-auto">
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.path;
@@ -45,8 +45,8 @@ const Dashboard = () => {
           })}
         </nav>
 
-        <div className="p-4 border-t border-border">
-          <div className="mb-2 rounded-lg bg-muted p-4">
+        <div className="p-4 border-t border-border space-y-2 flex-shrink-0">
+          <div className="rounded-lg bg-muted p-4">
             <p className="text-sm font-medium text-foreground">
               {user?.nombre?.toUpperCase()}
             </p>
@@ -78,7 +78,7 @@ const Dashboard = () => {
         </div>
 
       </aside>
-      <main className="flex-1 p-8">
+      <main className="flex-1 p-8 overflow-y-auto">
         <Outlet />
       </main>
     </div>
