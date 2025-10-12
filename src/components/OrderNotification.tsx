@@ -20,21 +20,28 @@ const OrderNotification: React.FC = () => {
       }
 
       const context = audioContextRef.current;
+
+      // Sonido más agudo y corto como "tin"
       const oscillator = context.createOscillator();
       const gainNode = context.createGain();
 
       oscillator.connect(gainNode);
       gainNode.connect(context.destination);
 
-      // Configuración del sonido de campana
-      oscillator.frequency.setValueAtTime(800, context.currentTime);
-      oscillator.frequency.exponentialRampToValueAtTime(400, context.currentTime + 0.1);
-      
-      gainNode.gain.setValueAtTime(0.3, context.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.5);
+      oscillator.type = 'sine'; // O 'sine' para más suave
+
+      // Frecuencia más alta para sonido agudo
+      oscillator.frequency.setValueAtTime(100, context.currentTime);
+      oscillator.frequency.exponentialRampToValueAtTime(800, context.currentTime + 0.08);
+
+      // Envolvente muy corta y rápida
+      gainNode.gain.setValueAtTime(0, context.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.4, context.currentTime + 0.02); // Attack rápido
+      gainNode.gain.exponentialRampToValueAtTime(0.001, context.currentTime + 0.15); // Decay rápido
 
       oscillator.start(context.currentTime);
       oscillator.stop(context.currentTime + 0.5);
+
     } catch (error) {
       console.error('Error al reproducir sonido:', error);
     }
@@ -45,7 +52,7 @@ const OrderNotification: React.FC = () => {
 
     const handleNuevoPedido = () => {
       playNotificationSound();
-      
+
       if (!isOnPedidosPage) {
         toast.info('Nuevo pedido recibido', {
           description: 'Haz click aquí para ver los pedidos',
