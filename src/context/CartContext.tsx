@@ -16,11 +16,34 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [cart, setCart] = useState<CartItem[]>(() => {
     const savedCart = localStorage.getItem('cart');
-    return savedCart ? JSON.parse(savedCart) : [];
+    const savedTimestamp = localStorage.getItem('cartTimestamp');
+
+    if (savedCart && savedTimestamp) {
+      const now = Date.now();
+      const timestamp = parseInt(savedTimestamp, 10);
+      const oneHour = 60 * 60 * 1000; // 1 hora en milisegundos
+
+      // Si pasó más de una hora, limpiar el carrito
+      if (now - timestamp > oneHour) {
+        localStorage.removeItem('cart');
+        localStorage.removeItem('cartTimestamp');
+        return [];
+      }
+
+      return JSON.parse(savedCart);
+    }
+
+    return [];
   });
 
   useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(cart));
+    if (cart.length > 0) {
+      localStorage.setItem('cart', JSON.stringify(cart));
+      localStorage.setItem('cartTimestamp', Date.now().toString());
+    } else {
+      localStorage.removeItem('cart');
+      localStorage.removeItem('cartTimestamp');
+    }
   }, [cart]);
 
   const addToCart = (product: Omit<CartItem, 'cantidad'>) => {
