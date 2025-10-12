@@ -278,7 +278,7 @@ const ProductosManager = () => {
                 <label className="mb-2 block text-sm font-medium text-foreground">Stock</label>
                 <Input
                   type="number"
-                  min="0"
+                  min="1"
                   value={formData.stock}
                   onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
                   className="bg-background"
