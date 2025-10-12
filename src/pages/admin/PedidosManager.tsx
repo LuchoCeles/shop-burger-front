@@ -9,12 +9,27 @@ import {
   SelectValue,
 } from '../../components/ui/select';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui/tabs';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '../../components/ui/alert-dialog';
 import { toast } from 'sonner';
 
 const PedidosManager = () => {
   const [pedidos, setPedidos] = useState<Orders[]>([]);
   const [loading, setLoading] = useState(true);
   const [filtroEstado, setFiltroEstado] = useState<'todos' | 'pendiente' | 'entregado' | 'cancelado'>('todos');
+  const [confirmDialog, setConfirmDialog] = useState<{ open: boolean; pedidoId: number; nuevoEstado: string }>({
+    open: false,
+    pedidoId: 0,
+    nuevoEstado: '',
+  });
 
   useEffect(() => {
     loadPedidos();
@@ -31,7 +46,15 @@ const PedidosManager = () => {
     }
   };
 
-  const handleEstadoChange = async (id: number, estado: string) => {
+  const handleEstadoChange = (id: number, estado: string) => {
+    if (estado === 'entregado' || estado === 'cancelado') {
+      setConfirmDialog({ open: true, pedidoId: id, nuevoEstado: estado });
+    } else {
+      confirmarCambioEstado(id, estado);
+    }
+  };
+
+  const confirmarCambioEstado = async (id: number, estado: string) => {
     try {
       const r = await ApiService.updateOrder({ id: id, estado: estado });
       if (r.suscess) {
@@ -134,6 +157,35 @@ const PedidosManager = () => {
   return (
     <div>
       <h1 className="mb-6 text-3xl font-bold text-foreground">Pedidos</h1>
+
+      <AlertDialog open={confirmDialog.open} onOpenChange={(open) => setConfirmDialog({ ...confirmDialog, open })}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar cambio de estado</AlertDialogTitle>
+            <AlertDialogDescription>
+              <p>
+                ¿Estás seguro de que quieres marcar este pedido como "{confirmDialog.nuevoEstado}"?
+              </p>
+              <p>
+                Esta acción cambiará el estado del pedido #{confirmDialog.pedidoId}.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setConfirmDialog({ open: false, pedidoId: 0, nuevoEstado: '' })}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                confirmarCambioEstado(confirmDialog.pedidoId, confirmDialog.nuevoEstado);
+                setConfirmDialog({ open: false, pedidoId: 0, nuevoEstado: '' });
+              }}
+            >
+              Confirmar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <Tabs value={filtroEstado} onValueChange={(value) => setFiltroEstado(value as any)} className="w-full">
         <TabsList className="mb-6 grid w-full max-w-md grid-cols-4">
