@@ -1,6 +1,6 @@
-🍔 Burger Shop - Frontend
+# 🍔 Burger Shop - Frontend
 
-Tienda online minimalista tipo gourmet construida con React, TypeScript y TailwindCSS.
+Tienda online con React, TypeScript y TailwindCSS.
 
 ## 🚀 Características
 
