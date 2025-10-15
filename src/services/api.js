@@ -139,6 +139,42 @@ class ApiService {
     return rsp.json();
   }
 
+  // Adicionales endpoints
+  async getAdicionales() {
+    const rsp = await this.GET('api/adicionales/');
+    return rsp.json();
+  }
+
+  async createAdicional(adicionalData) {
+    const rsp = await this.POST('api/adicionales/create', adicionalData);
+    return rsp.json();
+  }
+
+  async updateAdicional(id, adicionalData) {
+    const rsp = await this.PATCH(`api/adicionales/${id}`, adicionalData);
+    return rsp.json();
+  }
+
+  async deleteAdicional(id) {
+    const rsp = await this.DELETE(`api/adicionales/${id}`);
+    return rsp.json();
+  }
+
+  async getProductoAdicionales(idProducto) {
+    const rsp = await this.GET(`api/adicionales/producto/${idProducto}`);
+    return rsp.json();
+  }
+
+  async addAdicionalToProducto(idProducto, idAdicional) {
+    const rsp = await this.POST('api/adicionales/producto', { idProducto, idAdicional });
+    return rsp.json();
+  }
+
+  async removeAdicionalFromProducto(idProducto, idAdicional) {
+    const rsp = await this.DELETE(`api/adicionales/producto`, { idProducto, idAdicional });
+    return rsp.json();
+  }
+  
 }
 
 export default new ApiService();

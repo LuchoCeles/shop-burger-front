@@ -15,6 +15,7 @@ import Dashboard from "./pages/admin/Dashboard";
 import DashboardHome from "./pages/admin/DashboardHome";
 import ProductosManager from "./pages/admin/ProductosManager";
 import CategoriasManager from "./pages/admin/CategoriasManager";
+import AdicionalesManager from "./pages/admin/AdicionalesManager";
 import PedidosManager from "./pages/admin/PedidosManager";
 import ConfiguracionManager from "./pages/admin/ConfiguracionManager";
 import NotFound from "./pages/NotFound";
@@ -47,6 +48,7 @@ const App = () => (
                   <Route index element={<DashboardHome />} />
                   <Route path="productos" element={<ProductosManager />} />
                   <Route path="categorias" element={<CategoriasManager />} />
+                  <Route path="adicionales" element={<AdicionalesManager />} />
                   <Route path="pedidos" element={<PedidosManager />} />
                   <Route path="configuracion" element={<ConfiguracionManager />} />
                 </Route>

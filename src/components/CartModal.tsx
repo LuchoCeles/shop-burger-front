@@ -77,6 +77,16 @@ const CartModal: React.FC<CartModalProps> = ({ open, onOpenChange }) => {
                     <div className="flex-1">
                       <h4 className="font-semibold text-foreground">{item.nombre}</h4>
                       <p className="text-lg font-bold text-primary">${item.precio}</p>
+                      {item.adicionales && item.adicionales.length > 0 && (
+                        <div className="mt-2 space-y-1">
+                          <p className="text-xs text-muted-foreground font-medium">Adicionales:</p>
+                          {item.adicionales.map((adic) => (
+                            <p key={adic.id} className="text-xs text-muted-foreground">
+                              • {adic.nombre} x{adic.cantidad} (+${(adic.precio * adic.cantidad).toFixed(2)})
+                            </p>
+                          ))}
+                        </div>
+                      )}
                     </div>
 
                     {/* Controles */}
