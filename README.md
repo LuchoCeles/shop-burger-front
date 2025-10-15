@@ -1,4 +1,4 @@
-# Gourmet - Tienda Online
+🍔 Burger Shop - Frontend
 
 Tienda online minimalista tipo gourmet construida con React, TypeScript y TailwindCSS.
 

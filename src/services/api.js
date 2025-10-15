@@ -71,8 +71,9 @@ class ApiService {
   }
 
   // Products endpoints
-  async getProducts() {
-    const rsp = await this.GET('api/producto/');
+  async getProducts(soloActivos = false) {
+    const query = soloActivos ? '?soloActivos=false' : '';
+    const rsp = await this.GET(`api/producto${query}`);
     return rsp.json();
   }
 

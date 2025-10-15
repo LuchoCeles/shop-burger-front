@@ -56,7 +56,7 @@ const ProductosManager = () => {
 
   const loadData = async () => {
     try {
-      const [prodData, catData] = await Promise.all([ApiService.getProducts(), ApiService.getCategories()]);
+      const [prodData, catData] = await Promise.all([ApiService.getProducts(true), ApiService.getCategories()]);
       setProductos(prodData.data);
       setCategorias(catData.data);
     } catch (error) {
