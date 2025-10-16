@@ -71,6 +71,17 @@ const ProductosManager = () => {
     e.preventDefault();
     setLoading(true);
 
+    if (categorias.length === 0) {
+      toast.error('Debes crear al menos una categoría antes de crear productos');
+      setLoading(false);
+      return;
+    }
+    if (!formData.idCategoria) {
+      toast.error('Selecciona una categoría');
+      setLoading(false);
+      return;
+    }
+
     try {
       const formDataToSend = new FormData();
       formDataToSend.append('nombre', formData.nombre);
@@ -351,7 +362,7 @@ const ProductosManager = () => {
               <Button
                 type="submit"
                 className="bg-primary text-primary-foreground hover:bg-primary/90"
-                disabled={loading}
+                disabled={loading || categorias.length === 0}
               >
                 {loading ? 'Guardando...' : 'Guardar'}
               </Button>
@@ -386,7 +397,7 @@ const ProductosManager = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      
+
       {selectedProductForAdicionales && (
         <AsignarAdicionalesDialog
           open={adicionalesDialogOpen}
