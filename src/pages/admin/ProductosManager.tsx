@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Plus, Pencil, Trash2, Eye, EyeOff } from 'lucide-react';
+import { Plus, Pencil, Trash2, Eye, EyeOff, ListPlus } from 'lucide-react';
 import ApiService from '../../services/api';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Textarea } from '../../components/ui/textarea';
 import { Product, Category } from 'src/intefaces/interfaz';
 import ImageEditor from '../../components/ImageEditor';
+import AsignarAdicionalesDialog from '../../components/AsignarAdicionalesDialog';
 import {
   Dialog,
   DialogContent,
@@ -49,6 +50,8 @@ const ProductosManager = () => {
   const [imagenParaEditar, setImagenParaEditar] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [productToDelete, setProductToDelete] = useState<number | null>(null);
+  const [adicionalesDialogOpen, setAdicionalesDialogOpen] = useState(false);
+  const [selectedProductForAdicionales, setSelectedProductForAdicionales] = useState<Product | null>(null);
 
   useEffect(() => {
     loadData();
@@ -67,6 +70,17 @@ const ProductosManager = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
+    if (categorias.length === 0) {
+      toast.error('Debes crear al menos una categoría antes de crear productos');
+      setLoading(false);
+      return;
+    }
+    if (!formData.idCategoria) {
+      toast.error('Selecciona una categoría');
+      setLoading(false);
+      return;
+    }
 
     try {
       const formDataToSend = new FormData();
@@ -206,24 +220,39 @@ const ProductosManager = () => {
               </p>
               <p className="mb-2 text-lg font-bold text-primary">${product.precio}</p>
               <p className="mb-4 text-xs text-muted-foreground">Stock: {product.stock || 'N/A'}</p>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleToggleEstado(product)}
-                  title={product.estado ? 'Desactivar' : 'Activar'}
-                >
-                  {product.estado ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex-1"
-                  onClick={() => handleEdit(product)}
-                >
-                  <Pencil className="mr-1 h-3 w-3" />
-                  Editar
-                </Button>
+
+              <div className="flex flex-col gap-2">
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleToggleEstado(product)}
+                    title={product.estado ? 'Desactivar' : 'Activar'}
+                  >
+                    {product.estado ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1"
+                    onClick={() => handleEdit(product)}
+                  >
+                    <Pencil className="mr-1 h-3 w-3" />
+                    Editar
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => {
+                      setSelectedProductForAdicionales(product);
+                      setAdicionalesDialogOpen(true);
+                    }}
+
+                  >
+                    <ListPlus className="mr-1 h-3 w-3" />
+                    Adicionales
+                  </Button>
+                </div>
                 <Button
                   variant="destructive"
                   size="sm"
@@ -333,7 +362,7 @@ const ProductosManager = () => {
               <Button
                 type="submit"
                 className="bg-primary text-primary-foreground hover:bg-primary/90"
-                disabled={loading}
+                disabled={loading || categorias.length === 0}
               >
                 {loading ? 'Guardando...' : 'Guardar'}
               </Button>
@@ -368,6 +397,15 @@ const ProductosManager = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {selectedProductForAdicionales && (
+        <AsignarAdicionalesDialog
+          open={adicionalesDialogOpen}
+          onOpenChange={setAdicionalesDialogOpen}
+          productId={selectedProductForAdicionales.id}
+          productName={selectedProductForAdicionales.nombre}
+        />
+      )}
     </div>
   );
 };

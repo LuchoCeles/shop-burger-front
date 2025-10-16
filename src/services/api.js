@@ -73,7 +73,7 @@ class ApiService {
   // Products endpoints
   async getProducts(soloActivos = false) {
     const query = soloActivos ? '?soloActivos=false' : '';
-    const rsp = await this.GET(`api/producto${query}`);
+    const rsp = await this.GET(`api/producto${query}/`);
     return rsp.json();
   }
 
@@ -83,7 +83,7 @@ class ApiService {
   }
 
   async createProduct(productData) {
-    const rsp = await this.POST('api/producto', productData, true);
+    const rsp = await this.POST('api/producto/', productData, true);
     return rsp.json();
   }
 
@@ -104,7 +104,7 @@ class ApiService {
   }
 
   async createCategory(nombre) {
-    const rsp = await this.POST('api/categoria', { nombre: nombre });
+    const rsp = await this.POST('api/categoria/', { nombre: nombre });
     return rsp.json();
   }
 
@@ -120,25 +120,66 @@ class ApiService {
 
   // Orders endpoints
   async getOrders() {
-    const rsp = await this.GET('admin/pedidos');
+    const rsp = await this.GET('admin/pedido');
     return rsp.json();
   }
 
   async createOrder(productData) {
-    const rsp = await this.POST('admin/pedidos', productData);
+    const rsp = await this.POST('admin/pedido', productData);
     return rsp.json();
   }
 
   async updateOrder(orderData) {
-    const rsp = await this.PATCH(`admin/pedidos/estado`, orderData);
+    const rsp = await this.PATCH(`admin/pedido/estado`, orderData);
     return rsp.json();
   }
 
   async deleteOrder(id) {
-    const rsp = await this.DELETE(`admin/pedidos/${id}`);
+    const rsp = await this.DELETE(`admin/pedido/${id}`);
     return rsp.json();
   }
 
+  // Adicionales endpoints
+  async getAdicionales() {
+    const rsp = await this.GET('api/adicional/');
+    return rsp.json();
+  }
+
+  async createAdicional(adicionalData) {
+    const rsp = await this.POST('api/adicional/create', adicionalData);
+    return rsp.json();
+  }
+
+  async updateAdicional(id, adicionalData) {
+    const rsp = await this.PATCH(`api/adicional/${id}`, adicionalData);
+    return rsp.json();
+  }
+
+  async deleteAdicional(id) {
+    const rsp = await this.DELETE(`api/adicional/${id}`);
+    return rsp.json();
+  }
+
+  async getProductoAdicionales(idProducto) {
+    const rsp = await this.GET(`api/adicional/producto/${idProducto}`);
+    return rsp.json();
+  }
+
+  async changeState(id) {
+    const rsp = await this.PATCH(`api/adicional/${id}/state`);
+    return rsp.json();
+  }
+
+  async addAdicionalToProducto(idProducto, idAdicional) {
+    const rsp = await this.POST('api/adicional/producto', { idProducto, idAdicional });
+    return rsp.json();
+  }
+
+  async removeAdicionalFromProducto(idProducto, idAdicional) {
+    const rsp = await this.DELETE(`api/adicional/producto`, { idProducto, idAdicional });
+    return rsp.json();
+  }
+  
 }
 
 export default new ApiService();
