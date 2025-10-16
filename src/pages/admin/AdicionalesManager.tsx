@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Plus, Pencil, Trash2, ToggleLeft, ToggleRight } from 'lucide-react';
+import { Plus, Pencil, Trash2, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -123,12 +123,9 @@ export default function AdicionalesManager() {
 
   const handleToggleEstado = async (adicional: Adicional) => {
     try {
-      await ApiService.updateAdicional(adicional.id, {
-        ...adicional,
-        estado: !adicional.estado,
-      });
+      const a = await ApiService.changeState(adicional.id);
       toast({
-        title: adicional.estado ? 'Adicional desactivado' : 'Adicional activado',
+        title: a.estado ? 'Adicional desactivado' : 'Adicional activado',
       });
       loadAdicionales();
     } catch (error) {
@@ -184,9 +181,9 @@ export default function AdicionalesManager() {
                 onClick={() => handleToggleEstado(adicional)}
               >
                 {adicional.estado ? (
-                  <ToggleRight className="h-5 w-5 text-green-500" />
+                  <Eye className="h-3 w-3" />
                 ) : (
-                  <ToggleLeft className="h-5 w-5 text-muted-foreground" />
+                  <EyeOff className="h-3 w-3" />
                 )}
               </Button>
             </div>
