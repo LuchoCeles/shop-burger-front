@@ -33,7 +33,7 @@ export default function AdicionalesManager() {
     nombre: '',
     precio: '',
     stock: '',
-    cantidadMax: '',
+    maxCantidad: '',
   });
 
   useEffect(() => {
@@ -43,7 +43,7 @@ export default function AdicionalesManager() {
   const loadAdicionales = async () => {
     try {
       const data = await ApiService.getAdicionales();
-      setAdicionales(data);
+      setAdicionales(data.data);
     } catch (error) {
       toast({
         title: 'Error',
@@ -58,9 +58,9 @@ export default function AdicionalesManager() {
 
     const adicionalData = {
       nombre: formData.nombre,
-      precio: parseFloat(formData.precio),
       stock: parseInt(formData.stock),
-      cantidadMax: parseInt(formData.cantidadMax),
+      precio: parseFloat(formData.precio),
+      maxCantidad: parseInt(formData.maxCantidad),
     };
 
     try {
@@ -95,7 +95,7 @@ export default function AdicionalesManager() {
       nombre: adicional.nombre,
       precio: adicional.precio.toString(),
       stock: adicional.stock.toString(),
-      cantidadMax: adicional.cantidadMax.toString(),
+      maxCantidad: adicional.maxCantidad.toString(),
     });
     setIsDialogOpen(true);
   };
@@ -145,7 +145,7 @@ export default function AdicionalesManager() {
       nombre: '',
       precio: '',
       stock: '',
-      cantidadMax: '',
+      maxCantidad: '',
     });
     setSelectedAdicional(null);
   };
@@ -175,7 +175,7 @@ export default function AdicionalesManager() {
               <div className="flex-1">
                 <h3 className="font-semibold text-foreground">{adicional.nombre}</h3>
                 <p className="text-2xl font-bold text-primary mt-1">
-                  ${adicional.precio.toFixed(2)}
+                  ${adicional.precio}
                 </p>
               </div>
               <Button
@@ -192,9 +192,9 @@ export default function AdicionalesManager() {
             </div>
 
             <div className="text-sm text-muted-foreground space-y-1">
-              <p>Stock: {adicional.stock}</p>
-              <p>Cantidad Máxima: {adicional.cantidadMax}</p>
               <p>Estado: {adicional.estado ? 'Activo' : 'Inactivo'}</p>
+              <p>Cantidad Disponible: {adicional.stock}</p>
+              <p>Cantidad Máxima por Producto: {adicional.maxCantidad}</p>
             </div>
 
             <div className="flex gap-2 pt-2">
@@ -281,14 +281,14 @@ export default function AdicionalesManager() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="cantidadMax">Cantidad Máxima por Pedido</Label>
+              <Label htmlFor="maxCantidad">Cantidad Máxima por Producto</Label>
               <Input
-                id="cantidadMax"
+                id="maxCantidad"
                 type="number"
                 min="1"
-                value={formData.cantidadMax}
+                value={formData.maxCantidad}
                 onChange={(e) =>
-                  setFormData({ ...formData, cantidadMax: e.target.value })
+                  setFormData({ ...formData, maxCantidad: e.target.value })
                 }
                 required
               />
