@@ -18,12 +18,7 @@ interface AsignarAdicionalesDialogProps {
   productName: string;
 }
 
-export default function AsignarAdicionalesDialog({
-  open,
-  onOpenChange,
-  productId,
-  productName,
-}: AsignarAdicionalesDialogProps) {
+export default function AsignarAdicionalesDialog({ open, onOpenChange, productId, productName }: AsignarAdicionalesDialogProps) {
   const [adicionales, setAdicionales] = useState<Adicional[]>([]);
   const [asignados, setAsignados] = useState<number[]>([]);
   const [loading, setLoading] = useState(false);
@@ -42,8 +37,8 @@ export default function AsignarAdicionalesDialog({
         ApiService.getProductoAdicionales(productId),
       ]);
 
-      setAdicionales(allAdicionales.filter((a: Adicional) => a.estado !== false));
-      setAsignados(productoAdicionales.map((pa: ProductoAdicional) => pa.idAdicional));
+      setAdicionales(allAdicionales.data.filter((a: Adicional) => a.estado !== false));
+      setAsignados(productoAdicionales.data.map((pa: ProductoAdicional) => pa.idAdicional));
     } catch (error) {
       toast({
         title: 'Error',
@@ -105,9 +100,9 @@ export default function AsignarAdicionalesDialog({
                   <div className="flex-1">
                     <h4 className="font-medium text-foreground">{adicional.nombre}</h4>
                     <div className="flex gap-4 mt-1 text-sm text-muted-foreground">
-                      <span>Precio: ${adicional.precio.toFixed(2)}</span>
+                      <span>Precio: ${adicional.precio}</span>
                       <span>Stock: {adicional.stock}</span>
-                      <span>Máx: {adicional.cantidadMax}</span>
+                      <span>Máx: {adicional.maxCantidad}</span>
                     </div>
                   </div>
                   <Button
