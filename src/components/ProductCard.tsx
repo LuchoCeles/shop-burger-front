@@ -1,12 +1,30 @@
+import { useState, useEffect } from 'react';
 import { ShoppingCart } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardFooter } from './ui/card';
 import { useCart } from '../context/CartContext';
 import { toast } from 'sonner';
-import { Product } from '../intefaces/interfaz';
+import { Product, CartItemAdicional } from '../intefaces/interfaz';
+import AdicionalesModal from './AdicionalesModal';
+import ApiService from '@/services/api';
 
 const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
   const { addToCart, cart } = useCart();
+  const [showAdicionalesModal, setShowAdicionalesModal] = useState(false);
+  const [hasAdicionales, setHasAdicionales] = useState(false);
+
+  useEffect(() => {
+    checkAdicionales();
+  }, [product.id]);
+
+  const checkAdicionales = async () => {
+    try {
+      const productoAdicionales = await ApiService.getProductoAdicionales(product.id);
+      setHasAdicionales(productoAdicionales.length > 0);
+    } catch (error) {
+      setHasAdicionales(false);
+    }
+  };
 
   const handleAddToCart = () => {
     if (product.stock !== undefined && product.stock <= 0) {
@@ -19,14 +37,32 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
       toast.error(`Solo hay ${product.stock} unidades disponibles`);
       return;
     }
+    // Si tiene adicionales, mostrar modal
+    if (hasAdicionales) {
+      setShowAdicionalesModal(true);
+    } else {
+      // Agregar directamente sin adicionales
+      addToCart({
+        id: product.id,
+        nombre: product.nombre,
+        precio: product.precio,
+        url_imagen: product.url_imagen,
+        stock: product.stock,
+      });
+      toast.success('Agregado al carrito');
+    }
+  };
+
+  const handleAdicionalesConfirm = (adicionales: CartItemAdicional[]) => {
     addToCart({
       id: product.id,
       nombre: product.nombre,
       precio: product.precio,
       url_imagen: product.url_imagen,
       stock: product.stock,
+      adicionales,
     });
-    toast.success('Agregado al carrito');
+    toast.success('Agregado al carrito con adicionales');
   };
 
   return (
@@ -68,6 +104,13 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
           </p>
         )}
       </div>
+      <AdicionalesModal
+        open={showAdicionalesModal}
+        onOpenChange={setShowAdicionalesModal}
+        productId={product.id}
+        productName={product.nombre}
+        onConfirm={handleAdicionalesConfirm}
+      />
     </Card>
   );
 };

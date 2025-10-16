@@ -19,6 +19,15 @@ export interface CartItem {
   cantidad: number;
   url_imagen?: string;
   stock?: number;
+  adicionales?: CartItemAdicional[];
+}
+
+export interface CartItemAdicional {
+  id: number;
+  nombre: string;
+  precio: number;
+  cantidad: number;
+  cantidadMax: number;
 }
 
 export interface Category {
@@ -76,4 +85,19 @@ export interface SocketContextType {
   connected: boolean;
   newOrderCount: number;
   clearNewOrderCount: () => void;
+}
+
+export interface Adicional {
+  id?: number;
+  nombre: string;
+  precio: number;
+  stock: number;
+  maxCantidad: number;
+  estado?: boolean;
+}
+
+export interface ProductoAdicional {
+  idProducto: number;
+  idAdicional: number;
+  adicional?: Adicional;
 }

@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Package, FolderKanban, ShoppingBag, Settings, LogOut } from 'lucide-react';
+import { LayoutDashboard, Package, FolderKanban, ShoppingBag, Settings, LogOut, Plus } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../../components/ui/button';
 import { cn } from '@/lib/utils';
@@ -13,6 +13,7 @@ const Dashboard = () => {
     { icon: LayoutDashboard, label: 'Dashboard', path: '/admin' },
     { icon: Package, label: 'Productos', path: '/admin/productos' },
     { icon: FolderKanban, label: 'Categorías', path: '/admin/categorias' },
+    { icon: Plus, label: 'Adicionales', path: '/admin/adicionales' },
     { icon: ShoppingBag, label: 'Pedidos', path: '/admin/pedidos' },
     { icon: Settings, label: 'Configuración', path: '/admin/configuracion' },
   ];
