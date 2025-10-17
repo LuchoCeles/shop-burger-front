@@ -88,7 +88,7 @@ class ApiService {
   }
 
   async updateProduct(id, productData) {
-    const rsp = await this.PATCH(`api/${id}`, productData, true);
+    const rsp = await this.PATCH(`api/producto/${id}`, productData, true);
     return rsp.json();
   }
 
@@ -179,7 +179,23 @@ class ApiService {
     const rsp = await this.DELETE(`api/adicional/producto`, { idProducto, idAdicional });
     return rsp.json();
   }
-  
+
+  // Bancos endpoints
+  async getBancos() {
+    const rsp = await this.GET('admin/banco/');
+    return rsp.json();
+  }
+
+  async loginBanco(password) {
+    const rsp = await this.POST('admin/banco/login', password);
+    return rsp.json();
+  }
+
+  async updateBanco(id, bancoData) {
+    const rsp = await this.PATCH(`admin/banco/${id}`, { bancoData });
+    return rsp.json();
+  }
+
 }
 
 export default new ApiService();
