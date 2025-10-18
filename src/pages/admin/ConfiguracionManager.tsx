@@ -5,12 +5,12 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Lock, Eye, EyeOff } from 'lucide-react';
-import api from '../../services/api';
+import ApiService from '@/services/api';
 import { BankData } from '@/intefaces/interfaz';
 
 const ConfiguracionManager = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [password, setPassword] = useState('');
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [bankData, setBankData] = useState<BankData | null>(null);
@@ -31,16 +31,16 @@ const ConfiguracionManager = () => {
   const fetchBankData = async () => {
     try {
       setLoading(true);
-      const response = await api.GET('admin/banco/');
+      const response = await ApiService.getBancos();
       if (setLoading) {
         const data = await response.json();
-        setBankData(data);
+        setBankData(response.data);
         setFormData({
-          cuit: data.cuit || '',
-          alias: data.alias || '',
-          cbu: data.cbu || '',
-          apellido: data.apellido || '',
-          nombre: data.nombre || '',
+          cuit: response.data.cuit || '',
+          alias: response.data.alias || '',
+          cbu: response.data.cbu || '',
+          apellido: response.data.apellido || '',
+          nombre: response.data.nombre || '',
         });
       }
     } catch (error) {
@@ -54,11 +54,18 @@ const ConfiguracionManager = () => {
     e.preventDefault();
     try {
       setLoading(true);
-      const response = await api.POST('admin/banco/login', { password });
-      const data = await response.json();
-      
-      if (response.ok && data.success) {
+      const response = await ApiService.loginBanco(password);
+
+      if (response.success) {
         setIsAuthenticated(true);
+        setBankData(response.data);
+        setFormData({
+          cuit: response.data.cuit || '',
+          alias: response.data.alias || '',
+          cbu: response.data.cbu || '',
+          apellido: response.data.apellido || '',
+          nombre: response.data.nombre || '',
+        });
         toast.success('Acceso concedido');
       } else {
         toast.error('Contraseña incorrecta');
@@ -78,8 +85,8 @@ const ConfiguracionManager = () => {
   const handleSave = async () => {
     try {
       setLoading(true);
-      const response = await api.PATCH('admin/banco/', formData);
-      
+      const response = await ApiService.updateBanco(bankData.id, formData);
+
       if (response.ok) {
         toast.success('Datos bancarios actualizados');
         await fetchBankData();

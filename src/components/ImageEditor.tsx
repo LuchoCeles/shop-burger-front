@@ -3,12 +3,8 @@ import ReactCrop, { Crop, PixelCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import { Button } from './ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from './ui/dialog';
+import { ImageEditorProps } from 'src/intefaces/interfaz';
 
-interface ImageEditorProps {
-  file: File | null;
-  onSave: (croppedImage: File) => void;
-  onCancel: () => void;
-}
 
 const ImageEditor: React.FC<ImageEditorProps> = ({ file, onSave, onCancel }) => {
   const [imgSrc, setImgSrc] = useState<string>('');

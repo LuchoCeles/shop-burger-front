@@ -1,13 +1,7 @@
 import { useRef } from 'react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
-import { Category } from 'src/intefaces/interfaz';
-
-interface CategoryCarouselProps {
-  categories: Category[];
-  selectedCategory: number | null;
-  onSelectCategory: (id: number | null) => void;
-}
+import { CategoryCarouselProps } from 'src/intefaces/interfaz';
 
 const CategoryCarousel: React.FC<CategoryCarouselProps> = ({
   categories,

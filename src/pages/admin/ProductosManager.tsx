@@ -402,8 +402,7 @@ const ProductosManager = () => {
         <AsignarAdicionalesDialog
           open={adicionalesDialogOpen}
           onOpenChange={setAdicionalesDialogOpen}
-          productId={selectedProductForAdicionales.id}
-          productName={selectedProductForAdicionales.nombre}
+          Product={selectedProductForAdicionales}
         />
       )}
     </div>
