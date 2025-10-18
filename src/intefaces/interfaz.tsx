@@ -1,5 +1,10 @@
 import { Socket } from 'socket.io-client';
 
+/**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  +                                                                                              +
+  +                                         MODELOS BACKEND                                      +
+  +                                                                                              +
+  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 export interface Product {
   id: number;
   nombre: string;
@@ -11,24 +16,6 @@ export interface Product {
   idCategoria?: number;
   estado?: boolean;
   adicionales?: Adicional[];
-}
-
-export interface CartItem {
-  id: number;
-  nombre: string;
-  precio: number;
-  cantidad: number;
-  url_imagen?: string;
-  stock?: number;
-  adicionales?: CartItemAdicional[];
-}
-
-export interface CartItemAdicional {
-  id: number;
-  nombre: string;
-  precio: number;
-  cantidad: number;
-  maxCantidad: number;
 }
 
 export interface Category {
@@ -52,6 +39,22 @@ export interface Cliente {
   direccion: string;
 }
 
+export interface Admin {
+  id: number;
+  name: string;
+  password: string;
+}
+
+export interface Adicional {
+  id?: number;
+  nombre: string;
+  precio: number;
+  stock: number;
+  maxCantidad: number;
+  estado?: boolean;
+  idAxP?: number;
+}
+
 export interface Orders {
   id: number;
   estado: 'pendiente' | 'entregado' | 'cancelado';
@@ -68,12 +71,27 @@ export interface Orders {
     cantidad: number;
   }[];
 }
-
-
-export interface Admin {
+/**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  +                                                                                              +
+  +                                         MODELOS CARRITO                                      +
+  +                                                                                              +
+  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+export interface CartItem {
   id: number;
-  name: string;
-  password: string;
+  nombre: string;
+  precio: number;
+  cantidad: number;
+  url_imagen?: string;
+  stock?: number;
+  adicionales?: CartItemAdicional[];
+}
+
+export interface CartItemAdicional {
+  id: number;
+  nombre: string;
+  precio: number;
+  cantidad: number;
+  maxCantidad: number;
 }
 
 export interface CartModalProps {
@@ -81,29 +99,16 @@ export interface CartModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export interface SocketContextType {
-  socket: Socket | null;
-  connected: boolean;
-  newOrderCount: number;
-  clearNewOrderCount: () => void;
-}
-
-export interface Adicional {
-  id?: number;
-  nombre: string;
-  precio: number;
-  stock: number;
-  maxCantidad: number;
-  estado?: boolean;
-  idAxP?: number;
-}
-
 export interface ProductoAdicional {
   idProducto: number;
   idAdicional: number;
   adicional?: Adicional;
 }
-
+/**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  +                                                                                              +
+  +                                     MODELOS COMPONENTES                                      +
+  +                                                                                              +
+  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 export interface AsignarAdicionalesDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -129,6 +134,18 @@ export interface ImageEditorProps {
   onSave: (croppedImage: File) => void;
   onCancel: () => void;
 }
+/**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  +                                                                                              +
+  +                                         MODELOS CONTEXT                                      +
+  +                                                                                              +
+  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+export interface AuthContextType {
+  isAuthenticated: boolean;
+  user: { nombre: string } | null;
+  loading: boolean;
+  login: (token: string, nombre: string) => void;
+  logout: () => void;
+}
 
 export interface CartContextType {
   cart: CartItem[];
@@ -140,11 +157,14 @@ export interface CartContextType {
   itemCount: number;
   updateAdicionales: (id: number, adicionales: CartItem['adicionales']) => void;
 }
-
-export interface AuthContextType {
-  isAuthenticated: boolean;
-  user: { nombre: string } | null;
-  loading: boolean;
-  login: (token: string, nombre: string) => void;
-  logout: () => void;
+/**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  +                                                                                              +
+  +                                        WEBSOCKET CONTEXT                                     +
+  +                                                                                              +
+  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+export interface SocketContextType {
+  socket: Socket | null;
+  connected: boolean;
+  newOrderCount: number;
+  clearNewOrderCount: () => void;
 }
