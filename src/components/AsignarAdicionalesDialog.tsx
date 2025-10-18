@@ -7,18 +7,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from './ui/dialog';
-import { Adicional, ProductoAdicional } from '@/intefaces/interfaz';
+import { Adicional, AsignarAdicionalesDialogProps } from '@/intefaces/interfaz';
 import ApiService from '@/services/api';
 import { toast } from '@/hooks/use-toast';
 
-interface AsignarAdicionalesDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  productId: number;
-  productName: string;
-}
 
-export default function AsignarAdicionalesDialog({ open, onOpenChange, productId, productName }: AsignarAdicionalesDialogProps) {
+export default function AsignarAdicionalesDialog({ open, onOpenChange, Product }: AsignarAdicionalesDialogProps) {
   const [adicionales, setAdicionales] = useState<Adicional[]>([]);
   const [asignados, setAsignados] = useState<number[]>([]);
   const [loading, setLoading] = useState(false);
@@ -27,18 +21,21 @@ export default function AsignarAdicionalesDialog({ open, onOpenChange, productId
     if (open) {
       loadData();
     }
-  }, [open, productId]);
+  }, [open, Product.id]);
 
   const loadData = async () => {
     setLoading(true);
     try {
-      const [allAdicionales, productoAdicionales] = await Promise.all([
-        ApiService.getAdicionales(),
-        ApiService.getProductoAdicionales(productId),
-      ]);
-
+      const allAdicionales = await ApiService.getAdicionales();
       setAdicionales(allAdicionales.data.filter((a: Adicional) => a.estado !== false));
-      setAsignados(productoAdicionales.data.map((pa: ProductoAdicional) => pa.idAdicional));
+
+      if (Product?.adicionales && Product.adicionales.length > 0) {
+        const asignadosIds = Product.adicionales.map(a => a.id).filter(id => id !== undefined);
+        setAsignados(asignadosIds);
+      } else {
+        setAsignados([]);
+      }
+
     } catch (error) {
       toast({
         title: 'Error',
@@ -53,13 +50,19 @@ export default function AsignarAdicionalesDialog({ open, onOpenChange, productId
   const handleToggleAdicional = async (adicionalId: number) => {
     try {
       if (asignados.includes(adicionalId)) {
-        await ApiService.removeAdicionalFromProducto(productId, adicionalId);
+        const adicionalAsignado = Product?.adicionales?.find((a) => a.id === adicionalId);
+        if (!adicionalAsignado?.idAxP) {
+          throw new Error('No se encontró el idAxP para este adicional');
+        }
+
+        await ApiService.removeAdicionalFromProducto(adicionalAsignado.idAxP);
+
         setAsignados(asignados.filter((id) => id !== adicionalId));
         toast({
           title: 'Adicional removido',
         });
       } else {
-        await ApiService.addAdicionalToProducto(productId, adicionalId);
+        await ApiService.addAdicionalToProducto(Product.id, adicionalId);
         setAsignados([...asignados, adicionalId]);
         toast({
           title: 'Adicional agregado',
@@ -78,7 +81,7 @@ export default function AsignarAdicionalesDialog({ open, onOpenChange, productId
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Asignar Adicionales a "{productName}"</DialogTitle>
+          <DialogTitle>Asignar Adicionales a "{Product.nombre}"</DialogTitle>
         </DialogHeader>
 
         {loading ? (

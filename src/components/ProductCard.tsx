@@ -107,8 +107,7 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
       <AdicionalesModal
         open={showAdicionalesModal}
         onOpenChange={setShowAdicionalesModal}
-        productId={product.id}
-        productName={product.nombre}
+        Product={product}
         onConfirm={handleAdicionalesConfirm}
       />
     </Card>

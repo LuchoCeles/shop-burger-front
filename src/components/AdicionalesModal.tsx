@@ -8,24 +8,14 @@ import {
   DialogTitle,
   DialogFooter,
 } from './ui/dialog';
-import { Adicional, CartItemAdicional } from '@/intefaces/interfaz';
+import { Adicional, CartItemAdicional, AdicionalesModalProps } from '@/intefaces/interfaz';
 import ApiService from '@/services/api';
 import { toast } from '@/hooks/use-toast';
-
-interface AdicionalesModalProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  productId: number;
-  productName: string;
-  onConfirm: (adicionales: CartItemAdicional[]) => void;
-  initialAdicionales?: CartItemAdicional[];
-}
 
 export default function AdicionalesModal({
   open,
   onOpenChange,
-  productId,
-  productName,
+  Product,
   onConfirm,
   initialAdicionales = [],
 }: AdicionalesModalProps) {
@@ -43,20 +33,19 @@ export default function AdicionalesModal({
       });
       setSelectedAdicionales(initial);
     }
-  }, [open, productId]);
+  }, [open, Product.id]);
 
   const loadAdicionales = async () => {
     setLoading(true);
     try {
-      const productoAdicionales = await ApiService.getProductoAdicionales(productId);
-      
+
       // Obtener detalles completos de los adicionales
       const allAdicionales = await ApiService.getAdicionales();
-      const adicionalesIds = productoAdicionales.map((pa: any) => pa.idAdicional);
-      const filtered = allAdicionales.filter((a: Adicional) => 
+      const adicionalesIds = Product.adicionales.map((pa: any) => pa.idAdicional);
+      const filtered = allAdicionales.filter((a: Adicional) =>
         adicionalesIds.includes(a.id) && a.estado !== false && a.stock > 0
       );
-      
+
       setAdicionales(filtered);
     } catch (error) {
       toast({
@@ -71,14 +60,14 @@ export default function AdicionalesModal({
 
   const handleIncrement = (adicional: Adicional) => {
     const current = selectedAdicionales.get(adicional.id) || 0;
-    if (current < adicional.cantidadMax && current < adicional.stock) {
+    if (current < adicional.maxCantidad && current < adicional.stock) {
       const newMap = new Map(selectedAdicionales);
       newMap.set(adicional.id, current + 1);
       setSelectedAdicionales(newMap);
-    } else if (current >= adicional.cantidadMax) {
+    } else if (current >= adicional.maxCantidad) {
       toast({
         title: 'Límite alcanzado',
-        description: `Máximo ${adicional.cantidadMax} unidades de ${adicional.nombre}`,
+        description: `Máximo ${adicional.maxCantidad} unidades de ${adicional.nombre}`,
         variant: 'destructive',
       });
     } else {
@@ -113,7 +102,7 @@ export default function AdicionalesModal({
           nombre: adicional.nombre,
           precio: adicional.precio,
           cantidad,
-          cantidadMax: adicional.cantidadMax,
+          maxCantidad: adicional.maxCantidad,
         });
       }
     });
@@ -136,7 +125,7 @@ export default function AdicionalesModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Agregar Adicionales a "{productName}"</DialogTitle>
+          <DialogTitle>Agregar Adicionales a "{Product.nombre}"</DialogTitle>
         </DialogHeader>
 
         {loading ? (
@@ -158,7 +147,7 @@ export default function AdicionalesModal({
                     <div className="flex-1">
                       <h4 className="font-medium text-foreground">{adicional.nombre}</h4>
                       <p className="text-sm text-muted-foreground">
-                        ${adicional.precio.toFixed(2)} - Máx: {adicional.cantidadMax}
+                        ${adicional.precio.toFixed(2)} - Máx: {adicional.maxCantidad}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
@@ -175,7 +164,7 @@ export default function AdicionalesModal({
                         variant="outline"
                         size="sm"
                         onClick={() => handleIncrement(adicional)}
-                        disabled={cantidad >= adicional.cantidadMax || cantidad >= adicional.stock}
+                        disabled={cantidad >= adicional.maxCantidad || cantidad >= adicional.stock}
                       >
                         <Plus className="h-3 w-3" />
                       </Button>

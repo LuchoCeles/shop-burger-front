@@ -1,16 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { CartItem } from '../intefaces/interfaz';
-
-interface CartContextType {
-  cart: CartItem[];
-  addToCart: (product: Omit<CartItem, 'cantidad'>) => void;
-  removeFromCart: (id: number) => void;
-  updateQuantity: (id: number, cantidad: number) => void;
-  clearCart: () => void;
-  total: number;
-  itemCount: number;
-  updateAdicionales: (id: number, adicionales: CartItem['adicionales']) => void;
-}
+import { CartItem, CartContextType } from '../intefaces/interfaz';
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
