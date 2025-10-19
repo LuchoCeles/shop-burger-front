@@ -78,6 +78,7 @@ export interface Orders {
   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 export interface CartItem {
   id: number;
+  cartId: string; // ID único para el carrito (producto + adicionales)
   nombre: string;
   precio: number;
   cantidad: number;
@@ -150,12 +151,12 @@ export interface AuthContextType {
 export interface CartContextType {
   cart: CartItem[];
   addToCart: (product: Omit<CartItem, 'cantidad'>) => void;
-  removeFromCart: (id: number) => void;
-  updateQuantity: (id: number, cantidad: number) => void;
+  removeFromCart: (cartId: string) => void;
+  updateQuantity: (cartId: string, cantidad: number) => void;
   clearCart: () => void;
   total: number;
   itemCount: number;
-  updateAdicionales: (id: number, adicionales: CartItem['adicionales']) => void;
+  updateAdicionales: (cartId: string, adicionales: CartItem['adicionales']) => void;
 }
 /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   +                                                                                              +

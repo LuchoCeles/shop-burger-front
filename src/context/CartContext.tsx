@@ -38,32 +38,33 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const addToCart = (product: Omit<CartItem, 'cantidad'>) => {
     setCart((prev) => {
-      const existing = prev.find((item) => item.id === product.id);
+      // Buscar por cartId en lugar de solo id
+      const existing = prev.find((item) => item.cartId === product.cartId);
       if (existing) {
         // Validar que no exceda el stock
         if (product.stock !== undefined && existing.cantidad >= product.stock) {
           return prev; // No agregar más si ya alcanzó el stock
         }
         return prev.map((item) =>
-          item.id === product.id ? { ...item, cantidad: item.cantidad + 1, stock: product.stock } : item
+          item.cartId === product.cartId ? { ...item, cantidad: item.cantidad + 1, stock: product.stock } : item
         );
       }
       return [...prev, { ...product, cantidad: 1 }];
     });
   };
 
-  const removeFromCart = (id: number) => {
-    setCart((prev) => prev.filter((item) => item.id !== id));
+  const removeFromCart = (cartId: string) => {
+    setCart((prev) => prev.filter((item) => item.cartId !== cartId));
   };
 
-  const updateQuantity = (id: number, cantidad: number) => {
+  const updateQuantity = (cartId: string, cantidad: number) => {
     if (cantidad <= 0) {
-      removeFromCart(id);
+      removeFromCart(cartId);
       return;
     }
     setCart((prev) =>
       prev.map((item) => {
-        if (item.id === id) {
+        if (item.cartId === cartId) {
           // Validar que no exceda el stock
           if (item.stock !== undefined && cantidad > item.stock) {
             return item; // No actualizar si excede el stock
@@ -78,9 +79,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const clearCart = () => {
     setCart([]);
   };
-  const updateAdicionales = (id: number, adicionales: CartItem['adicionales']) => {
+  const updateAdicionales = (cartId: string, adicionales: CartItem['adicionales']) => {
     setCart((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, adicionales } : item))
+      prev.map((item) => (item.cartId === cartId ? { ...item, adicionales } : item))
     );
   };
 

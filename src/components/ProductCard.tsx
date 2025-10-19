@@ -19,19 +19,16 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
       toast.error('Producto sin stock');
       return;
     }
-    // Verificar si ya está en el carrito y validar stock
-    const itemInCart = cart.find(item => item.id === product.id);
-    if (itemInCart && product.stock !== undefined && itemInCart.cantidad >= product.stock) {
-      toast.error(`Solo hay ${product.stock} unidades disponibles`);
-      return;
-    }
     // Si tiene adicionales, mostrar modal
     if (hasAdicionales) {
       setShowAdicionalesModal(true);
     } else {
+      // Generar cartId único
+      const cartId = `${product.id}-${Date.now()}`;
       // Agregar directamente sin adicionales
       addToCart({
         id: product.id,
+        cartId,
         nombre: product.nombre,
         precio: product.precio,
         url_imagen: product.url_imagen,
@@ -42,8 +39,11 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
   };
 
   const handleAdicionalesConfirm = (adicionales: CartItemAdicional[]) => {
+    // Generar cartId único basado en producto + timestamp
+    const cartId = `${product.id}-${Date.now()}`;
     addToCart({
       id: product.id,
+      cartId,
       nombre: product.nombre,
       precio: product.precio,
       url_imagen: product.url_imagen,

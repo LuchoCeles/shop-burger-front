@@ -24,19 +24,19 @@ const CartModal: React.FC<CartModalProps> = ({ open, onOpenChange }) => {
     navigate('/checkout');
   };
 
-  const handleIncrement = (id: number, currentCantidad: number, stock?: number) => {
+  const handleIncrement = (cartId: string, currentCantidad: number, stock?: number) => {
     if (stock !== undefined && currentCantidad >= stock) {
       toast.error(`Solo hay ${stock} unidades disponibles`);
       return;
     }
-    updateQuantity(id, currentCantidad + 1);
+    updateQuantity(cartId, currentCantidad + 1);
   };
 
-  const handleDecrement = (id: number, currentCantidad: number) => {
+  const handleDecrement = (cartId: string, currentCantidad: number) => {
     if (currentCantidad > 1) {
-      updateQuantity(id, currentCantidad - 1);
+      updateQuantity(cartId, currentCantidad - 1);
     } else {
-      removeFromCart(id);
+      removeFromCart(cartId);
     }
   };
 
@@ -61,7 +61,7 @@ const CartModal: React.FC<CartModalProps> = ({ open, onOpenChange }) => {
                   item.stock !== undefined && item.cantidad >= item.stock;
 
                 return (
-                  <div key={item.id} className="space-y-2">
+                  <div key={item.cartId} className="space-y-2">
                     <div className="flex items-center gap-4 rounded-lg border border-border bg-muted/30 p-4">
                       {/* Imagen */}
                       <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-md bg-muted">
@@ -102,7 +102,7 @@ const CartModal: React.FC<CartModalProps> = ({ open, onOpenChange }) => {
                             variant="outline"
                             size="icon"
                             className="h-8 w-8"
-                            onClick={() => handleDecrement(item.id, item.cantidad)}
+                            onClick={() => handleDecrement(item.cartId, item.cantidad)}
                           >
                             <Minus className="h-4 w-4" />
                           </Button>
@@ -116,7 +116,7 @@ const CartModal: React.FC<CartModalProps> = ({ open, onOpenChange }) => {
                             size="icon"
                             className="h-8 w-8"
                             onClick={() =>
-                              handleIncrement(item.id, item.cantidad, item.stock)
+                              handleIncrement(item.cartId, item.cantidad, item.stock)
                             }
                             disabled={isMaxStock}
                           >
@@ -127,7 +127,7 @@ const CartModal: React.FC<CartModalProps> = ({ open, onOpenChange }) => {
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8 text-destructive hover:bg-destructive/10"
-                            onClick={() => removeFromCart(item.id)}
+                            onClick={() => removeFromCart(item.cartId)}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -196,7 +196,7 @@ const CartModal: React.FC<CartModalProps> = ({ open, onOpenChange }) => {
             })) || []
           }}
           onConfirm={(adicionales) => {
-            updateAdicionales(editingItem.id, adicionales);
+            updateAdicionales(editingItem.cartId, adicionales);
             setEditingItem(null);
             toast.success('Adicionales actualizados');
           }}
