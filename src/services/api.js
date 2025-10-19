@@ -182,6 +182,11 @@ class ApiService {
     return rsp.json();
   }
 
+  async getProductoAdicionales(idProducto) {
+    const rsp = await this.GET(`admin/adicionalxproducto/${idProducto}`);
+    return rsp.json();
+  }
+
   // Bancos endpoints
   async getBancos() {
     const rsp = await this.GET('admin/banco/');
