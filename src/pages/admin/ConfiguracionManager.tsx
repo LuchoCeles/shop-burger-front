@@ -22,32 +22,15 @@ const ConfiguracionManager = () => {
     nombre: '',
   });
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      fetchBankData();
-    }
-  }, [isAuthenticated]);
-
-  const fetchBankData = async () => {
-    try {
-      setLoading(true);
-      const response = await ApiService.getBancos();
-      if (setLoading) {
-        const data = await response.json();
-        setBankData(response.data);
-        setFormData({
-          cuit: response.data.cuit || '',
-          alias: response.data.alias || '',
-          cbu: response.data.cbu || '',
-          apellido: response.data.apellido || '',
-          nombre: response.data.nombre || '',
-        });
-      }
-    } catch (error) {
-      toast.error('Error al cargar datos bancarios');
-    } finally {
-      setLoading(false);
-    }
+  const fetchBankData = (data: BankData) => {
+    setBankData(data);
+    setFormData({
+      cuit: data.cuit || '',
+      alias: data.alias || '',
+      cbu: data.cbu || '',
+      apellido: data.apellido || '',
+      nombre: data.nombre || '',
+    });
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -55,20 +38,12 @@ const ConfiguracionManager = () => {
     try {
       setLoading(true);
       const response = await ApiService.loginBanco(password);
-
       if (response.success) {
         setIsAuthenticated(true);
-        setBankData(response.data);
-        setFormData({
-          cuit: response.data.cuit || '',
-          alias: response.data.alias || '',
-          cbu: response.data.cbu || '',
-          apellido: response.data.apellido || '',
-          nombre: response.data.nombre || '',
-        });
-        toast.success('Acceso concedido');
+        fetchBankData(response.data);
+        toast.success(response.message || 'Autenticación exitosa');
       } else {
-        toast.error('Contraseña incorrecta');
+        toast.error(response.message || 'Contraseña incorrecta');
       }
     } catch (error) {
       toast.error('Error al autenticar');
@@ -85,13 +60,23 @@ const ConfiguracionManager = () => {
   const handleSave = async () => {
     try {
       setLoading(true);
+      const isDiferent =
+        formData.cuit !== bankData?.cuit ||
+        formData.alias !== bankData?.alias ||
+        formData.cbu !== bankData?.cbu ||
+        formData.apellido !== bankData?.apellido ||
+        formData.nombre !== bankData?.nombre;
+      if (!isDiferent) {
+        toast.info('No hay cambios para guardar');
+        return;
+      }
       const response = await ApiService.updateBanco(bankData.id, formData);
-
-      if (response.ok) {
-        toast.success('Datos bancarios actualizados');
-        await fetchBankData();
+      console.log(response);
+      if (response.success) {
+        toast.success(response.message || 'Datos actualizados correctamente');
+        fetchBankData(response.data);
       } else {
-        toast.error('Error al actualizar datos');
+        toast.error(response.message || 'Error al actualizar datos');
       }
     } catch (error) {
       toast.error('Error al guardar cambios');
