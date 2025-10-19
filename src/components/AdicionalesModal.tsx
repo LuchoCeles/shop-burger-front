@@ -41,9 +41,9 @@ export default function AdicionalesModal({
 
       // Obtener detalles completos de los adicionales
       const allAdicionales = await ApiService.getAdicionales();
-      const adicionalesIds = Product.adicionales.map((pa: any) => pa.idAdicional);
-      const filtered = allAdicionales.filter((a: Adicional) =>
-        adicionalesIds.includes(a.id) && a.estado !== false && a.stock > 0
+      const adicionalesIds = Product.adicionales.map((pa: Adicional) => pa.id);
+      const filtered = allAdicionales.data?.filter((a: Adicional) =>
+        adicionalesIds.includes(a.id) && a.stock > 0
       );
 
       setAdicionales(filtered);
@@ -147,7 +147,7 @@ export default function AdicionalesModal({
                     <div className="flex-1">
                       <h4 className="font-medium text-foreground">{adicional.nombre}</h4>
                       <p className="text-sm text-muted-foreground">
-                        ${adicional.precio.toFixed(2)} - Máx: {adicional.maxCantidad}
+                        ${adicional.precio} - Máx: {adicional.maxCantidad}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
