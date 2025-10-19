@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { ShoppingCart } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardFooter } from './ui/card';
@@ -6,25 +6,13 @@ import { useCart } from '../context/CartContext';
 import { toast } from 'sonner';
 import { Product, CartItemAdicional } from '../intefaces/interfaz';
 import AdicionalesModal from './AdicionalesModal';
-import ApiService from '@/services/api';
 
 const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
   const { addToCart, cart } = useCart();
   const [showAdicionalesModal, setShowAdicionalesModal] = useState(false);
-  const [hasAdicionales, setHasAdicionales] = useState(false);
-
-  useEffect(() => {
-    checkAdicionales();
-  }, [product.id]);
-
-  const checkAdicionales = async () => {
-    try {
-      const productoAdicionales = await ApiService.getProductoAdicionales(product.id);
-      setHasAdicionales(productoAdicionales.length > 0);
-    } catch (error) {
-      setHasAdicionales(false);
-    }
-  };
+  
+  // Los adicionales ya vienen en el producto
+  const hasAdicionales = product.adicionales && product.adicionales.length > 0;
 
   const handleAddToCart = () => {
     if (product.stock !== undefined && product.stock <= 0) {
