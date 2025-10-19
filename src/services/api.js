@@ -194,12 +194,12 @@ class ApiService {
   }
 
   async loginBanco(password) {
-    const rsp = await this.POST('admin/banco/acceder', { password });
+    const rsp = await this.POST('admin/banco/login', { password });
     return rsp.json();
   }
 
   async updateBanco(id, bancoData) {
-    const rsp = await this.PATCH(`admin/banco/${id}`, { bancoData });
+    const rsp = await this.PATCH(`admin/banco/${id}`, { banco: bancoData });
     return rsp.json();
   }
 
