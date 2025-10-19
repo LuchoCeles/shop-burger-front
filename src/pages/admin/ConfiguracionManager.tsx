@@ -33,7 +33,6 @@ const ConfiguracionManager = () => {
       setLoading(true);
       const response = await ApiService.getBancos();
       if (setLoading) {
-        const data = await response.json();
         setBankData(response.data);
         setFormData({
           cuit: response.data.cuit || '',
@@ -55,7 +54,7 @@ const ConfiguracionManager = () => {
     try {
       setLoading(true);
       const response = await ApiService.loginBanco(password);
-
+      console.log(response.data);
       if (response.success) {
         setIsAuthenticated(true);
         setBankData(response.data);
