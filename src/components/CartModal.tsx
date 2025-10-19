@@ -63,6 +63,7 @@ const CartModal: React.FC<CartModalProps> = ({ open, onOpenChange }) => {
                 return (
                   <div key={item.id} className="space-y-2">
                     <div className="flex items-center gap-4 rounded-lg border border-border bg-muted/30 p-4">
+                      {/* Imagen */}
                       <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-md bg-muted">
                         {item.url_imagen ? (
                           <img
@@ -81,20 +82,10 @@ const CartModal: React.FC<CartModalProps> = ({ open, onOpenChange }) => {
                       <div className="flex-1">
                         <h4 className="font-semibold text-foreground">{item.nombre}</h4>
                         <p className="text-lg font-bold text-primary">${item.precio}</p>
+
                         {item.adicionales && item.adicionales.length > 0 && (
                           <div className="mt-2 space-y-1">
-                            <div className="flex items-center justify-between">
-                              <p className="text-xs text-muted-foreground font-medium">Adicionales:</p>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-6 text-xs"
-                                onClick={() => setEditingItem(item)}
-                              >
-                                <Edit className="h-3 w-3 mr-1" />
-                                Editar
-                              </Button>
-                            </div>
+                            <p className="text-xs text-muted-foreground font-medium">Adicionales:</p>
                             {item.adicionales.map((adic) => (
                               <p key={adic.id} className="text-xs text-muted-foreground">
                                 • {adic.nombre} x{adic.cantidad} (+${(adic.precio * adic.cantidad).toFixed(2)})
@@ -141,6 +132,16 @@ const CartModal: React.FC<CartModalProps> = ({ open, onOpenChange }) => {
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
+                        
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 text-xs"
+                          onClick={() => setEditingItem(item)}
+                        >
+                          <Edit className="h-3 w-3 mr-1" />
+                          Editar adicionales
+                        </Button>
 
                         {isMaxStock && (
                           <div className="text-center -mt-2">
@@ -153,6 +154,7 @@ const CartModal: React.FC<CartModalProps> = ({ open, onOpenChange }) => {
                     </div>
                   </div>
                 );
+
               })
             )}
           </div>
