@@ -401,7 +401,12 @@ const ProductosManager = () => {
       {selectedProductForAdicionales && (
         <AsignarAdicionalesDialog
           open={adicionalesDialogOpen}
-          onOpenChange={setAdicionalesDialogOpen}
+          onOpenChange={(open) => {
+            setAdicionalesDialogOpen(open);
+            if (!open) {
+              loadData();
+            }
+          }}
           Product={selectedProductForAdicionales}
         />
       )}
