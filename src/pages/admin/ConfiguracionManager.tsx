@@ -60,8 +60,18 @@ const ConfiguracionManager = () => {
   const handleSave = async () => {
     try {
       setLoading(true);
+      const isDiferent =
+        formData.cuit !== bankData?.cuit ||
+        formData.alias !== bankData?.alias ||
+        formData.cbu !== bankData?.cbu ||
+        formData.apellido !== bankData?.apellido ||
+        formData.nombre !== bankData?.nombre;
+      if (!isDiferent) {
+        toast.info('No hay cambios para guardar');
+        return;
+      }
       const response = await ApiService.updateBanco(bankData.id, formData);
-
+      console.log(response);
       if (response.success) {
         toast.success(response.message || 'Datos actualizados correctamente');
         fetchBankData(response.data);
