@@ -44,7 +44,9 @@ const ProductosManager = () => {
     descripcion: '',
     precio: '',
     stock: '',
+    descuento: '',
     idCategoria: '',
+    isPromocion: false,
   });
   const [imagen, setImagen] = useState<File | null>(null);
   const [imagenParaEditar, setImagenParaEditar] = useState<File | null>(null);
@@ -88,6 +90,7 @@ const ProductosManager = () => {
       formDataToSend.append('descripcion', formData.descripcion);
       formDataToSend.append('precio', formData.precio);
       formDataToSend.append('stock', formData.stock);
+      formDataToSend.append('descuento', formData.descuento);
       formDataToSend.append('idCategoria', formData.idCategoria);
       if (imagen) {
         formDataToSend.append('imagen', imagen);
@@ -133,6 +136,8 @@ const ProductosManager = () => {
       precio: product.precio.toString(),
       stock: product.stock?.toString() || '',
       idCategoria: product.idCategoria?.toString() || '',
+      descuento: product.descuento?.toString() || '',
+      isPromocion: product.descuento ? true : false,
     });
     setShowDialog(true);
   };
@@ -145,6 +150,8 @@ const ProductosManager = () => {
       precio: '',
       stock: '',
       idCategoria: '',
+      descuento: '',
+      isPromocion: false,
     });
     setImagen(null);
     setImagenParaEditar(null);
@@ -293,6 +300,30 @@ const ProductosManager = () => {
                   className="bg-background"
                 />
               </div>
+            </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium text-foreground">Descuento %</label>
+              <Input
+                type="number"
+                min="0"
+                max="100"
+                value={formData.descuento}
+                onChange={(e) => setFormData({ ...formData, descuento: e.target.value })}
+                className="bg-background"
+              />
+            </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium text-foreground">Precio Final</label>
+              <Input
+                type="number"
+                min="1"
+                value={formData.precio && formData.descuento
+                  ? (parseFloat(formData.precio) * (1 - parseFloat(formData.descuento) / 100)).toFixed(2)
+                  : formData.precio}
+                readOnly
+                onChange={(e) => setFormData({ ...formData, descuento: e.target.value })}
+                className="bg-background"
+              />
             </div>
             <div>
               <label className="mb-2 block text-sm font-medium text-foreground">Categoría</label>

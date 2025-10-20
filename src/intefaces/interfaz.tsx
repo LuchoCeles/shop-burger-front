@@ -14,6 +14,8 @@ export interface Product {
   imagen?: File | null;
   stock?: number;
   idCategoria?: number;
+  descuento?: number;
+  isPromocion?: boolean;
   estado?: boolean;
   adicionales?: Adicional[];
 }
@@ -82,6 +84,7 @@ export interface CartItem {
   nombre: string;
   precio: number;
   cantidad: number;
+  descuento?: number;
   url_imagen?: string;
   stock?: number;
   adicionales?: CartItemAdicional[];

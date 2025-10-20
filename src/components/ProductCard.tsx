@@ -10,7 +10,7 @@ import AdicionalesModal from './AdicionalesModal';
 const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
   const { addToCart, cart } = useCart();
   const [showAdicionalesModal, setShowAdicionalesModal] = useState(false);
-  
+
   // Los adicionales ya vienen en el producto
   const hasAdicionales = product.adicionales && product.adicionales.length > 0;
 
@@ -31,6 +31,7 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
         cartId,
         nombre: product.nombre,
         precio: product.precio,
+        descuento: product.descuento,
         url_imagen: product.url_imagen,
         stock: product.stock,
       });
@@ -46,6 +47,7 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
       cartId,
       nombre: product.nombre,
       precio: product.precio,
+      descuento: product.descuento,
       url_imagen: product.url_imagen,
       stock: product.stock,
       adicionales,
@@ -73,7 +75,7 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
         {product.descripcion && (
           <p className="mb-3 line-clamp-2 text-sm text-muted-foreground">{product.descripcion}</p>
         )}
-        <p className="text-2xl font-bold text-primary">${product.precio}</p>
+        <p className="text-2xl font-bold text-primary">${((product.precio) * (1 - (product.descuento) / 100)).toFixed(2)} </p>
       </CardContent>
       <CardFooter className="p-4 pt-0">
         <Button
