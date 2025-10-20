@@ -44,7 +44,9 @@ const ProductosManager = () => {
     descripcion: '',
     precio: '',
     stock: '',
+    descuento: '',
     idCategoria: '',
+    isPromocion: false,
   });
   const [imagen, setImagen] = useState<File | null>(null);
   const [imagenParaEditar, setImagenParaEditar] = useState<File | null>(null);
@@ -59,7 +61,7 @@ const ProductosManager = () => {
 
   const loadData = async () => {
     try {
-      const [prodData, catData] = await Promise.all([ApiService.getProducts(true), ApiService.getCategories()]);
+      const [prodData, catData] = await Promise.all([ApiService.getProducts(false), ApiService.getCategories()]);
       setProductos(prodData.data);
       setCategorias(catData.data);
     } catch (error) {
@@ -88,6 +90,7 @@ const ProductosManager = () => {
       formDataToSend.append('descripcion', formData.descripcion);
       formDataToSend.append('precio', formData.precio);
       formDataToSend.append('stock', formData.stock);
+      formDataToSend.append('descuento', formData.descuento);
       formDataToSend.append('idCategoria', formData.idCategoria);
       if (imagen) {
         formDataToSend.append('imagen', imagen);
@@ -133,26 +136,10 @@ const ProductosManager = () => {
       precio: product.precio.toString(),
       stock: product.stock?.toString() || '',
       idCategoria: product.idCategoria?.toString() || '',
+      descuento: product.descuento?.toString() || '',
+      isPromocion: product.descuento ? true : false,
     });
     setShowDialog(true);
-  };
-
-  const handleToggleEstado = async (product: Product) => {
-    try {
-      const formDataToSend = new FormData();
-      formDataToSend.append('nombre', product.nombre);
-      formDataToSend.append('descripcion', product.descripcion || '');
-      formDataToSend.append('precio', product.precio.toString());
-      formDataToSend.append('stock', product.stock?.toString() || '0');
-      formDataToSend.append('idCategoria', product.idCategoria?.toString() || '');
-      formDataToSend.append('estado', (!product.estado).toString());
-
-      await ApiService.updateProduct(product.id, formDataToSend);
-      toast.success(`Producto ${!product.estado ? 'activado' : 'desactivado'}`);
-      loadData();
-    } catch (error) {
-      toast.error(error.message || 'Error al cambiar estado');
-    }
   };
 
   const resetForm = () => {
@@ -163,6 +150,8 @@ const ProductosManager = () => {
       precio: '',
       stock: '',
       idCategoria: '',
+      descuento: '',
+      isPromocion: false,
     });
     setImagen(null);
     setImagenParaEditar(null);
@@ -182,6 +171,12 @@ const ProductosManager = () => {
 
   const handleImageCancel = () => {
     setImagenParaEditar(null);
+  };
+
+  const handleToggleEstado = async (id: number, currentState: boolean) => {
+    if (currentState === undefined) return;
+    await ApiService.updateStateProduct(id, !currentState);
+    loadData();
   };
 
   return (
@@ -226,7 +221,7 @@ const ProductosManager = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleToggleEstado(product)}
+                    onClick={() => handleToggleEstado(product.id, product.estado)}
                     title={product.estado ? 'Desactivar' : 'Activar'}
                   >
                     {product.estado ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
@@ -247,19 +242,11 @@ const ProductosManager = () => {
                       setSelectedProductForAdicionales(product);
                       setAdicionalesDialogOpen(true);
                     }}
-
                   >
                     <ListPlus className="mr-1 h-3 w-3" />
                     Adicionales
                   </Button>
                 </div>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => setProductToDelete(product.id)}
-                >
-                  <Trash2 className="h-3 w-3" />
-                </Button>
               </div>
             </div>
           </div>
@@ -313,6 +300,30 @@ const ProductosManager = () => {
                   className="bg-background"
                 />
               </div>
+            </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium text-foreground">Descuento %</label>
+              <Input
+                type="number"
+                min="0"
+                max="100"
+                value={formData.descuento}
+                onChange={(e) => setFormData({ ...formData, descuento: e.target.value })}
+                className="bg-background"
+              />
+            </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium text-foreground">Precio Final</label>
+              <Input
+                type="number"
+                min="1"
+                value={formData.precio && formData.descuento
+                  ? (parseFloat(formData.precio) * (1 - parseFloat(formData.descuento) / 100)).toFixed(2)
+                  : formData.precio}
+                readOnly
+                onChange={(e) => setFormData({ ...formData, descuento: e.target.value })}
+                className="bg-background"
+              />
             </div>
             <div>
               <label className="mb-2 block text-sm font-medium text-foreground">Categoría</label>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import ApiService from '../services/api';
@@ -8,17 +8,33 @@ import { Textarea } from '../components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { toast } from 'sonner';
 import Navbar from '../components/Navbar';
-import { Cliente } from '@/intefaces/interfaz';
+import { Cliente, BankData } from '@/intefaces/interfaz';
 
 const Checkout = () => {
   const { cart, total, clearCart } = useCart();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [bankData, setBankData] = useState<BankData | null>(null);
   const [cliente, setCliente] = useState<Cliente>({
     telefono: '',
     direccion: '',
   });
   const [descripcion, setDescripcion] = useState('');
+
+  useEffect(() => {
+    fetchBankData();
+  }, []);
+
+  const fetchBankData = async () => {
+    try {
+      const rsp = await ApiService.getBancos();
+      setBankData(rsp.data);
+    } catch (error) {
+      toast.error('Error al obtener datos bancarios');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,6 +50,7 @@ const Checkout = () => {
     }
 
     setLoading(true);
+
     try {
       const pedido = {
         cliente: {
@@ -47,31 +64,32 @@ const Checkout = () => {
         })),
       };
 
-      console.log('Pedido a enviar:', pedido);
       const response = await ApiService.createOrder(pedido);
-
       clearCart();
 
-      // Simulated payment info
-      const alias = 'GOURMET.PAGO';
-      const cbu = '0000003100000000000000';
-      const pedidoId = response.id || Math.floor(Math.random() * 10000);
-
       const whatsappMessage = encodeURIComponent(
-        `¡Hola! Te paso el comprobante de mi pedido #${pedidoId}.\n\n` +
-        `Total: $${total.toFixed(2)}\n` +
-        `Alias: ${alias}\n` +
-        `CBU: ${cbu}\n\n` +
-        `Productos:\n${cart.map(item => `- ${item.nombre} x${item.cantidad}`).join('\n')}`
+        `¡Hola! Te paso el comprobante de mi pedido #${response.data.id}.\n\n` +
+          `Nombre: ${bankData?.nombre}\n` +
+          `Apellido: ${bankData?.apellido}\n` +
+          `CUIT / DNI: ${bankData?.cuit}\n` +
+          `Alias: ${bankData?.alias}\n` +
+          `CBU: ${bankData?.cbu}\n\n` +
+          `Total: $${total.toFixed(2)}\n` +
+          `Productos:\n${cart
+            .map((item) => `- ${item.nombre} x${item.cantidad}`)
+            .join('\n')}`
       );
 
       toast.success('Pedido creado exitosamente');
 
       setTimeout(() => {
-        window.open(`https://wa.me/5491122334455?text=${whatsappMessage}`, '_blank');
+        window.open(
+          `https://wa.me/5491122334455?text=${whatsappMessage}`,
+          '_blank'
+        );
         navigate('/');
       }, 1500);
-    } catch (error) {
+    } catch (error: any) {
       toast.error(error.message || 'Error al crear el pedido');
     } finally {
       setLoading(false);
@@ -83,9 +101,19 @@ const Checkout = () => {
       <div className="min-h-screen bg-background">
         <Navbar />
         <div className="container mx-auto px-4 py-20 text-center">
-          <h2 className="mb-4 text-2xl font-bold text-foreground">Tu carrito está vacío</h2>
+          <h2 className="mb-4 text-2xl font-bold text-foreground">
+            Tu carrito está vacío
+          </h2>
           <Button onClick={() => navigate('/')}>Volver a la tienda</Button>
         </div>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background text-foreground">
+        <p>Cargando datos...</p>
       </div>
     );
   }
@@ -94,7 +122,9 @@ const Checkout = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       <div className="container mx-auto max-w-4xl px-4 py-8">
-        <h1 className="mb-8 text-3xl font-bold text-foreground">Finalizar Compra</h1>
+        <h1 className="mb-8 text-3xl font-bold text-foreground">
+          Finalizar Compra
+        </h1>
 
         <div className="grid gap-6 lg:grid-cols-2">
           <Card className="bg-card">
@@ -140,9 +170,7 @@ const Checkout = () => {
                   <Textarea
                     placeholder="Agregar instrucciones de entrega o notas adicionales..."
                     value={descripcion}
-                    onChange={(e) =>
-                      setDescripcion(e.target.value)
-                    }
+                    onChange={(e) => setDescripcion(e.target.value)}
                     className="bg-background"
                   />
                 </div>
@@ -179,14 +207,22 @@ const Checkout = () => {
                     <span className="text-primary">${total.toFixed(2)}</span>
                   </div>
                 </div>
-                <div className="rounded-lg bg-muted p-4 text-sm text-muted-foreground">
-                  <p className="mb-2 font-semibold text-foreground">Datos de pago:</p>
-                  <p>Alias: GOURMET.PAGO</p>
-                  <p>CBU: 0000003100000000000000</p>
-                  <p className="mt-2 text-xs">
-                    Después de confirmar, recibirás un mensaje para enviarnos el comprobante por WhatsApp.
-                  </p>
-                </div>
+                {bankData && (
+                  <div className="rounded-lg bg-muted p-4 text-sm text-muted-foreground">
+                    <p className="mb-2 font-semibold text-foreground">
+                      Datos de pago:
+                    </p>
+                    <p>Nombre: {bankData.nombre}</p>
+                    <p>Apellido: {bankData.apellido}</p>
+                    <p>CUIT / DNI: {bankData.cuit}</p>
+                    <p>Alias: {bankData.alias}</p>
+                    <p>CBU: {bankData.cbu}</p>
+                    <p className="mt-2 text-xs">
+                      Después de confirmar, recibirás un mensaje para enviarnos el
+                      comprobante por WhatsApp.
+                    </p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
