@@ -162,7 +162,7 @@ export default function AdicionalesManager() {
         </Button>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
         {adicionales.map((adicional) => (
           <div
             key={adicional.id}
@@ -175,17 +175,7 @@ export default function AdicionalesManager() {
                   ${adicional.precio}
                 </p>
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleToggleEstado(adicional)}
-              >
-                {adicional.estado ? (
-                  <Eye className="h-3 w-3" />
-                ) : (
-                  <EyeOff className="h-3 w-3" />
-                )}
-              </Button>
+
             </div>
 
             <div className="text-sm text-muted-foreground space-y-1">
@@ -195,6 +185,17 @@ export default function AdicionalesManager() {
             </div>
 
             <div className="flex gap-2 pt-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleToggleEstado(adicional)}
+              >
+                {adicional.estado ? (
+                  <Eye className="h-3 w-3" />
+                ) : (
+                  <EyeOff className="h-3 w-3" />
+                )}
+              </Button>
               <Button
                 variant="outline"
                 size="sm"
@@ -211,10 +212,8 @@ export default function AdicionalesManager() {
                   setSelectedAdicional(adicional);
                   setIsDeleteDialogOpen(true);
                 }}
-                className="flex-1"
               >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Eliminar
+                <Trash2 className="h-4 w-4" />
               </Button>
             </div>
           </div>

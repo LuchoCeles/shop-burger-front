@@ -59,7 +59,7 @@ const ProductosManager = () => {
 
   const loadData = async () => {
     try {
-      const [prodData, catData] = await Promise.all([ApiService.getProducts(true), ApiService.getCategories()]);
+      const [prodData, catData] = await Promise.all([ApiService.getProducts(false), ApiService.getCategories()]);
       setProductos(prodData.data);
       setCategorias(catData.data);
     } catch (error) {
@@ -137,24 +137,6 @@ const ProductosManager = () => {
     setShowDialog(true);
   };
 
-  const handleToggleEstado = async (product: Product) => {
-    try {
-      const formDataToSend = new FormData();
-      formDataToSend.append('nombre', product.nombre);
-      formDataToSend.append('descripcion', product.descripcion || '');
-      formDataToSend.append('precio', product.precio.toString());
-      formDataToSend.append('stock', product.stock?.toString() || '0');
-      formDataToSend.append('idCategoria', product.idCategoria?.toString() || '');
-      formDataToSend.append('estado', (!product.estado).toString());
-
-      await ApiService.updateProduct(product.id, formDataToSend);
-      toast.success(`Producto ${!product.estado ? 'activado' : 'desactivado'}`);
-      loadData();
-    } catch (error) {
-      toast.error(error.message || 'Error al cambiar estado');
-    }
-  };
-
   const resetForm = () => {
     setEditingProduct(null);
     setFormData({
@@ -182,6 +164,12 @@ const ProductosManager = () => {
 
   const handleImageCancel = () => {
     setImagenParaEditar(null);
+  };
+
+  const handleToggleEstado = async (id: number, currentState: boolean) => {
+    if (currentState === undefined) return;
+    await ApiService.updateStateProduct(id, !currentState);
+    loadData();
   };
 
   return (
@@ -226,7 +214,7 @@ const ProductosManager = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleToggleEstado(product)}
+                    onClick={() => handleToggleEstado(product.id, product.estado)}
                     title={product.estado ? 'Desactivar' : 'Activar'}
                   >
                     {product.estado ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
@@ -247,19 +235,11 @@ const ProductosManager = () => {
                       setSelectedProductForAdicionales(product);
                       setAdicionalesDialogOpen(true);
                     }}
-
                   >
                     <ListPlus className="mr-1 h-3 w-3" />
                     Adicionales
                   </Button>
                 </div>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => setProductToDelete(product.id)}
-                >
-                  <Trash2 className="h-3 w-3" />
-                </Button>
               </div>
             </div>
           </div>
