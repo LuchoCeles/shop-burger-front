@@ -57,9 +57,17 @@ export function AdminSidebar() {
                 return (
                   <SidebarMenuItem key={item.path}>
                     <SidebarMenuButton asChild isActive={isActive}>
-                      <Link to={item.path} className="flex items-center">
-                        <Icon className="h-5 w-5" />
-                        <span>{item.label}</span>
+                      <Link key={item.path} to={item.path}>
+                        <Button
+                          variant="ghost"
+                          className={cn(
+                            'w-full justify-start',
+                            isActive && 'bg-primary text-primary-foreground hover:bg-primary/90'
+                          )}
+                        >
+                          <Icon className="mr-2 h-5 w-5" />
+                          {item.label}
+                        </Button>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -91,6 +99,11 @@ export function AdminSidebar() {
             variant="ghost"
             className="w-full justify-start"
             onClick={() => navigate('/')}
+            onAuxClick={(e) => {
+              if (e.button === 1) {
+                window.open('/', '_blank');
+              }
+            }}
           >
             {!isCollapsed && 'Volver a la tienda'}
             {isCollapsed && '🏪'}
