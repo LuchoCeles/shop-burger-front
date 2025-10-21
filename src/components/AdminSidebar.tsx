@@ -48,7 +48,6 @@ export function AdminSidebar() {
 
       <SidebarContent className="bg-secondary">
         <SidebarGroup className="bg-secondary">
-          <SidebarGroupLabel className="bg-secondary">Menú</SidebarGroupLabel>
           <SidebarGroupContent className="bg-secondary">
             <SidebarMenu>
               {menuItems.map((item) => {
@@ -79,8 +78,8 @@ export function AdminSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="bg-secondary">
-        <div className="p-4 border-t border-border space-y-2 flex-shrink-0">
-          <div className="space-y-2 p-2 bg-secondary">
+        <div className="space-y-2 p-2 bg-secondary">
+          <div className="p-4 border-t border-border space-y-2 flex-shrink-0">
             <div className="rounded-lg bg-muted p-3">
               {!isCollapsed && (
                 <>
@@ -110,14 +109,17 @@ export function AdminSidebar() {
               {isCollapsed && '🏪'}
             </Button>
           </div>
-          <Button
-            variant="outline"
-            className="w-full justify-start"
-            onClick={logout}
-          >
-            <LogOut className="h-4 w-4" />
-            {!isCollapsed && <span className="ml-2">Cerrar Sesión</span>}
-          </Button>
+
+          <div className="p-4 border-t border-border">
+            <Button
+              variant="outline"
+              className="w-full justify-start"
+              onClick={logout}
+            >
+              <LogOut className="h-4 w-4" />
+              {!isCollapsed && <span className="ml-2">Cerrar Sesión</span>}
+            </Button>
+          </div>
         </div>
       </SidebarFooter>
     </Sidebar>
