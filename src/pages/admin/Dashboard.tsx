@@ -1,88 +1,25 @@
-import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Package, FolderKanban, ShoppingBag, Settings, LogOut, Plus } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
-import { Button } from '../../components/ui/button';
-import { cn } from '@/lib/utils';
+import { Outlet } from 'react-router-dom';
+import { SidebarProvider, SidebarTrigger, SidebarInset } from '../../components/ui/sidebar';
+import { AdminSidebar } from '../../components/AdminSidebar';
 
 const Dashboard = () => {
-  const navigate = useNavigate();
-  const { logout, user } = useAuth();
-  const location = useLocation();
-
-  const menuItems = [
-    { icon: LayoutDashboard, label: 'Dashboard', path: '/admin' },
-    { icon: Package, label: 'Productos', path: '/admin/productos' },
-    { icon: FolderKanban, label: 'Categorías', path: '/admin/categorias' },
-    { icon: Plus, label: 'Adicionales', path: '/admin/adicionales' },
-    { icon: ShoppingBag, label: 'Pedidos', path: '/admin/pedidos' },
-    { icon: Settings, label: 'Configuración', path: '/admin/configuracion' },
-  ];
-
   return (
-    <div className="flex h-screen bg-background overflow-hidden">
-      <aside className="w-64 border-r border-border bg-card flex flex-col h-full">
-        <div className="flex h-16 items-center border-b border-border px-6 flex-shrink-0">
-          <h2 className="text-xl font-bold text-foreground">Admin Panel</h2>
-        </div>
-
-        <nav className="space-y-2 p-4 flex-1 overflow-y-auto">
-          {menuItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = location.pathname === item.path;
-            return (
-              <Link key={item.path} to={item.path}>
-                <Button
-                  variant="ghost"
-                  className={cn(
-                    'w-full justify-start',
-                    isActive && 'bg-primary text-primary-foreground hover:bg-primary/90'
-                  )}
-                >
-                  <Icon className="mr-2 h-5 w-5" />
-                  {item.label}
-                </Button>
-              </Link>
-            );
-          })}
-        </nav>
-
-        <div className="p-4 border-t border-border space-y-2 flex-shrink-0">
-          <div className="rounded-lg bg-muted p-4">
-            <p className="text-sm font-medium text-foreground">
-              {user?.nombre?.toUpperCase()}
-            </p>
-            <p className="text-xs text-muted-foreground">Administrador</p>
-          </div>
-          <Button
-            onAuxClick={(e) => {
-              if (e.button === 1) {
-                window.open('/', '_blank');
-              }
-            }}
-            onClick={() => navigate('/')}
-            variant="ghost"
-            className="w-full"
-          >
-            Volver a la tienda
-          </Button>
-        </div>
-
-        <div className="p-4 border-t border-border">
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={logout}
-          >
-            <LogOut className="mr-2 h-4 w-4" />
-            Cerrar Sesión
-          </Button>
-        </div>
-
-      </aside>
-      <main className="flex-1 p-8 overflow-y-auto">
-        <Outlet />
-      </main>
-    </div>
+    <SidebarProvider>
+      <div className="flex min-h-screen w-full bg-background">
+        <AdminSidebar />
+        <SidebarInset className="flex-1">
+          <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background px-4 lg:h-16 lg:px-6">
+            <SidebarTrigger />
+            <div className="flex-1">
+              <h1 className="text-lg font-semibold md:text-xl">Panel de Administración</h1>
+            </div>
+          </header>
+          <main className="flex-1 p-4 md:p-6 lg:p-8">
+            <Outlet />
+          </main>
+        </SidebarInset>
+      </div>
+    </SidebarProvider>
   );
 };
 

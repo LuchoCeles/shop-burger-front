@@ -153,16 +153,16 @@ export default function AdicionalesManager() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-foreground">Adicionales</h1>
-        <Button onClick={openCreateDialog}>
+    <div className="space-y-4 md:space-y-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="text-2xl font-bold text-foreground md:text-3xl">Adicionales</h1>
+        <Button onClick={openCreateDialog} className="w-full sm:w-auto">
           <Plus className="mr-2 h-4 w-4" />
           Nuevo Adicional
         </Button>
       </div>
 
-      <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {adicionales.map((adicional) => (
           <div
             key={adicional.id}
@@ -184,11 +184,12 @@ export default function AdicionalesManager() {
               <p>Cantidad Máxima por Producto: {adicional.maxCantidad}</p>
             </div>
 
-            <div className="flex gap-2 pt-2">
+            <div className="flex flex-wrap gap-2 pt-2">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => handleToggleEstado(adicional)}
+                className="flex-shrink-0"
               >
                 {adicional.estado ? (
                   <Eye className="h-3 w-3" />
@@ -200,10 +201,10 @@ export default function AdicionalesManager() {
                 variant="outline"
                 size="sm"
                 onClick={() => handleEdit(adicional)}
-                className="flex-1"
+                className="flex-1 min-w-0"
               >
                 <Pencil className="mr-2 h-4 w-4" />
-                Editar
+                <span className="truncate">Editar</span>
               </Button>
               <Button
                 variant="destructive"
@@ -212,6 +213,7 @@ export default function AdicionalesManager() {
                   setSelectedAdicional(adicional);
                   setIsDeleteDialogOpen(true);
                 }}
+                className="flex-shrink-0"
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
