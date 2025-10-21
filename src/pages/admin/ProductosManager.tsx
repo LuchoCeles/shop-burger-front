@@ -180,22 +180,22 @@ const ProductosManager = () => {
   };
 
   return (
-    <div>
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-foreground">Productos</h1>
+    <div className="space-y-4 md:space-y-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="text-2xl font-bold text-foreground md:text-3xl">Productos</h1>
         <Button
           onClick={() => {
             resetForm();
             setShowDialog(true);
           }}
-          className="bg-primary text-primary-foreground hover:bg-primary/90"
+          className="bg-primary text-primary-foreground hover:bg-primary/90 w-full sm:w-auto"
         >
           <Plus className="mr-2 h-4 w-4" />
           Nuevo Producto
         </Button>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {productos.map((product) => (
           <div
             key={product.id}
@@ -217,34 +217,36 @@ const ProductosManager = () => {
               <p className="mb-4 text-xs text-muted-foreground">Stock: {product.stock || 'N/A'}</p>
 
               <div className="flex flex-col gap-2">
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => handleToggleEstado(product.id, product.estado)}
                     title={product.estado ? 'Desactivar' : 'Activar'}
+                    className="flex-shrink-0"
                   >
                     {product.estado ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
-                    className="flex-1"
+                    className="flex-1 min-w-0"
                     onClick={() => handleEdit(product)}
                   >
                     <Pencil className="mr-1 h-3 w-3" />
-                    Editar
+                    <span className="truncate">Editar</span>
                   </Button>
                   <Button
                     variant="secondary"
                     size="sm"
+                    className="flex-1 min-w-0"
                     onClick={() => {
                       setSelectedProductForAdicionales(product);
                       setAdicionalesDialogOpen(true);
                     }}
                   >
                     <ListPlus className="mr-1 h-3 w-3" />
-                    Adicionales
+                    <span className="truncate">Adicionales</span>
                   </Button>
                 </div>
               </div>
@@ -254,7 +256,7 @@ const ProductosManager = () => {
       </div>
 
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="bg-card">
+        <DialogContent className="bg-card max-h-[90vh] overflow-y-auto max-w-[95vw] sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle className="text-foreground">
               {editingProduct ? 'Editar Producto' : 'Nuevo Producto'}
@@ -278,7 +280,7 @@ const ProductosManager = () => {
                 className="bg-background"
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="mb-2 block text-sm font-medium text-foreground">Precio</label>
                 <Input
