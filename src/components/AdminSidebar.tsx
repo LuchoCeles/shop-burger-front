@@ -34,8 +34,8 @@ export function AdminSidebar() {
   const isCollapsed = state === 'collapsed';
 
   return (
-    <Sidebar collapsible="icon">
-      <SidebarHeader>
+    <Sidebar collapsible="icon" className="bg-secondary">
+      <SidebarHeader className="bg-secondary">
         <div className="flex h-16 items-center px-4 border-b border-border">
           <h2 className={cn(
             "font-bold text-foreground transition-all",
