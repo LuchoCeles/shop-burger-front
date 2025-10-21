@@ -46,10 +46,10 @@ export function AdminSidebar() {
         </div>
       </SidebarHeader>
 
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Menú</SidebarGroupLabel>
-          <SidebarGroupContent>
+      <SidebarContent className="bg-secondary">
+        <SidebarGroup className="bg-secondary">
+          <SidebarGroupLabel className="bg-secondary">Menú</SidebarGroupLabel>
+          <SidebarGroupContent className="bg-secondary">
             <SidebarMenu>
               {menuItems.map((item) => {
                 const Icon = item.icon;
@@ -78,8 +78,8 @@ export function AdminSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter>
-        <div className="space-y-2 p-2">
+      <SidebarFooter className="bg-secondary">
+        <div className="space-y-2 p-2 bg-secondary">
           <div className="rounded-lg bg-muted p-3">
             {!isCollapsed && (
               <>
