@@ -164,17 +164,6 @@ const CategoriasManager = () => {
                 className="bg-background"
               />
             </div>
-            {editingCategory && (<div>
-              <label className="mb-2 block text-sm font-medium text-foreground">Estado</label>
-              <select
-                value={estado ? 'true' : 'false'}
-                onChange={(e) => setEstado(e.target.value === 'true')}
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-              >
-                <option value="true">Activo</option>
-                <option value="false">Inactivo</option>
-              </select>
-            </div>)}
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setShowDialog(false)}>
                 Cancelar

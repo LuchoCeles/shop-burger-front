@@ -79,35 +79,37 @@ export function AdminSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="bg-secondary">
-        <div className="space-y-2 p-2 bg-secondary">
-          <div className="rounded-lg bg-muted p-3">
-            {!isCollapsed && (
-              <>
-                <p className="text-sm font-medium text-foreground truncate">
-                  {user?.nombre?.toUpperCase()}
+        <div className="p-4 border-t border-border space-y-2 flex-shrink-0">
+          <div className="space-y-2 p-2 bg-secondary">
+            <div className="rounded-lg bg-muted p-3">
+              {!isCollapsed && (
+                <>
+                  <p className="text-sm font-medium text-foreground truncate">
+                    {user?.nombre?.toUpperCase()}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Administrador</p>
+                </>
+              )}
+              {isCollapsed && (
+                <p className="text-xs font-medium text-foreground text-center">
+                  {user?.nombre?.charAt(0).toUpperCase()}
                 </p>
-                <p className="text-xs text-muted-foreground">Administrador</p>
-              </>
-            )}
-            {isCollapsed && (
-              <p className="text-xs font-medium text-foreground text-center">
-                {user?.nombre?.charAt(0).toUpperCase()}
-              </p>
-            )}
+              )}
+            </div>
+            <Button
+              variant="ghost"
+              className="w-full justify-start"
+              onClick={() => navigate('/')}
+              onAuxClick={(e) => {
+                if (e.button === 1) {
+                  window.open('/', '_blank');
+                }
+              }}
+            >
+              {!isCollapsed && 'Volver a la tienda'}
+              {isCollapsed && '🏪'}
+            </Button>
           </div>
-          <Button
-            variant="ghost"
-            className="w-full justify-start"
-            onClick={() => navigate('/')}
-            onAuxClick={(e) => {
-              if (e.button === 1) {
-                window.open('/', '_blank');
-              }
-            }}
-          >
-            {!isCollapsed && 'Volver a la tienda'}
-            {isCollapsed && '🏪'}
-          </Button>
           <Button
             variant="outline"
             className="w-full justify-start"
