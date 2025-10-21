@@ -81,7 +81,7 @@ export default function AsignarAdicionalesDialog({ open, onOpenChange, Product }
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Asignar Adicionales a "{Product.nombre}"</DialogTitle>
+          <DialogTitle>Asignar Adicionales{Product?.nombre ? ` a "${Product.nombre}"` : ''}</DialogTitle>
         </DialogHeader>
 
         {loading ? (
