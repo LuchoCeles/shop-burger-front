@@ -83,9 +83,15 @@ export function AdminSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="bg-secondary">
-        <div className="space-y-2 p-2 bg-secondary">
-          <div className="p-4 border-t border-border space-y-2 flex-shrink-0">
-            <div className="rounded-lg bg-muted p-3">
+        <div className="space-y-2 bg-secondary">
+          <div className={cn(
+            "border-t border-border space-y-2 flex-shrink-0",
+            isCollapsed ? "p-2" : "p-4"
+          )}>
+            <div className={cn(
+              "rounded-lg bg-muted",
+              isCollapsed ? "p-2" : "p-3"
+            )}>
               {!isCollapsed && (
                 <>
                   <p className="text-sm font-medium text-foreground truncate">
@@ -96,13 +102,16 @@ export function AdminSidebar() {
               )}
               {isCollapsed && (
                 <p className="text-xs font-medium text-foreground text-center">
-                  {user?.nombre?.toUpperCase()}
+                  {user?.nombre?.charAt(0).toUpperCase()}
                 </p>
               )}
             </div>
             <Button
               variant="ghost"
-              className="w-full justify-start"
+              className={cn(
+                "w-full",
+                isCollapsed ? "justify-center px-0" : "justify-start"
+              )}
               onClick={() => navigate('/')}
               onAuxClick={(e) => {
                 if (e.button === 1) {
@@ -115,10 +124,16 @@ export function AdminSidebar() {
             </Button>
           </div>
 
-          <div className="p-4 border-t border-border">
+          <div className={cn(
+            "border-t border-border",
+            isCollapsed ? "p-2" : "p-4"
+          )}>
             <Button
               variant="outline"
-              className="w-full justify-start"
+              className={cn(
+                "w-full",
+                isCollapsed ? "justify-center px-0" : "justify-start"
+              )}
               onClick={logout}
             >
               <LogOut className="h-4 w-4" />
