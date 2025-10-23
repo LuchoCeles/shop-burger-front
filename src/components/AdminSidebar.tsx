@@ -41,7 +41,7 @@ export function AdminSidebar() {
             "font-bold text-foreground transition-all",
             isCollapsed ? "text-sm" : "text-xl"
           )}>
-            {isCollapsed ? 'AP' : 'Admin Panel'}
+            {isCollapsed ? 'Admin Panel' : 'Admin Panel'}
           </h2>
         </div>
       </SidebarHeader>
@@ -60,13 +60,19 @@ export function AdminSidebar() {
                         <Button
                           variant="ghost"
                           className={cn(
-                            'w-full justify-start',
-                            isActive && 'bg-primary text-primary-foreground hover:bg-primary/90'
+                            isCollapsed
+                              ? 'justify-center px-2'
+                              : 'w-full justify-start px-4',
+                            isActive && 'bg-primary text-primary-foreground hover:bg-primary/90',
+                            'transition-all duration-300'
                           )}
                         >
-                          <Icon className="mr-2 h-5 w-5" />
-                          {item.label}
+                          <Icon className={cn("flex-shrink-0", isCollapsed ? "h-10 w-10" : "h-10 w-10 mr-2")} />
+                          {!isCollapsed && (
+                            <span className="truncate">{item.label}</span>
+                          )}
                         </Button>
+
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -91,7 +97,7 @@ export function AdminSidebar() {
               )}
               {isCollapsed && (
                 <p className="text-xs font-medium text-foreground text-center">
-                  {user?.nombre?.charAt(0).toUpperCase()}
+                  {user?.nombre?.toUpperCase()}
                 </p>
               )}
             </div>
