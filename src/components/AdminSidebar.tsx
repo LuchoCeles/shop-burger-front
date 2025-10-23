@@ -39,9 +39,9 @@ export function AdminSidebar() {
         <div className="flex h-16 items-center px-4 border-b border-border">
           <h2 className={cn(
             "font-bold text-foreground transition-all",
-            isCollapsed ? "text-sm" : "text-xl"
+            isCollapsed ? "text-sm text-left" : "text-xl"
           )}>
-            {isCollapsed ? 'Admin Panel' : 'Admin Panel'}
+            {isCollapsed ? 'Panel' : 'Admin Panel'}
           </h2>
         </div>
       </SidebarHeader>
@@ -54,17 +54,17 @@ export function AdminSidebar() {
                 const Icon = item.icon;
                 const isActive = location.pathname === item.path;
                 return (
-                <SidebarMenuItem key={item.path} className="w-full">
-                  <SidebarMenuButton asChild isActive={isActive} className="w-full">
-                    <Link to={item.path} className="w-full block">
+                <SidebarMenuItem key={item.path}>
+                  <SidebarMenuButton asChild isActive={isActive}>
+                    <Link to={item.path}>
                       <Button
                         variant="ghost"
                         className={cn(
-                          'w-full h-full transition-all duration-300',
                           isCollapsed
-                            ? 'justify-center px-0'
-                            : 'justify-start px-4',
-                          isActive && 'bg-primary text-primary-foreground hover:bg-primary/90'
+                            ? 'justify-center px-2'
+                            : 'w-full justify-start px-4',
+                          isActive && 'bg-primary text-primary-foreground hover:bg-primary/90',
+                          'transition-all duration-300'
                         )}
                       >
                         <Icon className={cn("flex-shrink-0", isCollapsed ? "h-5 w-5" : "h-5 w-5 mr-2")} />
