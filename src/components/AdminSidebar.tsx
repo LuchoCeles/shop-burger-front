@@ -54,15 +54,15 @@ export function AdminSidebar() {
                 const Icon = item.icon;
                 const isActive = location.pathname === item.path;
                 return (
-                <SidebarMenuItem key={item.path}>
-                  <SidebarMenuButton asChild isActive={isActive}>
-                    <Link to={item.path}>
+                <SidebarMenuItem key={item.path} className="w-full">
+                  <SidebarMenuButton asChild isActive={isActive} className="w-full">
+                    <Link to={item.path} className="w-full block">
                       <Button
                         variant="ghost"
                         className={cn(
-                          'w-full transition-all duration-300',
+                          'w-full h-full transition-all duration-300',
                           isCollapsed
-                            ? 'justify-center px-2'
+                            ? 'justify-center px-0'
                             : 'justify-start px-4',
                           isActive && 'bg-primary text-primary-foreground hover:bg-primary/90'
                         )}
