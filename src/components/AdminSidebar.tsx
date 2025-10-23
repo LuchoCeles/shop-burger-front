@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Package, FolderKanban, ShoppingBag, Settings, LogOut, Plus } from 'lucide-react';
+import { LayoutDashboard, Package, FolderKanban, ShoppingBag, Settings, LogOut, Plus, Home } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { Button } from './ui/button';
 import {
@@ -7,7 +7,6 @@ import {
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
@@ -38,10 +37,10 @@ export function AdminSidebar() {
       <SidebarHeader className="bg-secondary">
         <div className="flex h-16 items-center px-4 border-b border-border">
           <h2 className={cn(
-            "font-bold text-foreground transition-all",
+            "font-bold text-foreground transition-all duration-300",
             isCollapsed ? "text-sm text-left" : "text-xl"
           )}>
-            {isCollapsed ? 'Panel' : 'Admin Panel'}
+            {isCollapsed ? 'AP' : 'Admin Panel'}
           </h2>
         </div>
       </SidebarHeader>
@@ -54,25 +53,27 @@ export function AdminSidebar() {
                 const Icon = item.icon;
                 const isActive = location.pathname === item.path;
                 return (
-                <SidebarMenuItem key={item.path}>
-                  <SidebarMenuButton asChild isActive={isActive}>
-                    <Link to={item.path}>
-                      <Button
-                        variant="ghost"
-                        className={cn(
-                          'w-full transition-all duration-300',
-                          isCollapsed ? 'justify-center px-0' : 'justify-start px-4',
-                          isActive && 'bg-primary text-primary-foreground hover:bg-primary/90'
-                        )}
-                      >
-                        <Icon className={cn("flex-shrink-0", isCollapsed ? "h-5 w-5" : "h-5 w-5 mr-2")} />
-                        {!isCollapsed && (
-                          <span className="truncate">{item.label}</span>
-                        )}
-                      </Button>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
+                  <SidebarMenuItem key={item.path}>
+                    <SidebarMenuButton asChild isActive={isActive}>
+                      <Link to={item.path}>
+                        <Button
+                          variant="ghost"
+                          className={cn(
+                            isCollapsed
+                              ? 'justify-center px-2'
+                              : 'w-full justify-start px-4',
+                            isActive && 'bg-primary text-primary-foreground hover:bg-primary/90',
+                            'transition-all duration-300'
+                          )}
+                        >
+                          <Icon className={cn("flex-shrink-0", isCollapsed ? "h-5 w-5" : "h-5 w-5 mr-2")} />
+                          {!isCollapsed && (
+                            <span className="truncate">{item.label}</span>
+                          )}
+                        </Button>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
                 );
               })}
             </SidebarMenu>
@@ -83,33 +84,19 @@ export function AdminSidebar() {
       <SidebarFooter className="bg-secondary">
         <div className="space-y-2 bg-secondary">
           <div className={cn(
-            "border-t border-border space-y-2 flex-shrink-0",
+            "border-t border-border space-y-2 flex-shrink-0 transition-all duration-300",
             isCollapsed ? "p-2" : "p-4"
           )}>
-            <div className={cn(
-              "rounded-lg bg-muted",
-              isCollapsed ? "p-2" : "p-3"
-            )}>
-              {!isCollapsed && (
-                <>
-                  <p className="text-sm font-medium text-foreground truncate">
-                    {user?.nombre?.toUpperCase()}
-                  </p>
-                  <p className="text-xs text-muted-foreground">Administrador</p>
-                </>
-              )}
-              {isCollapsed && (
-                <p className="text-xs font-medium text-foreground text-center">
-                  {user?.nombre?.charAt(0).toUpperCase()}
+            {!isCollapsed && (
+              <div className={cn("rounded-lg bg-muted transition-all duration-200", isCollapsed ? "p-2" : "p-3")}>
+                <p className="text-sm font-medium text-foreground truncate">
+                  {user?.nombre?.toUpperCase()}
                 </p>
-              )}
-            </div>
+                <p className="text-xs text-muted-foreground">Administrador</p>
+              </div>)}
             <Button
               variant="ghost"
-              className={cn(
-                "w-full",
-                isCollapsed ? "justify-center px-0" : "justify-start"
-              )}
+              className={cn("w-full transition-all duration-200", isCollapsed ? "justify-center px-0" : "justify-start")}
               onClick={() => navigate('/')}
               onAuxClick={(e) => {
                 if (e.button === 1) {
@@ -118,18 +105,15 @@ export function AdminSidebar() {
               }}
             >
               {!isCollapsed && 'Volver a la tienda'}
-              {isCollapsed && '🏪'}
+              {isCollapsed && <Home className="h-4 w-4" />}
             </Button>
           </div>
 
-          <div className={cn(
-            "border-t border-border",
-            isCollapsed ? "p-2" : "p-4"
-          )}>
+          <div className={cn("border-t border-border transition-all duration-500", isCollapsed ? "p-2" : "p-4")}>
             <Button
               variant="outline"
               className={cn(
-                "w-full",
+                "w-full transition-all duration-200",
                 isCollapsed ? "justify-center px-0" : "justify-start"
               )}
               onClick={logout}
