@@ -125,7 +125,7 @@ export default function AdicionalesModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Agregar Adicionales a "{Product.nombre}"</DialogTitle>
+          <DialogTitle>Agregar Adicionales{Product?.nombre ? ` a "${Product.nombre}"` : ''}</DialogTitle>
         </DialogHeader>
 
         {loading ? (
