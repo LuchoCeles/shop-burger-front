@@ -56,23 +56,15 @@ export function AdminSidebar() {
                 return (
                   <SidebarMenuItem key={item.path}>
                     <SidebarMenuButton asChild isActive={isActive}>
-                      <Link key={item.path} to={item.path}>
-                        <Button
-                          variant="ghost"
-                          className={cn(
-                            isCollapsed
-                              ? 'justify-center px-2'
-                              : 'w-full justify-start px-4',
-                            isActive && 'bg-primary text-primary-foreground hover:bg-primary/90',
-                            'transition-all duration-300'
-                          )}
-                        >
-                          <Icon className={cn("flex-shrink-0", isCollapsed ? "h-10 w-10" : "h-10 w-10 mr-2")} />
-                          {!isCollapsed && (
-                            <span className="truncate">{item.label}</span>
-                          )}
-                        </Button>
-
+                      <Link 
+                        to={item.path}
+                        className={cn(
+                          "flex items-center gap-3 transition-all duration-300",
+                          isActive && 'bg-primary text-primary-foreground hover:bg-primary/90'
+                        )}
+                      >
+                        <Icon className="h-5 w-5 flex-shrink-0" />
+                        <span className="truncate">{item.label}</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
