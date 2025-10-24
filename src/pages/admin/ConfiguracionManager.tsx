@@ -42,7 +42,7 @@ const ConfiguracionManager = () => {
       const response = await ApiService.loginBanco(cuit, password);
       if (response.success) {
         loginBanco(response.token);
-        fetchBankData(response.data.datos);
+        fetchBankData(response.data);
         toast.success(response.message || 'Autenticación exitosa');
       } else {
         toast.error(response.message || 'Contraseña incorrecta');

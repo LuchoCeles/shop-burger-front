@@ -36,7 +36,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsBankAuthenticated(false);
       }
     } else {
-      setIsBankAuthenticated(false);
+      setIsBankAuthenticated(true);
     }
 
     if (token && nombre) {
