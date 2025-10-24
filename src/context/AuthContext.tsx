@@ -65,7 +65,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const loginBanco = (token: string) => {
-    console.log(token);
     localStorage.setItem('bancoToken', token);
     setIsBankAuthenticated(true);
   };

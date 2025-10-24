@@ -11,7 +11,7 @@ import { useAuth } from '@/context/AuthContext';
 
 const ConfiguracionManager = () => {
   const [password, setPassword] = useState("");
-  const { loginBanco: authLogin, isBankAuthenticated: isAuthenticated } = useAuth();
+  const { loginBanco, isBankAuthenticated: isAuthenticated } = useAuth();
   const [cuit, setCuit] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -41,7 +41,7 @@ const ConfiguracionManager = () => {
       setLoading(true);
       const response = await ApiService.loginBanco(cuit, password);
       if (response.success) {
-        authLogin(response.data);
+        loginBanco(response.data.token);
         fetchBankData(response.data);
         toast.success(response.message || 'Autenticación exitosa');
       } else {
