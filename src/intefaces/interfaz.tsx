@@ -149,6 +149,8 @@ export interface AuthContextType {
   loading: boolean;
   login: (token: string, nombre: string) => void;
   logout: () => void;
+  loginBanco: (token: string) => void;
+  isBankAuthenticated: boolean;
 }
 
 export interface CartContextType {

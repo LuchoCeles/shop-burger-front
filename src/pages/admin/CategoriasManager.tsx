@@ -40,6 +40,11 @@ const CategoriasManager = () => {
     try {
       const data = await ApiService.getCategories();
       setCategorias(data.data || []);
+      if (!data.success) {
+        toast.error(data.message || 'Error al cargar categorías');
+        return;
+      }
+      toast.success(data.message || 'Categorías cargadas');
     } catch (error) {
       toast.error('Error al cargar categorías');
     }
@@ -51,12 +56,19 @@ const CategoriasManager = () => {
     setLoading(true);
     try {
       if (editingCategory) {
-        await ApiService.updateCategory(editingCategory.id, nombre, estado);
-        toast.success('Categoría actualizada');
+        const data = await ApiService.updateCategory(editingCategory.id, nombre);
+        if (!data.success) {
+          toast.error(data.message || 'Error al actualizar');
+          return;
+        }
+        toast.success(data.message || 'Categoría actualizada');
       } else {
-        
-        await ApiService.createCategory(nombre);
-        toast.success('Categoría creada');
+        const data = await ApiService.createCategory(nombre);
+        if (!data.success) {
+          toast.error(data.message || 'Error al crear');
+          return;
+        }
+        toast.success(data.message || 'Categoría creada');
       }
       setShowDialog(false);
       setNombre('');
@@ -73,8 +85,12 @@ const CategoriasManager = () => {
     if (!categoryToDelete) return;
 
     try {
-      await ApiService.deleteCategoria(categoryToDelete);
-      toast.success('Categoría eliminada');
+      const data = await ApiService.deleteCategoria(categoryToDelete);
+      if (!data.success) {
+        toast.error(data.message || 'Error al eliminar');
+        return;
+      }
+      toast.success(data.message || 'Categoría eliminada');
       loadCategorias();
     } catch (error) {
       toast.error(error.message || 'Error al eliminar');
@@ -92,7 +108,11 @@ const CategoriasManager = () => {
 
   const handleToggleEstado = async (category: Category) => {
     try {
-      await ApiService.updateCategory(category.id, category.nombre, !category.estado);
+      const data = await ApiService.updateStateCategory(category.id, !category.estado);
+      if (!data.success) {
+        toast.error(data.message || 'Error al cambiar estado');
+        return;
+      }
       toast.success(`Categoría ${!category.estado ? 'activada' : 'desactivada'}`);
       loadCategorias();
     } catch (error) {
