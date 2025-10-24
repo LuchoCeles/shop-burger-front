@@ -62,6 +62,12 @@ const Checkout = () => {
           id: item.id,
           cantidad: item.cantidad,
         })),
+        adicional: cart.flatMap((item) =>
+          item.adicionales?.map((adicional) => ({
+            id: adicional.id,
+            cantidad: adicional.cantidad,
+          })) || []
+        ),
       };
 
       const response = await ApiService.createOrder(pedido);
@@ -69,15 +75,15 @@ const Checkout = () => {
 
       const whatsappMessage = encodeURIComponent(
         `¡Hola! Te paso el comprobante de mi pedido #${response.data.id}.\n\n` +
-          `Nombre: ${bankData?.nombre}\n` +
-          `Apellido: ${bankData?.apellido}\n` +
-          `CUIT / DNI: ${bankData?.cuit}\n` +
-          `Alias: ${bankData?.alias}\n` +
-          `CBU: ${bankData?.cbu}\n\n` +
-          `Total: $${total.toFixed(2)}\n` +
-          `Productos:\n${cart
-            .map((item) => `- ${item.nombre} x${item.cantidad}`)
-            .join('\n')}`
+        `Nombre: ${bankData?.nombre}\n` +
+        `Apellido: ${bankData?.apellido}\n` +
+        `CUIT / DNI: ${bankData?.cuit}\n` +
+        `Alias: ${bankData?.alias}\n` +
+        `CBU: ${bankData?.cbu}\n\n` +
+        `Total: $${total.toFixed(2)}\n` +
+        `Productos:\n${cart
+          .map((item) => `- ${item.nombre} x${item.cantidad}`)
+          .join('\n')}`
       );
 
       toast.success('Pedido creado exitosamente');
