@@ -10,9 +10,8 @@ import { BankData } from '@/intefaces/interfaz';
 import { useAuth } from '@/context/AuthContext';
 
 const ConfiguracionManager = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
-  const { loginBanco: authLogin } = useAuth();
+  const { loginBanco: authLogin, isBankAuthenticated: isAuthenticated } = useAuth();
   const [cuit, setCuit] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -43,7 +42,6 @@ const ConfiguracionManager = () => {
       const response = await ApiService.loginBanco(cuit, password);
       if (response.success) {
         authLogin(response.data);
-        setIsAuthenticated(true);
         fetchBankData(response.data);
         toast.success(response.message || 'Autenticación exitosa');
       } else {
@@ -236,7 +234,6 @@ const ConfiguracionManager = () => {
             <Button
               variant="outline"
               onClick={() => {
-                setIsAuthenticated(false);
                 setPassword('');
               }}
             >

@@ -10,7 +10,7 @@ class ApiService {
       'Authorization': `Bearer ${localStorage.getItem('token')}`
     };
 
-    if (token) {
+    if (SecondToken) {
       headers['Authorization-Second'] = `Bearer ${SecondToken}`;
     }
 

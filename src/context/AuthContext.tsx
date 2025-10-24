@@ -21,6 +21,7 @@ const isTokenExpired = (token: string): boolean => {
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isBankAuthenticated, setIsBankAuthenticated] = useState(false);
   const [user, setUser] = useState<{ nombre: string } | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -29,8 +30,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const nombre = localStorage.getItem('userName');
     const bancoToken = localStorage.getItem('bancoToken');
 
-    if (isTokenExpired(bancoToken)) {
-      localStorage.removeItem('bancoToken');
+    if (bancoToken) {
+      if (isTokenExpired(bancoToken)) {
+        localStorage.removeItem('bancoToken');
+        setIsBankAuthenticated(false);
+      }
+    } else {
+      setIsBankAuthenticated(false);
     }
 
     if (token && nombre) {
@@ -43,6 +49,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsAuthenticated(true);
         setUser({ nombre });
       }
+    } else {
+      setIsAuthenticated(false);
+      setUser(null);
     }
 
     setLoading(false);
@@ -56,7 +65,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const loginBanco = (token: string) => {
+    console.log(token);
     localStorage.setItem('bancoToken', token);
+    setIsBankAuthenticated(true);
   };
 
   const logout = () => {
@@ -64,11 +75,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('userName');
     localStorage.removeItem('bancoToken');
     setIsAuthenticated(false);
+    setIsBankAuthenticated(false);
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, loading, login, logout, loginBanco }}>
+    <AuthContext.Provider value={{ isAuthenticated, user, loading, login, logout, loginBanco, isBankAuthenticated }}>
       {children}
     </AuthContext.Provider>
   );
