@@ -11,11 +11,10 @@ import { useAuth } from '@/context/AuthContext';
 
 const ConfiguracionManager = () => {
   const [password, setPassword] = useState("");
-  const { loginBanco, isBankAuthenticated: isAuthenticated } = useAuth();
+  const { loginBanco, isBankAuthenticated: isAuthenticated, logoutBanco, bankData, setBankData } = useAuth();
   const [cuit, setCuit] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [bankData, setBankData] = useState<BankData | null>(null);
   const [formData, setFormData] = useState({
     cuit: '',
     alias: '',
@@ -23,6 +22,18 @@ const ConfiguracionManager = () => {
     apellido: '',
     nombre: '',
   });
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      setFormData({
+        cuit: bankData?.cuit || '',
+        alias: bankData?.alias || '',
+        cbu: bankData?.cbu || '',
+        apellido: bankData?.apellido || '',
+        nombre: bankData?.nombre || '',
+      });
+    }
+  }, [isAuthenticated, bankData]);
 
   const fetchBankData = (data: BankData) => {
     setBankData(data);
@@ -41,8 +52,8 @@ const ConfiguracionManager = () => {
       setLoading(true);
       const response = await ApiService.loginBanco(cuit, password);
       if (response.success) {
-        loginBanco(response.token);
-        fetchBankData(response.data.datos);
+        loginBanco(response.token, response.data);
+        fetchBankData(response.data);
         toast.success(response.message || 'Autenticación exitosa');
       } else {
         toast.error(response.message || 'Contraseña incorrecta');
@@ -233,9 +244,7 @@ const ConfiguracionManager = () => {
           <div className="flex justify-end gap-2 pt-4">
             <Button
               variant="outline"
-              onClick={() => {
-                setPassword('');
-              }}
+              onClick={() => { logoutBanco(); toast.success('Cierre de sesión exitoso'); }}
             >
               Cerrar
             </Button>
