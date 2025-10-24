@@ -202,8 +202,8 @@ class ApiService {
     return rsp.json();
   }
 
-  async loginBanco(password) {
-    const rsp = await this.POST('admin/banco/login', { password });
+  async loginBanco(cuit, password) {
+    const rsp = await this.POST('admin/banco/login', { cuit, password });
     return rsp.json();
   }
 

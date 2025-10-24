@@ -11,6 +11,7 @@ import { BankData } from '@/intefaces/interfaz';
 const ConfiguracionManager = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
+  const [cuit, setCuit] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [bankData, setBankData] = useState<BankData | null>(null);
@@ -37,7 +38,7 @@ const ConfiguracionManager = () => {
     e.preventDefault();
     try {
       setLoading(true);
-      const response = await ApiService.loginBanco(password);
+      const response = await ApiService.loginBanco(cuit, password);
       if (response.success) {
         setIsAuthenticated(true);
         fetchBankData(response.data);
@@ -71,7 +72,6 @@ const ConfiguracionManager = () => {
         return;
       }
       const response = await ApiService.updateBanco(bankData.id, formData);
-      console.log(response);
       if (response.success) {
         toast.success(response.message || 'Datos actualizados correctamente');
         fetchBankData(response.data);
@@ -95,11 +95,23 @@ const ConfiguracionManager = () => {
               Autenticación Requerida
             </CardTitle>
             <CardDescription>
-              Ingrese la contraseña para acceder a la configuración bancaria
+              Ingrese el cuit y la contraseña para acceder a la configuración bancaria.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleLogin} className="space-y-4">
+              <div className="space-y-2">
+                <label className="mb-2 block text-sm font-medium text-foreground">CUIT</label>
+                <Input
+                  type="text"
+                  placeholder="XX-XXXXXXXX-X"
+                  value={cuit}
+                  onChange={(e) => setCuit(e.target.value)}
+                  required
+                  className="bg-background"
+                />
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="password">Contraseña</Label>
                 <div className="relative">
@@ -131,6 +143,15 @@ const ConfiguracionManager = () => {
                 {loading ? 'Verificando...' : 'Acceder'}
               </Button>
             </form>
+            <div className="mt-6 p-4 bg-muted/50 rounded-lg">
+              <p className="text-xs text-muted-foreground mb-2">
+                <strong>Credenciales de prueba:</strong>
+              </p>
+              <p className="text-xs text-muted-foreground">
+                CUIT: 20-12345678-9<br />
+                Contraseña: admin
+              </p>
+            </div>
           </CardContent>
         </Card>
       </div>
