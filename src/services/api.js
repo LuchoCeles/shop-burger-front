@@ -5,13 +5,19 @@ class ApiService {
     this.baseURL = API_URL;
   }
 
-  async POST(url, data, isFormData = false) {
+  async POST(url, data, isFormData = false, SecondToken = null) {
+    const headers = {
+      'Authorization': `Bearer ${localStorage.getItem('token')}`
+    };
+
+    if (SecondToken) {
+      headers['Authorization-Second'] = `Bearer ${SecondToken}`;
+    }
+
     const config = {
       method: 'POST',
       mode: 'cors',
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      },
+      headers: headers,
       body: isFormData ? data : JSON.stringify(data)
     };
 
@@ -112,8 +118,13 @@ class ApiService {
     return rsp.json();
   }
 
-  async updateCategory(id, nombre, estado) {
-    const rsp = await this.PATCH(`api/categoria/${id}`, { nombre: nombre, estado: estado });
+  async updateCategory(id, nombre) {
+    const rsp = await this.PATCH(`api/categoria/${id}`, { nombre: nombre });
+    return rsp.json();
+  }
+
+  async updateStateCategory(id, estado) {
+    const rsp = await this.PATCH(`api/categoria/${id}/estado`, { estado: estado });
     return rsp.json();
   }
 
@@ -197,13 +208,13 @@ class ApiService {
     return rsp.json();
   }
 
-  async loginBanco(password) {
-    const rsp = await this.POST('admin/banco/login', { password });
+  async loginBanco(cuit, password) {
+    const rsp = await this.POST('admin/banco/login', { cuit, password });
     return rsp.json();
   }
 
   async updateBanco(id, bancoData) {
-    const rsp = await this.PATCH(`admin/banco/${id}`, { banco: bancoData });
+    const rsp = await this.PATCH(`admin/banco/${id}`, { banco: bancoData }, false, localStorage.getItem('bancoToken'));
     return rsp.json();
   }
 
