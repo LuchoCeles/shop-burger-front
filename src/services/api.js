@@ -112,8 +112,13 @@ class ApiService {
     return rsp.json();
   }
 
-  async updateCategory(id, nombre, estado) {
-    const rsp = await this.PATCH(`api/categoria/${id}`, { nombre: nombre, estado: estado });
+  async updateCategory(id, nombre) {
+    const rsp = await this.PATCH(`api/categoria/${id}`, { nombre: nombre });
+    return rsp.json();
+  }
+
+  async updateStateCategory(id, estado) {
+    const rsp = await this.PATCH(`api/categoria/${id}/estado`, { estado: estado });
     return rsp.json();
   }
 
