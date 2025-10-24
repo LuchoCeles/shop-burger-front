@@ -5,13 +5,19 @@ class ApiService {
     this.baseURL = API_URL;
   }
 
-  async POST(url, data, isFormData = false) {
+  async POST(url, data, isFormData = false, SecondToken = null) {
+    const headers = {
+      'Authorization': `Bearer ${localStorage.getItem('token')}`
+    };
+
+    if (token) {
+      headers['Authorization-Second'] = `Bearer ${SecondToken}`;
+    }
+
     const config = {
       method: 'POST',
       mode: 'cors',
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      },
+      headers: headers,
       body: isFormData ? data : JSON.stringify(data)
     };
 
@@ -208,7 +214,7 @@ class ApiService {
   }
 
   async updateBanco(id, bancoData) {
-    const rsp = await this.PATCH(`admin/banco/${id}`, { banco: bancoData });
+    const rsp = await this.PATCH(`admin/banco/${id}`, { banco: bancoData }, false, localStorage.getItem('bancoToken'));
     return rsp.json();
   }
 

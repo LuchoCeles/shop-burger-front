@@ -27,6 +27,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const token = localStorage.getItem('token');
     const nombre = localStorage.getItem('userName');
+    const bancoToken = localStorage.getItem('bancoToken');
+
+    if (isTokenExpired(bancoToken)) {
+      localStorage.removeItem('bancoToken');
+    }
 
     if (token && nombre) {
       if (isTokenExpired(token)) {
@@ -50,15 +55,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser({ nombre });
   };
 
+  const loginBanco = (token: string) => {
+    localStorage.setItem('bancoToken', token);
+  };
+
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('userName');
+    localStorage.removeItem('bancoToken');
     setIsAuthenticated(false);
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, loading, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, user, loading, login, logout, loginBanco }}>
       {children}
     </AuthContext.Provider>
   );

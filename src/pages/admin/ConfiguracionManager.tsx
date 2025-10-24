@@ -7,10 +7,12 @@ import { toast } from 'sonner';
 import { Lock, Eye, EyeOff } from 'lucide-react';
 import ApiService from '@/services/api';
 import { BankData } from '@/intefaces/interfaz';
+import { useAuth } from '@/context/AuthContext';
 
 const ConfiguracionManager = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
+  const { loginBanco: authLogin } = useAuth();
   const [cuit, setCuit] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -40,6 +42,7 @@ const ConfiguracionManager = () => {
       setLoading(true);
       const response = await ApiService.loginBanco(cuit, password);
       if (response.success) {
+        authLogin(response.data);
         setIsAuthenticated(true);
         fetchBankData(response.data);
         toast.success(response.message || 'Autenticación exitosa');
