@@ -40,13 +40,19 @@ class ApiService {
     });
   };
 
-  async PATCH(url, data, isFormData = false) {
+  async PATCH(url, data, isFormData = false, SecondToken = null) {
+    const headers = {
+      'Authorization': `Bearer ${localStorage.getItem('token')}`
+    };
+
+    if (SecondToken) {
+      headers['Authorization-Second'] = `Bearer ${SecondToken}`;
+    }
+
     const config = {
       method: 'PATCH',
       mode: 'cors',
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      },
+      headers: headers,
       body: isFormData ? data : JSON.stringify(data)
     };
 

@@ -25,13 +25,7 @@ const ConfiguracionManager = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      setFormData({
-        cuit: bankData?.cuit || '',
-        alias: bankData?.alias || '',
-        cbu: bankData?.cbu || '',
-        apellido: bankData?.apellido || '',
-        nombre: bankData?.nombre || '',
-      });
+      fetchBankData(bankData);
     }
   }, [isAuthenticated, bankData]);
 
@@ -83,10 +77,13 @@ const ConfiguracionManager = () => {
         toast.info('No hay cambios para guardar');
         return;
       }
+      
       const response = await ApiService.updateBanco(bankData.id, formData);
+
       if (response.success) {
         toast.success(response.message || 'Datos actualizados correctamente');
         fetchBankData(response.data);
+        setBankData(response.data);
       } else {
         toast.error(response.message || 'Error al actualizar datos');
       }
