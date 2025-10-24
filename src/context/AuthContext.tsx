@@ -34,6 +34,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (isTokenExpired(bancoToken)) {
         localStorage.removeItem('bancoToken');
         setIsBankAuthenticated(false);
+      } else {
+        setIsBankAuthenticated(true);
       }
     } else {
       setIsBankAuthenticated(false);
