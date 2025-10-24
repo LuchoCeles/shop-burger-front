@@ -149,7 +149,10 @@ export interface AuthContextType {
   loading: boolean;
   login: (token: string, nombre: string) => void;
   logout: () => void;
-  loginBanco: (token: string) => void;
+  logoutBanco: () => void;
+  loginBanco: (token: string, data: BankData) => void;
+  bankData: BankData | null;
+  setBankData: (data: BankData | null) => void;
   isBankAuthenticated: boolean;
 }
 

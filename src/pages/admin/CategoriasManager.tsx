@@ -44,7 +44,6 @@ const CategoriasManager = () => {
         toast.error(data.message || 'Error al cargar categorías');
         return;
       }
-      toast.success(data.message || 'Categorías cargadas');
     } catch (error) {
       toast.error('Error al cargar categorías');
     }
