@@ -62,12 +62,13 @@ const Checkout = () => {
           id: item.id,
           cantidad: item.cantidad,
         })),
-        adicional: cart.flatMap((item) =>
+        adicionales: cart.flatMap((item) =>
           item.adicionales?.map((adicional) => ({
             id: adicional.id,
             cantidad: adicional.cantidad,
           })) || []
         ),
+        metodoDePago: ''
       };
 
       const response = await ApiService.createOrder(pedido);
