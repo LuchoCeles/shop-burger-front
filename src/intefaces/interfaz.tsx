@@ -88,6 +88,7 @@ export interface CartItem {
   url_imagen?: string;
   stock?: number;
   adicionales?: CartItemAdicional[];
+  metodoDePago: string;
 }
 
 export interface CartItemAdicional {
