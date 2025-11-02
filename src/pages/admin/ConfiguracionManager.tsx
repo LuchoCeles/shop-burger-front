@@ -48,7 +48,7 @@ const ConfiguracionManager = () => {
     e.preventDefault();
     try {
       setLoading(true);
-      const response = await ApiService.loginBanco(cuit, password);
+      const response = await ApiService.loginBanco(cuit.trim(), password);
       if (response.success) {
         loginBanco(response.token, response.data);
         fetchBankData(response.data);
