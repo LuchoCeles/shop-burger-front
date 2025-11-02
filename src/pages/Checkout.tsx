@@ -20,6 +20,7 @@ const Checkout = () => {
     direccion: '',
   });
   const [descripcion, setDescripcion] = useState('');
+  const [metodoDePago, setMetodoDePago] = useState<'efectivo' | 'transferencia' | 'mercadopago'>('efectivo');
 
   useEffect(() => {
     fetchBankData();
@@ -68,7 +69,7 @@ const Checkout = () => {
             cantidad: adicional.cantidad,
           })) || []
         ),
-        metodoDePago: ''
+        metodoDePago
       };
 
       const response = await ApiService.createOrder(pedido);
@@ -169,6 +170,48 @@ const Checkout = () => {
                     required
                     className="bg-background"
                   />
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-foreground">
+                    Método de pago
+                  </label>
+                  <div className="space-y-2">
+                    <label className="flex items-center space-x-3 rounded-lg border border-border bg-background p-3 cursor-pointer hover:bg-accent transition-colors">
+                      <input
+                        type="radio"
+                        name="metodoDePago"
+                        value="efectivo"
+                        checked={metodoDePago === 'efectivo'}
+                        onChange={(e) => setMetodoDePago(e.target.value as 'efectivo')}
+                        className="h-4 w-4 text-primary"
+                      />
+                      <span className="text-foreground">Efectivo</span>
+                    </label>
+                    <label className="flex items-center space-x-3 rounded-lg border border-border bg-background p-3 cursor-pointer hover:bg-accent transition-colors">
+                      <input
+                        type="radio"
+                        name="metodoDePago"
+                        value="transferencia"
+                        checked={metodoDePago === 'transferencia'}
+                        onChange={(e) => setMetodoDePago(e.target.value as 'transferencia')}
+                        className="h-4 w-4 text-primary"
+                      />
+                      <span className="text-foreground">Transferencia</span>
+                    </label>
+                    {bankData?.mpEstado && (
+                      <label className="flex items-center space-x-3 rounded-lg border border-border bg-background p-3 cursor-pointer hover:bg-accent transition-colors">
+                        <input
+                          type="radio"
+                          name="metodoDePago"
+                          value="mercadopago"
+                          checked={metodoDePago === 'mercadopago'}
+                          onChange={(e) => setMetodoDePago(e.target.value as 'mercadopago')}
+                          className="h-4 w-4 text-primary"
+                        />
+                        <span className="text-foreground">Mercado Pago</span>
+                      </label>
+                    )}
+                  </div>
                 </div>
                 <div>
                   <label className="mb-2 block text-sm font-medium text-foreground">

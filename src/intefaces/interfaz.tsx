@@ -33,6 +33,7 @@ export interface BankData {
   cbu: string;
   apellido: string;
   nombre: string;
+  mpEstado?: boolean;
 }
 
 export interface Cliente {
