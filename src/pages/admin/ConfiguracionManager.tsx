@@ -4,7 +4,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { Lock, Eye, EyeOff } from 'lucide-react';
+import { Lock, Eye, EyeOff, CreditCard } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
 import ApiService from '@/services/api';
 import { BankData } from '@/intefaces/interfaz';
 import { useAuth } from '@/context/AuthContext';
@@ -21,6 +22,7 @@ const ConfiguracionManager = () => {
     cbu: '',
     apellido: '',
     nombre: '',
+    mpEstado: false,
   });
 
   useEffect(() => {
@@ -37,6 +39,7 @@ const ConfiguracionManager = () => {
       cbu: data.cbu || '',
       apellido: data.apellido || '',
       nombre: data.nombre || '',
+      mpEstado: !!data.mpEstado,
     });
   };
 
@@ -72,7 +75,8 @@ const ConfiguracionManager = () => {
         formData.alias !== bankData?.alias ||
         formData.cbu !== bankData?.cbu ||
         formData.apellido !== bankData?.apellido ||
-        formData.nombre !== bankData?.nombre;
+        formData.nombre !== bankData?.nombre ||
+        formData.mpEstado !== !!bankData?.mpEstado;
       if (!isDiferent) {
         toast.info('No hay cambios para guardar');
         return;
@@ -245,6 +249,38 @@ const ConfiguracionManager = () => {
             >
               Cerrar
             </Button>
+            <Button onClick={handleSave} disabled={loading}>
+              {loading ? 'Guardando...' : 'Guardar Cambios'}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <CreditCard className="h-5 w-5" />
+            Mercado Pago
+          </CardTitle>
+          <CardDescription>
+            Activar o desactivar la integración con Mercado Pago
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="mp-estado">Estado de Mercado Pago</Label>
+              <p className="text-sm text-muted-foreground">
+                {formData.mpEstado ? 'Mercado Pago está activado' : 'Mercado Pago está desactivado'}
+              </p>
+            </div>
+            <Switch
+              id="mp-estado"
+              checked={formData.mpEstado}
+              onCheckedChange={(checked) => setFormData(prev => ({ ...prev, mpEstado: checked }))}
+            />
+          </div>
+          <div className="flex justify-end pt-4">
             <Button onClick={handleSave} disabled={loading}>
               {loading ? 'Guardando...' : 'Guardar Cambios'}
             </Button>
