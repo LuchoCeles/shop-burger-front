@@ -1,10 +1,12 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { Lock, Eye, EyeOff } from 'lucide-react';
+import { Lock, Eye, EyeOff, CreditCard, Landmark } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
 import ApiService from '@/services/api';
 import { BankData } from '@/intefaces/interfaz';
 import { useAuth } from '@/context/AuthContext';
@@ -21,6 +23,7 @@ const ConfiguracionManager = () => {
     cbu: '',
     apellido: '',
     nombre: '',
+    mpEstado: Boolean,
   });
 
   useEffect(() => {
@@ -37,6 +40,7 @@ const ConfiguracionManager = () => {
       cbu: data.cbu || '',
       apellido: data.apellido || '',
       nombre: data.nombre || '',
+      mpEstado: data.mpEstado,
     });
   };
 
@@ -44,9 +48,10 @@ const ConfiguracionManager = () => {
     e.preventDefault();
     try {
       setLoading(true);
-      const response = await ApiService.loginBanco(cuit, password);
+      const response = await ApiService.loginBanco(cuit.trim(), password);
       if (response.success) {
         loginBanco(response.token, response.data);
+        console.log(response.data);
         fetchBankData(response.data);
         toast.success(response.message || 'Autenticación exitosa');
       } else {
@@ -64,6 +69,23 @@ const ConfiguracionManager = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleChangeMP = async () => {
+    try {
+      setLoading(true);
+      const rsp = await ApiService.updateBancoMP(bankData.id, formData.mpEstado);
+      if (rsp.success) {
+        toast.success(rsp.message || 'Estado de Mercado Pago actualizado');
+        fetchBankData(rsp.data);
+      } else {
+        toast.error(rsp.message || 'Error al actualizar estado de Mercado Pago');
+      }
+    } catch (error) {
+      toast.error(error.message || 'Error al guardar cambios');
+    } finally {
+      setLoading(false);
+    }
+  }
+
   const handleSave = async () => {
     try {
       setLoading(true);
@@ -72,12 +94,13 @@ const ConfiguracionManager = () => {
         formData.alias !== bankData?.alias ||
         formData.cbu !== bankData?.cbu ||
         formData.apellido !== bankData?.apellido ||
-        formData.nombre !== bankData?.nombre;
+        formData.nombre !== bankData?.nombre ||
+        formData.mpEstado !== !!bankData?.mpEstado;
       if (!isDiferent) {
         toast.info('No hay cambios para guardar');
         return;
       }
-      
+
       const response = await ApiService.updateBanco(bankData.id, formData);
 
       if (response.success) {
@@ -171,86 +194,135 @@ const ConfiguracionManager = () => {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Configuración</h1>
-        <p className="text-muted-foreground">Gestionar datos bancarios</p>
+        <p className="text-muted-foreground">Gestionar datos bancarios y métodos de pago</p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Datos Bancarios</CardTitle>
-          <CardDescription>
-            Información de la cuenta para recibir pagos
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="nombre">Nombre</Label>
-              <Input
-                id="nombre"
-                name="nombre"
-                value={formData.nombre}
-                onChange={handleInputChange}
-                placeholder="Nombre del titular"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="apellido">Apellido</Label>
-              <Input
-                id="apellido"
-                name="apellido"
-                value={formData.apellido}
-                onChange={handleInputChange}
-                placeholder="Apellido del titular"
-              />
-            </div>
-          </div>
+      <Tabs defaultValue="bancarios" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="bancarios" className="flex items-center gap-2">
+            <Landmark className="h-4 w-4" />
+            Datos Bancarios
+          </TabsTrigger>
+          <TabsTrigger value="mercadopago" className="flex items-center gap-2">
+            <CreditCard className="h-4 w-4" />
+            Mercado Pago
+          </TabsTrigger>
+        </TabsList>
 
-          <div className="space-y-2">
-            <Label htmlFor="cuit">CUIT</Label>
-            <Input
-              id="cuit"
-              name="cuit"
-              value={formData.cuit}
-              onChange={handleInputChange}
-              placeholder="XX-XXXXXXXX-X"
-            />
-          </div>
+        <TabsContent value="bancarios">
+          <Card>
+            <CardHeader>
+              <CardTitle>Datos Bancarios</CardTitle>
+              <CardDescription>
+                Información de la cuenta para recibir pagos por transferencia
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="nombre">Nombre</Label>
+                  <Input
+                    id="nombre"
+                    name="nombre"
+                    value={formData.nombre}
+                    onChange={handleInputChange}
+                    placeholder="Nombre del titular"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="apellido">Apellido</Label>
+                  <Input
+                    id="apellido"
+                    name="apellido"
+                    value={formData.apellido}
+                    onChange={handleInputChange}
+                    placeholder="Apellido del titular"
+                  />
+                </div>
+              </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="cbu">CBU</Label>
-            <Input
-              id="cbu"
-              name="cbu"
-              value={formData.cbu}
-              onChange={handleInputChange}
-              placeholder="XXXXXXXXXXXXXXXXXXXXXX"
-            />
-          </div>
+              <div className="space-y-2">
+                <Label htmlFor="cuit">CUIT</Label>
+                <Input
+                  id="cuit"
+                  name="cuit"
+                  value={formData.cuit}
+                  onChange={handleInputChange}
+                  placeholder="XX-XXXXXXXX-X"
+                />
+              </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="alias">Alias</Label>
-            <Input
-              id="alias"
-              name="alias"
-              value={formData.alias}
-              onChange={handleInputChange}
-              placeholder="alias.banco"
-            />
-          </div>
+              <div className="space-y-2">
+                <Label htmlFor="cbu">CBU</Label>
+                <Input
+                  id="cbu"
+                  name="cbu"
+                  value={formData.cbu}
+                  onChange={handleInputChange}
+                  placeholder="XXXXXXXXXXXXXXXXXXXXXX"
+                />
+              </div>
 
-          <div className="flex justify-end gap-2 pt-4">
-            <Button
-              variant="outline"
-              onClick={() => { logoutBanco(); toast.success('Cierre de sesión exitoso'); }}
-            >
-              Cerrar
-            </Button>
-            <Button onClick={handleSave} disabled={loading}>
-              {loading ? 'Guardando...' : 'Guardar Cambios'}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+              <div className="space-y-2">
+                <Label htmlFor="alias">Alias</Label>
+                <Input
+                  id="alias"
+                  name="alias"
+                  value={formData.alias}
+                  onChange={handleInputChange}
+                  placeholder="alias.banco"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => { logoutBanco(); toast.success('Cierre de sesión exitoso'); }}
+                >
+                  Cerrar
+                </Button>
+                <Button onClick={handleSave} disabled={loading}>
+                  {loading ? 'Guardando...' : 'Guardar Cambios'}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="mercadopago">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <CreditCard className="h-5 w-5" />
+                Mercado Pago
+              </CardTitle>
+              <CardDescription>
+                Activar o desactivar la integración con Mercado Pago
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="mp-estado">Estado de Mercado Pago</Label>
+                  <p className="text-sm text-muted-foreground">
+                    {formData.mpEstado ? 'Mercado Pago está activado' : 'Mercado Pago está desactivado'}
+                  </p>
+                </div>
+                <Switch
+                  id="mp-estado"
+                  checked={formData.mpEstado}
+                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, mpEstado: checked }))}
+                />
+              </div>
+              <div className="flex justify-end pt-4">
+                <Button onClick={handleChangeMP} disabled={loading}>
+                  {loading ? 'Guardando...' : 'Guardar Cambios'}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
