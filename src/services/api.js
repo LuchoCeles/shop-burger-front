@@ -224,6 +224,11 @@ class ApiService {
     return rsp.json();
   }
 
+  async updateBancoMP(id, mpEstado) {
+    const rsp = await this.PATCH(`admin/banco/${id}/stateMP`, { mpEstado: mpEstado }, false, localStorage.getItem('bancoToken'));
+    return rsp.json();
+  }
+
 }
 
 export default new ApiService();

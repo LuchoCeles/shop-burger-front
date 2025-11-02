@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
@@ -23,7 +23,7 @@ const ConfiguracionManager = () => {
     cbu: '',
     apellido: '',
     nombre: '',
-    mpEstado: false,
+    mpEstado: Boolean,
   });
 
   useEffect(() => {
@@ -40,7 +40,7 @@ const ConfiguracionManager = () => {
       cbu: data.cbu || '',
       apellido: data.apellido || '',
       nombre: data.nombre || '',
-      mpEstado: !!data.mpEstado,
+      mpEstado: data.mpEstado,
     });
   };
 
@@ -51,6 +51,7 @@ const ConfiguracionManager = () => {
       const response = await ApiService.loginBanco(cuit.trim(), password);
       if (response.success) {
         loginBanco(response.token, response.data);
+        console.log(response.data);
         fetchBankData(response.data);
         toast.success(response.message || 'Autenticación exitosa');
       } else {
@@ -68,6 +69,23 @@ const ConfiguracionManager = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleChangeMP = async () => {
+    try {
+      setLoading(true);
+      const rsp = await ApiService.updateBancoMP(bankData.id, formData.mpEstado);
+      if (rsp.success) {
+        toast.success(rsp.message || 'Estado de Mercado Pago actualizado');
+        fetchBankData(rsp.data);
+      } else {
+        toast.error(rsp.message || 'Error al actualizar estado de Mercado Pago');
+      }
+    } catch (error) {
+      toast.error(error.message || 'Error al guardar cambios');
+    } finally {
+      setLoading(false);
+    }
+  }
+
   const handleSave = async () => {
     try {
       setLoading(true);
@@ -82,7 +100,7 @@ const ConfiguracionManager = () => {
         toast.info('No hay cambios para guardar');
         return;
       }
-      
+
       const response = await ApiService.updateBanco(bankData.id, formData);
 
       if (response.success) {
@@ -297,7 +315,7 @@ const ConfiguracionManager = () => {
                 />
               </div>
               <div className="flex justify-end pt-4">
-                <Button onClick={handleSave} disabled={loading}>
+                <Button onClick={handleChangeMP} disabled={loading}>
                   {loading ? 'Guardando...' : 'Guardar Cambios'}
                 </Button>
               </div>
