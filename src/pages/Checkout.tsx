@@ -6,6 +6,7 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Textarea } from '../components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/tabs';
 import { toast } from 'sonner';
 import Navbar from '../components/Navbar';
 import { Cliente, BankData } from '@/intefaces/interfaz';
@@ -175,43 +176,26 @@ const Checkout = () => {
                   <label className="mb-2 block text-sm font-medium text-foreground">
                     Método de pago
                   </label>
-                  <div className="space-y-2">
-                    <label className="flex items-center space-x-3 rounded-lg border border-border bg-background p-3 cursor-pointer hover:bg-accent transition-colors">
-                      <input
-                        type="radio"
-                        name="metodoDePago"
-                        value="efectivo"
-                        checked={metodoDePago === 'efectivo'}
-                        onChange={(e) => setMetodoDePago(e.target.value as 'efectivo')}
-                        className="h-4 w-4 text-primary"
-                      />
-                      <span className="text-foreground">Efectivo</span>
-                    </label>
-                    <label className="flex items-center space-x-3 rounded-lg border border-border bg-background p-3 cursor-pointer hover:bg-accent transition-colors">
-                      <input
-                        type="radio"
-                        name="metodoDePago"
-                        value="transferencia"
-                        checked={metodoDePago === 'transferencia'}
-                        onChange={(e) => setMetodoDePago(e.target.value as 'transferencia')}
-                        className="h-4 w-4 text-primary"
-                      />
-                      <span className="text-foreground">Transferencia</span>
-                    </label>
+                  <Tabs value={metodoDePago} onValueChange={(value) => setMetodoDePago(value as 'efectivo' | 'transferencia' | 'mercadopago')}>
+                    <TabsList className="grid w-full" style={{ gridTemplateColumns: bankData?.mpEstado ? 'repeat(3, 1fr)' : 'repeat(2, 1fr)' }}>
+                      <TabsTrigger value="efectivo">Efectivo</TabsTrigger>
+                      <TabsTrigger value="transferencia">Transferencia</TabsTrigger>
+                      {bankData?.mpEstado && (
+                        <TabsTrigger value="mercadopago">Mercado Pago</TabsTrigger>
+                      )}
+                    </TabsList>
+                    <TabsContent value="efectivo" className="text-sm text-muted-foreground">
+                      Pagarás en efectivo al recibir tu pedido.
+                    </TabsContent>
+                    <TabsContent value="transferencia" className="text-sm text-muted-foreground">
+                      Realiza la transferencia bancaria con los datos proporcionados.
+                    </TabsContent>
                     {bankData?.mpEstado && (
-                      <label className="flex items-center space-x-3 rounded-lg border border-border bg-background p-3 cursor-pointer hover:bg-accent transition-colors">
-                        <input
-                          type="radio"
-                          name="metodoDePago"
-                          value="mercadopago"
-                          checked={metodoDePago === 'mercadopago'}
-                          onChange={(e) => setMetodoDePago(e.target.value as 'mercadopago')}
-                          className="h-4 w-4 text-primary"
-                        />
-                        <span className="text-foreground">Mercado Pago</span>
-                      </label>
+                      <TabsContent value="mercadopago" className="text-sm text-muted-foreground">
+                        Recibirás un enlace de pago de Mercado Pago.
+                      </TabsContent>
                     )}
-                  </div>
+                  </Tabs>
                 </div>
                 <div>
                   <label className="mb-2 block text-sm font-medium text-foreground">
