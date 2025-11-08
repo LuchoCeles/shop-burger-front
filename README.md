@@ -17,6 +17,11 @@ Tienda online con React, TypeScript y TailwindCSS.
 - Node.js 16+ y npm
 - Backend API ejecutándose (ver endpoints más abajo)
 
+## 🔧 Configuración
+
+# ⚙️ Servidor
+VITE_API_URL=
+
 ## 🛠️ Instalación
 
 1. **Clonar el repositorio**

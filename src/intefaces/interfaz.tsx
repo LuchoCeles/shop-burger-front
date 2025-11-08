@@ -55,7 +55,7 @@ export interface Adicional {
   stock: number;
   maxCantidad: number;
   estado?: boolean;
-  idAxP?: number;
+  idAxp?: number;
 }
 
 export interface Orders {
