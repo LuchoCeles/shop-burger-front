@@ -21,6 +21,7 @@ Tienda online con React, TypeScript y TailwindCSS.
 
 # ⚙️ Servidor
 VITE_API_URL=
+VITE_ALLOWED_HOST=
 
 ## 🛠️ Instalación
 

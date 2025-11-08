@@ -5,18 +5,13 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
-  // Cargamos las variables de entorno del archivo .env
   const env = loadEnv(mode, process.cwd(), "");
 
   return {
     server: {
       host: "::",
       port: 8080,
-      allowedHosts: [
-        "localhost",
-        "127.0.0.1",
-        env.VITE_API_URL?.replace(/^https?:\/\//, ""), // 🔥 limpia el dominio
-      ],
+      allowedHosts: ["localhost", env.VITE_ALLOWED_HOST],
     },
     plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
     resolve: {
