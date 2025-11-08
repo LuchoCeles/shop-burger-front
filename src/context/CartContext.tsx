@@ -11,7 +11,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (savedCart && savedTimestamp) {
       const now = Date.now();
       const timestamp = parseInt(savedTimestamp, 10);
-      const oneHour = 60 * 30 * 1000; // 1 hora en milisegundos
+      const oneHour = 5 * 30 * 1000; // 1 hora en milisegundos
 
       // Si pasó más de una hora, limpiar el carrito
       if (now - timestamp > oneHour) {

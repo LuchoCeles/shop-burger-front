@@ -22,7 +22,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import ApiService from '@/services/api';
 import { Adicional } from '@/intefaces/interfaz';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 export default function AdicionalesManager() {
   const [adicionales, setAdicionales] = useState<Adicional[]>([]);
@@ -45,11 +45,7 @@ export default function AdicionalesManager() {
       const data = await ApiService.getAdicionales();
       setAdicionales(data.data);
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'No se pudieron cargar los adicionales',
-        variant: 'destructive',
-      });
+      toast.error('Error al cargar los adicionales');
     }
   };
 
@@ -66,26 +62,16 @@ export default function AdicionalesManager() {
     try {
       if (selectedAdicional) {
         await ApiService.updateAdicional(selectedAdicional.id, adicionalData);
-        toast({
-          title: 'Adicional actualizado',
-          description: 'El adicional se actualizó correctamente',
-        });
+        toast.success("El adicional se actualizó correctamente");
       } else {
         await ApiService.createAdicional(adicionalData);
-        toast({
-          title: 'Adicional creado',
-          description: 'El adicional se creó correctamente',
-        });
+        toast.success("El adicional se creó correctamente");
       }
       loadAdicionales();
       resetForm();
       setIsDialogOpen(false);
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'No se pudo guardar el adicional',
-        variant: 'destructive',
-      });
+      toast.error("Error al crear o actualizar el adicional");
     }
   };
 
@@ -105,35 +91,23 @@ export default function AdicionalesManager() {
 
     try {
       await ApiService.deleteAdicional(selectedAdicional.id);
-      toast({
-        title: 'Adicional eliminado',
-        description: 'El adicional se eliminó correctamente',
-      });
+      toast.success('El adicional se eliminó correctamente');
       loadAdicionales();
       setIsDeleteDialogOpen(false);
       setSelectedAdicional(null);
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'No se pudo eliminar el adicional',
-        variant: 'destructive',
-      });
+      toast.error('Error al eliminar el adicional');
     }
   };
 
   const handleToggleEstado = async (adicional: Adicional) => {
     try {
       const a = await ApiService.changeState(adicional.id);
-      toast({
-        title: a.estado ? 'Adicional desactivado' : 'Adicional activado',
-      });
+      const estado = a.data.estado ? 'Adicional activado' : 'Adicional desactivado';
+      toast.info(estado);
       loadAdicionales();
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'No se pudo cambiar el estado',
-        variant: 'destructive',
-      });
+      toast.error('Error al cambiar el estado del adicional');
     }
   };
 

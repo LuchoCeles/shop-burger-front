@@ -19,6 +19,9 @@ Tienda online con React, TypeScript y TailwindCSS.
 
 ## 🔧 Configuración
 
+# 📱 Variables de entorno
+VITE_NUM_WHATSAPP=
+
 # ⚙️ Servidor
 VITE_API_URL=
 VITE_ALLOWED_HOST=
