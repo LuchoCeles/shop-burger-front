@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { toast } from 'sonner';
 import Navbar from '../components/Navbar';
 import { Cliente, BankData } from '@/intefaces/interfaz';
+const Numero_Whatsapp = import.meta.env.VITE_NUM_WHATSAPP;
 
 const Checkout = () => {
   const { cart, total, clearCart } = useCart();
@@ -77,7 +78,6 @@ const Checkout = () => {
       toast.success('Pedido creado exitosamente');
 
       if (metodoDePago === 'Mercado Pago') {
-        // Para Mercado Pago, abrir el init_point
         if (response.data.init_point) {
           setTimeout(() => {
             window.open(response.data.init_point, '_blank');
@@ -89,12 +89,12 @@ const Checkout = () => {
         }
       } else {
         const whatsappMessage = encodeURIComponent(
-          `¡Hola! Te paso el comprobante de mi pedido #${response.data.id}.\n\n`
+          `¡Hola! Te paso el comprobante de mi pedido #${response.data.id}.`
         );
 
         setTimeout(() => {
           window.open(
-            `https://wa.me/5491122334455?text=${whatsappMessage}`,
+            `https://wa.me/${Numero_Whatsapp}?text=${whatsappMessage}`,
             '_blank'
           );
           navigate('/');
@@ -137,150 +137,173 @@ const Checkout = () => {
           Finalizar Compra
         </h1>
 
-        <div className="grid gap-6 lg:grid-cols-2">
-          <Card className="bg-card">
-            <CardHeader>
-              <CardTitle className="text-foreground">Datos de entrega</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-foreground">
-                    Teléfono
-                  </label>
-                  <Input
-                    type="tel"
-                    placeholder="+54 9 11 1234-5678"
-                    value={cliente.telefono}
-                    onChange={(e) =>
-                      setCliente({ ...cliente, telefono: e.target.value })
-                    }
-                    required
-                    className="bg-background"
-                  />
-                </div>
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-foreground">
-                    Dirección
-                  </label>
-                  <Input
-                    type="text"
-                    placeholder="Calle 123, Ciudad"
-                    value={cliente.direccion}
-                    onChange={(e) =>
-                      setCliente({ ...cliente, direccion: e.target.value })
-                    }
-                    required
-                    className="bg-background"
-                  />
-                </div>
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-foreground">
-                    Método de pago
-                  </label>
-                  <div className="space-y-2">
-                    <label className="flex items-center space-x-3 rounded-lg border border-border bg-background p-3 cursor-pointer hover:bg-accent transition-colors">
-                      <input
-                        type="radio"
-                        name="metodoDePago"
-                        value="Transferencia"
-                        checked={metodoDePago === 'Efectivo'}
-                        onChange={(e) => setMetodoDePago(e.target.value as 'Efectivo')}
-                        className="h-4 w-4 text-primary"
-                      />
-                      <span className="text-foreground">Efectivo</span>
+          <div className="grid gap-6 lg:grid-cols-2 items-start">
+            <Card className="bg-card">
+              <CardHeader>
+                <CardTitle className="text-foreground">Datos de entrega</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-foreground">
+                      Teléfono
                     </label>
-                    <label className="flex items-center space-x-3 rounded-lg border border-border bg-background p-3 cursor-pointer hover:bg-accent transition-colors">
-                      <input
-                        type="radio"
-                        name="metodoDePago"
-                        value="Transferencia"
-                        checked={metodoDePago === 'Transferencia'}
-                        onChange={(e) => setMetodoDePago(e.target.value as 'Transferencia')}
-                        className="h-4 w-4 text-primary"
-                      />
-                      <span className="text-foreground">Transferencia</span>
+                    <Input
+                      type="tel"
+                      placeholder="+54 9 11 1234-5678"
+                      value={cliente.telefono}
+                      onChange={(e) =>
+                        setCliente({ ...cliente, telefono: e.target.value })
+                      }
+                      required
+                      className="bg-background"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-foreground">
+                      Dirección
                     </label>
-                    {bankData?.mpEstado && (
+                    <Input
+                      type="text"
+                      placeholder="Calle 123, Ciudad"
+                      value={cliente.direccion}
+                      onChange={(e) =>
+                        setCliente({ ...cliente, direccion: e.target.value })
+                      }
+                      required
+                      className="bg-background"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-foreground">
+                      Método de pago
+                    </label>
+                    <div className="space-y-2">
                       <label className="flex items-center space-x-3 rounded-lg border border-border bg-background p-3 cursor-pointer hover:bg-accent transition-colors">
                         <input
                           type="radio"
                           name="metodoDePago"
-                          value="Mercado Pago"
-                          checked={metodoDePago === 'Mercado Pago'}
-                          onChange={(e) => setMetodoDePago(e.target.value as 'Mercado Pago')}
+                          value="Efectivo"
+                          checked={metodoDePago === 'Efectivo'}
+                          onChange={(e) => setMetodoDePago(e.target.value as 'Efectivo')}
                           className="h-4 w-4 text-primary"
                         />
-                        <span className="text-foreground">Mercado Pago</span>
+                        <span className="text-foreground">Efectivo</span>
                       </label>
-                    )}
+                      <label className="flex items-center space-x-3 rounded-lg border border-border bg-background p-3 cursor-pointer hover:bg-accent transition-colors">
+                        <input
+                          type="radio"
+                          name="metodoDePago"
+                          value="Transferencia"
+                          checked={metodoDePago === 'Transferencia'}
+                          onChange={(e) => setMetodoDePago(e.target.value as 'Transferencia')}
+                          className="h-4 w-4 text-primary"
+                        />
+                        <span className="text-foreground">Transferencia</span>
+                      </label>
+                      {Boolean(bankData?.mpEstado) && (
+                        <label className="flex items-center space-x-3 rounded-lg border border-border bg-background p-3 cursor-pointer hover:bg-accent transition-colors">
+                          <input
+                            type="radio"
+                            name="metodoDePago"
+                            value="Mercado Pago"
+                            checked={metodoDePago === 'Mercado Pago'}
+                            onChange={(e) => setMetodoDePago(e.target.value as 'Mercado Pago')}
+                            className="h-4 w-4 text-primary"
+                          />
+                          <span className="text-foreground">Mercado Pago</span>
+                        </label>
+                      )}
+                    </div>
                   </div>
-                </div>
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-foreground">
-                    Notas adicionales (Opcional)
-                  </label>
-                  <Textarea
-                    placeholder="Agregar instrucciones de entrega o notas adicionales..."
-                    value={descripcion}
-                    onChange={(e) => setDescripcion(e.target.value)}
-                    className="bg-background"
-                  />
-                </div>
-                <Button
-                  type="submit"
-                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
-                  disabled={submitting}
-                >
-                  {submitting ? 'Cargando...' : 'Confirmar Pedido'}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-foreground">
+                      Notas adicionales (Opcional)
+                    </label>
+                    <Textarea
+                      placeholder="Agregar instrucciones de entrega o notas adicionales..."
+                      value={descripcion}
+                      onChange={(e) => setDescripcion(e.target.value)}
+                      className="bg-background"
+                    />
+                  </div>
+                  <Button
+                    type="submit"
+                    className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+                    disabled={submitting}
+                  >
+                    {submitting ? 'Cargando...' : 'Confirmar Pedido'}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
 
-          <Card className="bg-card">
-            <CardHeader>
-              <CardTitle className="text-foreground">Resumen del pedido</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {cart.map((item) => (
-                  <div key={item.id} className="flex justify-between">
-                    <span className="text-foreground">
-                      {item.nombre} x{item.cantidad}
-                    </span>
-                    <span className="font-semibold text-foreground">
-                      ${(item.precio * item.cantidad).toFixed(2)}
-                    </span>
+            <Card className="bg-card">
+              <CardHeader>
+                <CardTitle className="text-foreground">Resumen del pedido</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {cart.map((item) => (
+                    <div key={item.id} className="flex justify-between">
+                      <div className="text-foreground text-xl">
+                        <p>
+                          {item.nombre} x{item.cantidad}
+                        </p>
+                        {/* Mostrar adicionales si existen */}
+                        {item.adicionales && item.adicionales.length > 0 && (
+                          <ul className="ml-4 list-disc text-sm text-muted-foreground">
+                            {item.adicionales.map((adicional) => (
+                              <li key={adicional.id}>
+                                {adicional.nombre} x{adicional.cantidad}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                      <div className="text-foreground text-xl text-right">
+                        <span className="font-semibold text-foreground text-xl">
+                          ${(item.precio * item.cantidad).toFixed(2)}
+                        </span>
+
+                        {item.adicionales && item.adicionales.length > 0 && (
+                          <ul className="text-sm text-muted-foreground text-right">
+                            {item.adicionales.map((adicional) => (
+                              <li key={adicional.id}>${(adicional.precio * adicional.cantidad).toFixed(2)}</li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+
+                  <div className="border-t border-border pt-4">
+                    <div className="flex justify-between text-xl font-bold">
+                      <span className="text-foreground">Total:</span>
+                      <span className="text-primary">${total.toFixed(2)}</span>
+                    </div>
                   </div>
-                ))}
-                <div className="border-t border-border pt-4">
-                  <div className="flex justify-between text-xl font-bold">
-                    <span className="text-foreground">Total:</span>
-                    <span className="text-primary">${total.toFixed(2)}</span>
-                  </div>
+                  {metodoDePago === 'Transferencia' && bankData && (
+                    <div className="rounded-lg bg-muted p-4 text-sm text-muted-foreground">
+                      <p className="mb-2 font-semibold text-foreground">
+                        Datos de pago:
+                      </p>
+                      <p>Nombre: {bankData.nombre}</p>
+                      <p>Apellido: {bankData.apellido}</p>
+                      <p>CUIT / DNI: {bankData.cuit}</p>
+                      <p>Alias: {bankData.alias}</p>
+                      <p>CBU: {bankData.cbu}</p>
+                      <p className="mt-2 text-xs">
+                        Después de confirmar, recibirás un mensaje para enviarnos el
+                        comprobante por WhatsApp.
+                      </p>
+                    </div>
+                  )}
                 </div>
-                {bankData && (
-                  <div className="rounded-lg bg-muted p-4 text-sm text-muted-foreground">
-                    <p className="mb-2 font-semibold text-foreground">
-                      Datos de pago:
-                    </p>
-                    <p>Nombre: {bankData.nombre}</p>
-                    <p>Apellido: {bankData.apellido}</p>
-                    <p>CUIT / DNI: {bankData.cuit}</p>
-                    <p>Alias: {bankData.alias}</p>
-                    <p>CBU: {bankData.cbu}</p>
-                    <p className="mt-2 text-xs">
-                      Después de confirmar, recibirás un mensaje para enviarnos el
-                      comprobante por WhatsApp.
-                    </p>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
         </div>
-      </div>
     </div>
   );
 };
