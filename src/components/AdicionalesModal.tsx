@@ -38,12 +38,12 @@ export default function AdicionalesModal({
   const loadAdicionales = async () => {
     setLoading(true);
     try {
-      // Obtener el producto completo con todos sus adicionales disponibles
-      const productDetails = await ApiService.getProduct(Product.id);
+      // Obtener los adicionales asignados al producto
+      const productoAdicionales = await ApiService.getProductoAdicionales(Product.id);
       const allAdicionales = await ApiService.getAdicionales();
       
-      // Obtener los IDs de adicionales del producto completo
-      const adicionalesIds = productDetails.data.adicionales?.map((pa: any) => pa.id) || [];
+      // Obtener los IDs de adicionales asignados al producto
+      const adicionalesIds = productoAdicionales.data?.map((pa: any) => pa.idAdicional) || [];
       const filtered = allAdicionales.data?.filter((a: Adicional) =>
         adicionalesIds.includes(a.id) && a.stock > 0
       );
