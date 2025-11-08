@@ -72,6 +72,11 @@ export interface Orders {
     nombre: string;
     precio: number;
     cantidad: number;
+    adicionales?: {
+      nombre: string;
+      precio: number;
+      cantidad: number;
+    }[];
   }[];
 }
 /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

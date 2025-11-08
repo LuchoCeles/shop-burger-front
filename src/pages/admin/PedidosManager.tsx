@@ -153,11 +153,22 @@ const PedidosManager = () => {
 
             <div className="border-t border-border pt-4">
               <p className="mb-2 font-medium text-foreground">Productos:</p>
-              <div className="space-y-1 text-sm">
+              <div className="space-y-2 text-sm">
                 {pedido.productos?.map((prod, idx: number) => (
-                  <p key={idx} className="text-muted-foreground">
-                    {prod.nombre} x{prod.cantidad} - ${prod.precio * prod.cantidad}
-                  </p>
+                  <div key={idx}>
+                    <p className="text-muted-foreground font-medium">
+                      {prod.nombre} x{prod.cantidad} - ${prod.precio * prod.cantidad}
+                    </p>
+                    {prod.adicionales && prod.adicionales.length > 0 && (
+                      <div className="ml-4 mt-1 space-y-1">
+                        {prod.adicionales.map((adicional: any, adIdx: number) => (
+                          <p key={adIdx} className="text-muted-foreground text-xs">
+                            + {adicional.nombre} x{adicional.cantidad} - ${adicional.precio * adicional.cantidad}
+                          </p>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 ))}
               </div>
               <p className="mt-4 text-right text-xl font-bold text-primary">
