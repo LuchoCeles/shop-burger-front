@@ -20,7 +20,7 @@ const Checkout = () => {
     direccion: '',
   });
   const [descripcion, setDescripcion] = useState('');
-  const [metodoDePago, setMetodoDePago] = useState<'efectivo' | 'transferencia' | 'mercadopago'>('efectivo');
+  const [metodoDePago, setMetodoDePago] = useState<'Efectivo' | 'Transferencia' | 'Mercado Pago'>('Efectivo');
 
   useEffect(() => {
     fetchBankData();
@@ -59,17 +59,15 @@ const Checkout = () => {
           direccion: cliente.direccion,
         },
         descripcion,
+        metodoDePago,
         productos: cart.map((item) => ({
           id: item.id,
           cantidad: item.cantidad,
-        })),
-        adicionales: cart.flatMap((item) =>
-          item.adicionales?.map((adicional) => ({
+          adicionales: item.adicionales?.map((adicional) => ({
             id: adicional.id,
             cantidad: adicional.cantidad,
           })) || []
-        ),
-        metodoDePago
+        })),
       };
 
       const response = await ApiService.createOrder(pedido);
@@ -180,9 +178,9 @@ const Checkout = () => {
                       <input
                         type="radio"
                         name="metodoDePago"
-                        value="efectivo"
-                        checked={metodoDePago === 'efectivo'}
-                        onChange={(e) => setMetodoDePago(e.target.value as 'efectivo')}
+                        value="Transferencia"
+                        checked={metodoDePago === 'Efectivo'}
+                        onChange={(e) => setMetodoDePago(e.target.value as 'Efectivo')}
                         className="h-4 w-4 text-primary"
                       />
                       <span className="text-foreground">Efectivo</span>
@@ -191,9 +189,9 @@ const Checkout = () => {
                       <input
                         type="radio"
                         name="metodoDePago"
-                        value="transferencia"
-                        checked={metodoDePago === 'transferencia'}
-                        onChange={(e) => setMetodoDePago(e.target.value as 'transferencia')}
+                        value="Transferencia"
+                        checked={metodoDePago === 'Transferencia'}
+                        onChange={(e) => setMetodoDePago(e.target.value as 'Transferencia')}
                         className="h-4 w-4 text-primary"
                       />
                       <span className="text-foreground">Transferencia</span>
@@ -203,9 +201,9 @@ const Checkout = () => {
                         <input
                           type="radio"
                           name="metodoDePago"
-                          value="mercadopago"
-                          checked={metodoDePago === 'mercadopago'}
-                          onChange={(e) => setMetodoDePago(e.target.value as 'mercadopago')}
+                          value="Mercado Pago"
+                          checked={metodoDePago === 'Mercado Pago'}
+                          onChange={(e) => setMetodoDePago(e.target.value as 'Mercado Pago')}
                           className="h-4 w-4 text-primary"
                         />
                         <span className="text-foreground">Mercado Pago</span>
