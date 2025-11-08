@@ -47,15 +47,15 @@ export default function AsignarAdicionalesDialog({ open, onOpenChange, Product }
     }
   };
 
-    const handleToggleAdicional = async (adicionalId: number) => {
+  const handleToggleAdicional = async (adicionalId: number) => {
     try {
       if (asignados.includes(adicionalId)) {
         const adicionalAsignado = Product?.adicionales?.find((a) => a.id === adicionalId);
-        if (!adicionalAsignado?.idAxP) {
+        if (!adicionalAsignado?.idAxp) {
           throw new Error('No se encontró el idAxP para este adicional');
         }
 
-        await ApiService.removeAdicionalFromProducto(adicionalAsignado.idAxP);
+        await ApiService.removeAdicionalFromProducto(adicionalAsignado.idAxp);
 
         setAsignados(asignados.filter((id) => id !== adicionalId));
         toast({
@@ -75,63 +75,63 @@ export default function AsignarAdicionalesDialog({ open, onOpenChange, Product }
         variant: 'destructive',
       });
     }
-  };
+};
 
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Asignar Adicionales{Product?.nombre ? ` a "${Product.nombre}"` : ''}</DialogTitle>
-        </DialogHeader>
+return (
+  <Dialog open={open} onOpenChange={onOpenChange}>
+    <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+      <DialogHeader>
+        <DialogTitle>Asignar Adicionales{Product?.nombre ? ` a "${Product.nombre}"` : ''}</DialogTitle>
+      </DialogHeader>
 
-        {loading ? (
-          <div className="py-8 text-center text-muted-foreground">Cargando...</div>
-        ) : adicionales.length === 0 ? (
-          <div className="py-8 text-center text-muted-foreground">
-            <p>No hay adicionales disponibles</p>
-            <p className="text-sm mt-1">Crea adicionales primero en la sección correspondiente</p>
-          </div>
-        ) : (
-          <div className="grid gap-3 py-4">
-            {adicionales.map((adicional) => {
-              const isAsignado = asignados.includes(adicional.id);
-              return (
-                <div
-                  key={adicional.id}
-                  className="flex items-center justify-between p-4 border border-border rounded-lg bg-card hover:bg-muted/50 transition-colors"
-                >
-                  <div className="flex-1">
-                    <h4 className="font-medium text-foreground">{adicional.nombre}</h4>
-                    <div className="flex gap-4 mt-1 text-sm text-muted-foreground">
-                      <span>Precio: ${adicional.precio}</span>
-                      <span>Stock: {adicional.stock}</span>
-                      <span>Máx: {adicional.maxCantidad}</span>
-                    </div>
+      {loading ? (
+        <div className="py-8 text-center text-muted-foreground">Cargando...</div>
+      ) : adicionales.length === 0 ? (
+        <div className="py-8 text-center text-muted-foreground">
+          <p>No hay adicionales disponibles</p>
+          <p className="text-sm mt-1">Crea adicionales primero en la sección correspondiente</p>
+        </div>
+      ) : (
+        <div className="grid gap-3 py-4">
+          {adicionales.map((adicional) => {
+            const isAsignado = asignados.includes(adicional.id);
+            return (
+              <div
+                key={adicional.id}
+                className="flex items-center justify-between p-4 border border-border rounded-lg bg-card hover:bg-muted/50 transition-colors"
+              >
+                <div className="flex-1">
+                  <h4 className="font-medium text-foreground">{adicional.nombre}</h4>
+                  <div className="flex gap-4 mt-1 text-sm text-muted-foreground">
+                    <span>Precio: ${adicional.precio}</span>
+                    <span>Stock: {adicional.stock}</span>
+                    <span>Máx: {adicional.maxCantidad}</span>
                   </div>
-                  <Button
-                    variant={isAsignado ? 'destructive' : 'default'}
-                    size="sm"
-                    onClick={() => handleToggleAdicional(adicional.id)}
-                  >
-                    {isAsignado ? (
-                      <>
-                        <X className="h-4 w-4 mr-1" />
-                        Quitar
-                      </>
-                    ) : (
-                      <>
-                        <Plus className="h-4 w-4 mr-1" />
-                        Agregar
-                      </>
-                    )}
-                  </Button>
                 </div>
-              );
-            })}
-          </div>
-        )}
-      </DialogContent>
-    </Dialog>
-  );
+                <Button
+                  variant={isAsignado ? 'destructive' : 'default'}
+                  size="sm"
+                  onClick={() => handleToggleAdicional(adicional.id)}
+                >
+                  {isAsignado ? (
+                    <>
+                      <X className="h-4 w-4 mr-1" />
+                      Quitar
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="h-4 w-4 mr-1" />
+                      Agregar
+                    </>
+                  )}
+                </Button>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </DialogContent>
+  </Dialog>
+);
 }

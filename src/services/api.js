@@ -84,9 +84,10 @@ class ApiService {
 
   // Products endpoints
   async getProducts(soloActivos = true) {
-    const rsp = await this.GET(`api/producto/${soloActivos}/`);
+    const rsp = await this.GET(`api/producto?soloActivos=${soloActivos}`);
     return rsp.json();
   }
+
 
   async getProduct(id) {
     const rsp = await this.GET(`api/producto/${id}`);
@@ -193,13 +194,13 @@ class ApiService {
     return rsp.json();
   }
 
-  async removeAdicionalFromProducto(idAxP) {
-    const rsp = await this.DELETE(`admin/adicionalxproducto/${idAxP}`);
+  async removeAdicionalFromProducto(idAxp) {
+    const rsp = await this.DELETE(`admin/adicionalxproducto/${idAxp}`);
     return rsp.json();
   }
 
-  async updateAdicionalXProducto(idAxP, idProducto, adicionales) {
-    const rsp = await this.PATCH(`admin/adicionalxproducto/${idAxP}`, { idProducto, adicionales });
+  async updateAdicionalXProducto(idAxp, idProducto, adicionales) {
+    const rsp = await this.PATCH(`admin/adicionalxproducto/${idAxp}`, { idProducto, adicionales });
     return rsp.json();
   }
 
