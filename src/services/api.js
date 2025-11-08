@@ -84,9 +84,10 @@ class ApiService {
 
   // Products endpoints
   async getProducts(soloActivos = true) {
-    const rsp = await this.GET(`api/producto/${soloActivos}/`);
+    const rsp = await this.GET(`api/producto?soloActivos=${soloActivos}`);
     return rsp.json();
   }
+
 
   async getProduct(id) {
     const rsp = await this.GET(`api/producto/${id}`);
