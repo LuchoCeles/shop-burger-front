@@ -8,10 +8,8 @@ import { Product, CartItemAdicional } from '../intefaces/interfaz';
 import AdicionalesModal from './AdicionalesModal';
 
 const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
-  const { addToCart, cart } = useCart();
+  const { addToCart } = useCart();
   const [showAdicionalesModal, setShowAdicionalesModal] = useState(false);
-
-  // Los adicionales ya vienen en el producto
   const hasAdicionales = product.adicionales && product.adicionales.length > 0;
 
   const handleAddToCart = () => {
@@ -19,18 +17,16 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
       toast.error('Producto sin stock');
       return;
     }
-    // Si tiene adicionales, mostrar modal
+
     if (hasAdicionales) {
       setShowAdicionalesModal(true);
     } else {
-      // Generar cartId único
       const cartId = `${product.id}-${Date.now()}`;
-      // Agregar directamente sin adicionales
       addToCart({
         id: product.id,
         cartId,
         nombre: product.nombre,
-        precio: (product.precio) * (1 - (product.descuento) / 100),
+        precio: product.precio * (1 - product.descuento / 100),
         descuento: product.descuento,
         url_imagen: product.url_imagen,
         stock: product.stock,
@@ -41,13 +37,12 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
   };
 
   const handleAdicionalesConfirm = (adicionales: CartItemAdicional[]) => {
-    // Generar cartId único basado en producto + timestamp
     const cartId = `${product.id}-${Date.now()}`;
     addToCart({
       id: product.id,
       cartId,
       nombre: product.nombre,
-      precio: (product.precio) * (1 - (product.descuento) / 100),
+      precio: product.precio * (1 - product.descuento / 100),
       descuento: product.descuento,
       url_imagen: product.url_imagen,
       stock: product.stock,
@@ -58,13 +53,14 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
   };
 
   return (
-    <Card className="group overflow-hidden border-border bg-card transition-all hover:shadow-xl hover:shadow-primary/10">
-      <div className="aspect-square overflow-hidden bg-muted">
+    <Card className="group flex flex-col justify-between border-border bg-card transition-all hover:shadow-xl hover:shadow-primary/10 min-h-[460px]">
+      {/* Imagen */}
+      <div className="aspect-square overflow-hidden bg-muted rounded-t-xl">
         {product.url_imagen ? (
           <img
             src={product.url_imagen}
             alt={product.nombre}
-            className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-110"
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-muted to-card">
@@ -72,14 +68,32 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
           </div>
         )}
       </div>
-      <CardContent className="p-4">
-        <h3 className="mb-2 text-lg font-semibold text-foreground">{product.nombre}</h3>
-        {product.descripcion && (
-          <p className="mb-3 line-clamp-2 text-sm text-muted-foreground">{product.descripcion}</p>
-        )}
-        <p className="text-2xl font-bold text-primary">${((product.precio) * (1 - (product.descuento) / 100)).toFixed(2)} </p>
+
+
+      {/* Contenido principal */}
+      <CardContent className="flex flex-col justify-between flex-1 p-4">
+        <div>
+          <h3 className="mb-2 text-lg font-semibold text-foreground">
+            {product.nombre}
+          </h3>
+
+          {product.descripcion && (
+            <p
+              title={product.descripcion} // Tooltip liviano
+              className="relative mb-3 text-sm text-muted-foreground line-clamp-2 group-hover:line-clamp-none group-hover:max-h-40 overflow-hidden transition-all duration-300"
+            >
+              {product.descripcion}
+            </p>
+          )}
+        </div>
+
+        <p className="mt-auto text-2xl font-bold text-primary">
+          ${(product.precio * (1 - product.descuento / 100)).toFixed(2)}
+        </p>
       </CardContent>
-      <CardFooter className="p-4 pt-0">
+
+      {/* Footer con botón */}
+      <CardFooter className="p-4 pt-0 mt-auto">
         <Button
           className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
           onClick={handleAddToCart}
@@ -89,6 +103,8 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
           Agregar al carrito
         </Button>
       </CardFooter>
+
+      {/* Stock */}
       <div className="ml-4 mb-4 flex">
         {product.stock !== undefined && product.stock <= 5 && (
           <p className="mt-1 text-xs text-destructive">
@@ -96,6 +112,7 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
           </p>
         )}
       </div>
+
       <AdicionalesModal
         open={showAdicionalesModal}
         onOpenChange={setShowAdicionalesModal}
