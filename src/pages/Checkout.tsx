@@ -13,7 +13,8 @@ import { Cliente, BankData } from '@/intefaces/interfaz';
 const Checkout = () => {
   const { cart, total, clearCart } = useCart();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
+  const [loadingData, setLoadingData] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [bankData, setBankData] = useState<BankData | null>(null);
   const [cliente, setCliente] = useState<Cliente>({
     telefono: '',
@@ -33,7 +34,7 @@ const Checkout = () => {
     } catch (error) {
       toast.error('Error al obtener datos bancarios');
     } finally {
-      setLoading(false);
+      setLoadingData(false);
     }
   };
 
@@ -50,7 +51,7 @@ const Checkout = () => {
       return;
     }
 
-    setLoading(true);
+    setSubmitting(true);
 
     try {
       const pedido = {
@@ -73,32 +74,36 @@ const Checkout = () => {
       const response = await ApiService.createOrder(pedido);
       clearCart();
 
-      const whatsappMessage = encodeURIComponent(
-        `¡Hola! Te paso el comprobante de mi pedido #${response.data.id}.\n\n` +
-        `Nombre: ${bankData?.nombre}\n` +
-        `Apellido: ${bankData?.apellido}\n` +
-        `CUIT / DNI: ${bankData?.cuit}\n` +
-        `Alias: ${bankData?.alias}\n` +
-        `CBU: ${bankData?.cbu}\n\n` +
-        `Total: $${total.toFixed(2)}\n` +
-        `Productos:\n${cart
-          .map((item) => `- ${item.nombre} x${item.cantidad}`)
-          .join('\n')}`
-      );
-
       toast.success('Pedido creado exitosamente');
 
-      setTimeout(() => {
-        window.open(
-          `https://wa.me/5491122334455?text=${whatsappMessage}`,
-          '_blank'
+      if (metodoDePago === 'Mercado Pago') {
+        // Para Mercado Pago, abrir el init_point
+        if (response.data.init_point) {
+          setTimeout(() => {
+            window.open(response.data.init_point, '_blank');
+            navigate('/');
+          }, 1500);
+        } else {
+          toast.error('No se recibió el link de pago de Mercado Pago');
+          navigate('/');
+        }
+      } else {
+        const whatsappMessage = encodeURIComponent(
+          `¡Hola! Te paso el comprobante de mi pedido #${response.data.id}.\n\n`
         );
-        navigate('/');
-      }, 1500);
+
+        setTimeout(() => {
+          window.open(
+            `https://wa.me/5491122334455?text=${whatsappMessage}`,
+            '_blank'
+          );
+          navigate('/');
+        }, 1500);
+      }
     } catch (error: any) {
       toast.error(error.message || 'Error al crear el pedido');
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   };
 
@@ -116,7 +121,7 @@ const Checkout = () => {
     );
   }
 
-  if (loading) {
+  if (loadingData) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background text-foreground">
         <p>Cargando datos...</p>
@@ -225,9 +230,9 @@ const Checkout = () => {
                 <Button
                   type="submit"
                   className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
-                  disabled={loading}
+                  disabled={submitting}
                 >
-                  {loading ? 'Procesando...' : 'Confirmar Pedido'}
+                  {submitting ? 'Cargando...' : 'Confirmar Pedido'}
                 </Button>
               </form>
             </CardContent>

@@ -47,7 +47,7 @@ export default function AsignarAdicionalesDialog({ open, onOpenChange, Product }
     }
   };
 
-  const handleToggleAdicional = async (adicionalId: number) => {
+    const handleToggleAdicional = async (adicionalId: number) => {
     try {
       if (asignados.includes(adicionalId)) {
         const adicionalAsignado = Product?.adicionales?.find((a) => a.id === adicionalId);
@@ -76,6 +76,7 @@ export default function AsignarAdicionalesDialog({ open, onOpenChange, Product }
       });
     }
   };
+
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
