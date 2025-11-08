@@ -80,35 +80,23 @@ const Checkout = () => {
         if (response.data.init_point) {
           setTimeout(() => {
             window.open(response.data.init_point, '_blank');
-            navigate('/');
           }, 1500);
         } else {
           toast.error('No se recibió el link de pago de Mercado Pago');
-          navigate('/');
         }
-      } else {
-        // Para otros métodos de pago, abrir WhatsApp
-        const whatsappMessage = encodeURIComponent(
-          `¡Hola! Te paso el comprobante de mi pedido #${response.data.id}.\n\n` +
-          `Nombre: ${bankData?.nombre}\n` +
-          `Apellido: ${bankData?.apellido}\n` +
-          `CUIT / DNI: ${bankData?.cuit}\n` +
-          `Alias: ${bankData?.alias}\n` +
-          `CBU: ${bankData?.cbu}\n\n` +
-          `Total: $${total.toFixed(2)}\n` +
-          `Productos:\n${cart
-            .map((item) => `- ${item.nombre} x${item.cantidad}`)
-            .join('\n')}`
-        );
-
-        setTimeout(() => {
-          window.open(
-            `https://wa.me/5491122334455?text=${whatsappMessage}`,
-            '_blank'
-          );
-          navigate('/');
-        }, 1500);
       }
+      const whatsappMessage = encodeURIComponent(
+        `¡Hola! Te paso el comprobante de mi pedido #${response.data.id}.\n\n`
+      );
+
+      setTimeout(() => {
+        window.open(
+          `https://wa.me/5491122334455?text=${whatsappMessage}`,
+          '_blank'
+        );
+        navigate('/');
+      }, 1500);
+
     } catch (error: any) {
       toast.error(error.message || 'Error al crear el pedido');
     } finally {
