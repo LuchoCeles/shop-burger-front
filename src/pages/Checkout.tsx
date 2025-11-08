@@ -13,7 +13,8 @@ import { Cliente, BankData } from '@/intefaces/interfaz';
 const Checkout = () => {
   const { cart, total, clearCart } = useCart();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
+  const [loadingData, setLoadingData] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [bankData, setBankData] = useState<BankData | null>(null);
   const [cliente, setCliente] = useState<Cliente>({
     telefono: '',
@@ -33,7 +34,7 @@ const Checkout = () => {
     } catch (error) {
       toast.error('Error al obtener datos bancarios');
     } finally {
-      setLoading(false);
+      setLoadingData(false);
     }
   };
 
@@ -50,7 +51,7 @@ const Checkout = () => {
       return;
     }
 
-    setLoading(true);
+    setSubmitting(true);
 
     try {
       const pedido = {
@@ -102,7 +103,7 @@ const Checkout = () => {
     } catch (error: any) {
       toast.error(error.message || 'Error al crear el pedido');
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   };
 
@@ -120,7 +121,7 @@ const Checkout = () => {
     );
   }
 
-  if (loading) {
+  if (loadingData) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background text-foreground">
         <p>Cargando datos...</p>
@@ -229,9 +230,9 @@ const Checkout = () => {
                 <Button
                   type="submit"
                   className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
-                  disabled={loading}
+                  disabled={submitting}
                 >
-                  {loading ? 'Procesando...' : 'Confirmar Pedido'}
+                  {submitting ? 'Cargando...' : 'Confirmar Pedido'}
                 </Button>
               </form>
             </CardContent>
