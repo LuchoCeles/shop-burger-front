@@ -95,6 +95,7 @@ export interface CartItem {
   stock?: number;
   adicionales?: CartItemAdicional[];
   metodoDePago: string;
+  idCategoria?: number;
 }
 
 export interface CartItemAdicional {

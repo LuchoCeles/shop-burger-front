@@ -8,7 +8,7 @@ import { Textarea } from '../components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { toast } from 'sonner';
 import Navbar from '../components/Navbar';
-import { Cliente, BankData } from '@/intefaces/interfaz';
+import { Cliente, BankData, Category } from '@/intefaces/interfaz';
 const Numero_Whatsapp = import.meta.env.VITE_NUM_WHATSAPP;
 
 const Checkout = () => {
@@ -17,6 +17,7 @@ const Checkout = () => {
   const [loadingData, setLoadingData] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [bankData, setBankData] = useState<BankData | null>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [cliente, setCliente] = useState<Cliente>({
     telefono: '',
     direccion: '',
@@ -30,8 +31,12 @@ const Checkout = () => {
 
   const fetchBankData = async () => {
     try {
-      const rsp = await ApiService.getBancos();
-      setBankData(rsp.data);
+      const [bankDataRes, categoriesRes] = await Promise.all([
+        ApiService.getBancos(),
+        ApiService.getCategories(),
+      ]);
+      setBankData(bankDataRes.data);
+      setCategories(Array.isArray(categoriesRes.data) ? categoriesRes.data : []);
     } catch (error) {
       toast.error('Error al obtener datos bancarios');
     } finally {
@@ -243,39 +248,63 @@ const Checkout = () => {
                 <CardTitle className="text-foreground">Resumen del pedido</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {cart.map((item) => (
-                    <div key={item.id} className="flex justify-between">
-                      <div className="text-foreground text-xl">
-                        <p>
-                          {item.nombre} x{item.cantidad}
-                        </p>
-                        {/* Mostrar adicionales si existen */}
-                        {item.adicionales && item.adicionales.length > 0 && (
-                          <ul className="ml-4 list-disc text-sm text-muted-foreground">
-                            {item.adicionales.map((adicional) => (
-                              <li key={adicional.id}>
-                                {adicional.nombre} x{adicional.cantidad}
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                      </div>
-                      <div className="text-foreground text-xl text-right">
-                        <span className="font-semibold text-foreground text-xl">
-                          ${(item.precio * item.cantidad).toFixed(2)}
-                        </span>
+                <div className="space-y-6">
+                  {/* Agrupar productos por categoría */}
+                  {Object.entries(
+                    cart.reduce((acc, item) => {
+                      const categoryId = item.idCategoria || 0;
+                      if (!acc[categoryId]) {
+                        acc[categoryId] = [];
+                      }
+                      acc[categoryId].push(item);
+                      return acc;
+                    }, {} as Record<number, typeof cart>)
+                  ).map(([categoryId, items]) => {
+                    const category = categories.find(c => c.id === Number(categoryId));
+                    const categoryName = category?.nombre || 'Sin categoría';
+                    
+                    return (
+                      <div key={categoryId} className="space-y-3">
+                        <h3 className="text-lg font-semibold text-primary border-b border-border pb-2">
+                          {categoryName}
+                        </h3>
+                        <div className="space-y-4">
+                          {items.map((item) => (
+                            <div key={item.cartId} className="flex justify-between">
+                              <div className="text-foreground text-xl">
+                                <p>
+                                  {item.nombre} x{item.cantidad}
+                                </p>
+                                {/* Mostrar adicionales si existen */}
+                                {item.adicionales && item.adicionales.length > 0 && (
+                                  <ul className="ml-4 list-disc text-sm text-muted-foreground">
+                                    {item.adicionales.map((adicional) => (
+                                      <li key={adicional.id}>
+                                        {adicional.nombre} x{adicional.cantidad}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                )}
+                              </div>
+                              <div className="text-foreground text-xl text-right">
+                                <span className="font-semibold text-foreground text-xl">
+                                  ${(item.precio * item.cantidad).toFixed(2)}
+                                </span>
 
-                        {item.adicionales && item.adicionales.length > 0 && (
-                          <ul className="text-sm text-muted-foreground text-right">
-                            {item.adicionales.map((adicional) => (
-                              <li key={adicional.id}>${(adicional.precio * adicional.cantidad).toFixed(2)}</li>
-                            ))}
-                          </ul>
-                        )}
+                                {item.adicionales && item.adicionales.length > 0 && (
+                                  <ul className="text-sm text-muted-foreground text-right">
+                                    {item.adicionales.map((adicional) => (
+                                      <li key={adicional.id}>${(adicional.precio * adicional.cantidad).toFixed(2)}</li>
+                                    ))}
+                                  </ul>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
 
                   <div className="border-t border-border pt-4">
                     <div className="flex justify-between text-xl font-bold">
