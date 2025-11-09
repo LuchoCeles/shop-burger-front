@@ -21,11 +21,39 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ file, onSave, onCancel }) => 
 
   useEffect(() => {
     if (file) {
+      // Reset crop state when a new file is loaded
+      setCrop({
+        unit: '%',
+        width: 100,
+        height: 100,
+        x: 0,
+        y: 0,
+      });
+      setCompletedCrop(null);
+
       const reader = new FileReader();
       reader.onload = () => {
         setImgSrc(reader.result as string);
       };
       reader.readAsDataURL(file);
+
+      // Cleanup function to revoke object URL
+      return () => {
+        if (imgSrc) {
+          URL.revokeObjectURL(imgSrc);
+        }
+      };
+    } else {
+      // Clear the image source when file is null
+      setImgSrc('');
+      setCrop({
+        unit: '%',
+        width: 100,
+        height: 100,
+        x: 0,
+        y: 0,
+      });
+      setCompletedCrop(null);
     }
   }, [file]);
 
@@ -81,6 +109,8 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ file, onSave, onCancel }) => 
   const handleSave = async () => {
     if (!completedCrop) {
       onSave(file!);
+      // Clear state after saving
+      setImgSrc('');
       return;
     }
 
@@ -88,6 +118,8 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ file, onSave, onCancel }) => 
     try {
       const croppedImage = await getCroppedImg();
       onSave(croppedImage);
+      // Clear state after saving
+      setImgSrc('');
     } catch (error) {
       console.error('Error cropping image:', error);
     } finally {
@@ -95,8 +127,22 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ file, onSave, onCancel }) => 
     }
   };
 
+  const handleCancel = () => {
+    // Clear state when canceling
+    setImgSrc('');
+    setCrop({
+      unit: '%',
+      width: 100,
+      height: 100,
+      x: 0,
+      y: 0,
+    });
+    setCompletedCrop(null);
+    onCancel();
+  };
+
   return (
-    <Dialog open={!!file} onOpenChange={(open) => !open && onCancel()}>
+    <Dialog open={!!file} onOpenChange={(open) => !open && handleCancel()}>
       <DialogContent className="max-w-4xl bg-card">
         <DialogHeader>
           <DialogTitle className="text-foreground">Editar Imagen</DialogTitle>
@@ -124,7 +170,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ file, onSave, onCancel }) => 
           </div>
         </div>
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={onCancel}>
+          <Button type="button" variant="outline" onClick={handleCancel}>
             Cancelar
           </Button>
           <Button
