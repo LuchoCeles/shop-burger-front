@@ -276,13 +276,15 @@ const Checkout = () => {
                                   {item.nombre} x{item.cantidad}
                                 </p>
                                 {/* Mostrar adicionales si existen */}
-                                {item.adicionales && item.adicionales.length > 0 && (
+                                {item.adicionales && item.adicionales.filter(adicional => adicional.cantidad > 0).length > 0 && (
                                   <ul className="ml-4 list-disc text-sm text-muted-foreground">
-                                    {item.adicionales.map((adicional) => (
-                                      <li key={adicional.id}>
-                                        {adicional.nombre} x{adicional.cantidad}
-                                      </li>
-                                    ))}
+                                    {item.adicionales
+                                      .filter(adicional => adicional.cantidad > 0)
+                                      .map((adicional) => (
+                                        <li key={adicional.id}>
+                                          {adicional.nombre} x{adicional.cantidad}
+                                        </li>
+                                      ))}
                                   </ul>
                                 )}
                               </div>
@@ -291,11 +293,13 @@ const Checkout = () => {
                                   ${(item.precio * item.cantidad).toFixed(2)}
                                 </span>
 
-                                {item.adicionales && item.adicionales.length > 0 && (
+                                {item.adicionales && item.adicionales.filter(adicional => adicional.cantidad > 0).length > 0 && (
                                   <ul className="text-sm text-muted-foreground text-right">
-                                    {item.adicionales.map((adicional) => (
-                                      <li key={adicional.id}>${(adicional.precio * adicional.cantidad).toFixed(2)}</li>
-                                    ))}
+                                    {item.adicionales
+                                      .filter(adicional => adicional.cantidad > 0)
+                                      .map((adicional) => (
+                                        <li key={adicional.id}>${(adicional.precio * adicional.cantidad).toFixed(2)}</li>
+                                      ))}
                                   </ul>
                                 )}
                               </div>
