@@ -31,6 +31,7 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
         url_imagen: product.url_imagen,
         stock: product.stock,
         metodoDePago: '',
+        idCategoria: product.idCategoria,
       });
       toast.success('Agregado al carrito');
     }
@@ -48,6 +49,7 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
       stock: product.stock,
       adicionales,
       metodoDePago: '',
+      idCategoria: product.idCategoria,
     });
     toast.success('Agregado al carrito con adicionales');
   };

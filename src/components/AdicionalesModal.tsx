@@ -38,8 +38,6 @@ export default function AdicionalesModal({
   const loadAdicionales = async () => {
     setLoading(true);
     try {
-
-      // Obtener detalles completos de los adicionales
       const allAdicionales = await ApiService.getAdicionales();
       const adicionalesIds = Product.adicionales.map((pa: Adicional) => pa.id);
       const filtered = allAdicionales.data?.filter((a: Adicional) =>
@@ -93,19 +91,15 @@ export default function AdicionalesModal({
   };
 
   const handleConfirm = () => {
-    const result: CartItemAdicional[] = [];
-    selectedAdicionales.forEach((cantidad, id) => {
-      const adicional = adicionales.find(a => a.id === id);
-      if (adicional && cantidad > 0) {
-        result.push({
-          id: adicional.id,
-          nombre: adicional.nombre,
-          precio: adicional.precio,
-          cantidad,
-          maxCantidad: adicional.maxCantidad,
-        });
-      }
-    });
+    // Guardar TODOS los adicionales del producto, incluyendo los que tienen cantidad 0
+    const result: CartItemAdicional[] = adicionales.map(adicional => ({
+      id: adicional.id!,
+      nombre: adicional.nombre,
+      precio: adicional.precio,
+      cantidad: selectedAdicionales.get(adicional.id!) || 0,
+      maxCantidad: adicional.maxCantidad,
+    }));
+    
     onConfirm(result);
     onOpenChange(false);
   };

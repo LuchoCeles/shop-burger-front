@@ -23,7 +23,7 @@ const ConfiguracionManager = () => {
     cbu: '',
     apellido: '',
     nombre: '',
-    mpEstado: Boolean,
+    mpEstado: false,
   });
 
   useEffect(() => {
