@@ -237,7 +237,7 @@ const ProductosManager = () => {
                     <span className="truncate">Editar</span>
                   </Button>
                   <Button
-                    variant="secondary"
+                    variant="outline"
                     size="sm"
                     className="flex-1 min-w-0"
                     onClick={() => {
