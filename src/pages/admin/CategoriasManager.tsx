@@ -1,16 +1,16 @@
-import { useState, useEffect } from 'react';
-import { Plus, Pencil, Trash2, Eye, EyeOff } from 'lucide-react';
-import ApiService from '../../services/api';
-import { Category } from 'src/intefaces/interfaz';
-import { Button } from '../../components/ui/button';
-import { Input } from '../../components/ui/input';
+import React, { useState, useEffect } from "react";
+import { Plus, Pencil, Trash2, Eye, EyeOff } from "lucide-react";
+import ApiService from "../../services/api";
+import { Category } from "src/intefaces/interfaz";
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from '../../components/ui/dialog';
+} from "../../components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,17 +20,18 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '../../components/ui/alert-dialog';
-import { toast } from 'sonner';
+} from "../../components/ui/alert-dialog";
+import { toast } from "sonner";
 
 const CategoriasManager = () => {
   const [categorias, setCategorias] = useState<Category[]>([]);
   const [showDialog, setShowDialog] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category>(null);
-  const [nombre, setNombre] = useState('');
+  const [nombre, setNombre] = useState("");
   const [estado, setEstado] = useState(true);
   const [loading, setLoading] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState<number | null>(null);
+  const MAX_CHARS = 25;
 
   useEffect(() => {
     loadCategorias();
@@ -41,40 +42,52 @@ const CategoriasManager = () => {
       const data = await ApiService.getCategories();
       setCategorias(data.data || []);
       if (!data.success) {
-        toast.error(data.message || 'Error al cargar categorías');
+        toast.error(data.message || "Error al cargar categorías");
         return;
       }
     } catch (error) {
-      toast.error('Error al cargar categorías');
+      toast.error("Error al cargar categorías");
+    }
+  };
+
+  const handleNombreChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.value.length <= MAX_CHARS) {
+      setNombre(e.target.value);
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!nombre.trim()) return;
+    if (nombre.length > MAX_CHARS) {
+      toast.error(`El nombre no puede tener más de ${MAX_CHARS} caracteres.`);
+    }
     setLoading(true);
     try {
       if (editingCategory) {
-        const data = await ApiService.updateCategory(editingCategory.id, nombre);
+        const data = await ApiService.updateCategory(
+          editingCategory.id,
+          nombre
+        );
         if (!data.success) {
-          toast.error(data.message || 'Error al actualizar');
+          toast.error(data.message || "Error al actualizar");
           return;
         }
-        toast.success(data.message || 'Categoría actualizada');
+        toast.success(data.message || "Categoría actualizada");
       } else {
         const data = await ApiService.createCategory(nombre);
         if (!data.success) {
-          toast.error(data.message || 'Error al crear');
+          toast.error(data.message || "Error al crear");
           return;
         }
-        toast.success(data.message || 'Categoría creada');
+        toast.success(data.message || "Categoría creada");
       }
       setShowDialog(false);
-      setNombre('');
+      setNombre("");
       setEditingCategory(null);
       loadCategorias();
     } catch (error) {
-      toast.error(error.message || 'Error al guardar');
+      toast.error(error.message || "Error al guardar");
     } finally {
       setLoading(false);
     }
@@ -86,13 +99,13 @@ const CategoriasManager = () => {
     try {
       const data = await ApiService.deleteCategoria(categoryToDelete);
       if (!data.success) {
-        toast.error(data.message || 'Error al eliminar');
+        toast.error(data.message || "Error al eliminar");
         return;
       }
-      toast.success(data.message || 'Categoría eliminada');
+      toast.success(data.message || "Categoría eliminada");
       loadCategorias();
     } catch (error) {
-      toast.error(error.message || 'Error al eliminar');
+      toast.error(error.message || "Error al eliminar");
     } finally {
       setCategoryToDelete(null);
     }
@@ -107,26 +120,33 @@ const CategoriasManager = () => {
 
   const handleToggleEstado = async (category: Category) => {
     try {
-      const data = await ApiService.updateStateCategory(category.id, !category.estado);
+      const data = await ApiService.updateStateCategory(
+        category.id,
+        !category.estado
+      );
       if (!data.success) {
-        toast.error(data.message || 'Error al cambiar estado');
+        toast.error(data.message || "Error al cambiar estado");
         return;
       }
-      toast.success(`Categoría ${!category.estado ? 'activada' : 'desactivada'}`);
+      toast.success(
+        `Categoría ${!category.estado ? "activada" : "desactivada"}`
+      );
       loadCategorias();
     } catch (error) {
-      toast.error(error.message || 'Error al cambiar estado');
+      toast.error(error.message || "Error al cambiar estado");
     }
   };
 
   return (
     <div className="space-y-4 md:space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-2xl font-bold text-foreground md:text-3xl">Categorías</h1>
+        <h1 className="text-2xl font-bold text-foreground md:text-3xl">
+          Categorías
+        </h1>
         <Button
           onClick={() => {
             setEditingCategory(null);
-            setNombre('');
+            setNombre("");
             setShowDialog(true);
           }}
           className="bg-primary text-primary-foreground hover:bg-primary/90 w-full sm:w-auto"
@@ -140,24 +160,42 @@ const CategoriasManager = () => {
         {categorias.map((cat) => (
           <div
             key={cat.id}
-            className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rounded-lg border border-border bg-card p-4"
+            className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-lg border border-border bg-card p-4 min-h-[72px]"
           >
-            <span className="font-medium text-foreground break-words">{cat.nombre}</span>
-            <div className="flex gap-2 w-full sm:w-auto flex-wrap">
+            <div className="flex-1 min-w-0">
+              <span className="font-medium text-foreground truncate block max-w-xs">
+                {cat.nombre}
+              </span>
+            </div>
+            <div className="flex-shrink-0 flex items-center justify-start sm:justify-end gap-2 flex-wrap">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => handleToggleEstado(cat)}
-                title={cat.estado ? 'Desactivar' : 'Activar'}
-                className="flex-shrink-0"
+                title={cat.estado ? "Desactivar" : "Activar"}
+                className="flex-1"
               >
-                {cat.estado ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
+                {cat.estado ? (
+                  <Eye className="h-3 w-3" />
+                ) : (
+                  <EyeOff className="h-3 w-3" />
+                )}
               </Button>
-              <Button variant="outline" size="sm" onClick={() => handleEdit(cat)} className="flex-1 sm:flex-initial">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleEdit(cat)}
+                className="flex-1 sm:flex-initial"
+              >
                 <Pencil className="h-3 w-3 sm:mr-0 mr-2" />
                 <span className="sm:hidden">Editar</span>
               </Button>
-              <Button variant="destructive" size="sm" onClick={() => setCategoryToDelete(cat.id)} className="flex-1 sm:flex-initial">
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => setCategoryToDelete(cat.id)}
+                className="flex-1 sm:flex-initial"
+              >
                 <Trash2 className="h-3 w-3 sm:mr-0 mr-2" />
                 <span className="sm:hidden">Eliminar</span>
               </Button>
@@ -170,40 +208,54 @@ const CategoriasManager = () => {
         <DialogContent className="bg-card">
           <DialogHeader>
             <DialogTitle className="text-foreground">
-              {editingCategory ? 'Editar Categoría' : 'Nueva Categoría'}
+              {editingCategory ? "Editar Categoría" : "Nueva Categoría"}
             </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="mb-2 block text-sm font-medium text-foreground">Nombre</label>
               <Input
+                type="text"
                 value={nombre}
-                onChange={(e) => setNombre(e.target.value)}
-                required
-                className="bg-background"
+                onChange={handleNombreChange}
+                maxLength={MAX_CHARS} // ¡La prevención en el navegador!
+                placeholder="Nombre de la categoría"
+                className="tu-clase-de-estilo"
               />
             </div>
+            <div className="text-right text-sm text-gray-500">
+              {nombre.length} / {MAX_CHARS}
+            </div>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setShowDialog(false)}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowDialog(false)}
+              >
                 Cancelar
               </Button>
               <Button
                 type="submit"
                 className="bg-primary text-primary-foreground hover:bg-primary/90"
-                disabled={loading}
+                disabled={loading || !nombre.trim() || nombre.length > MAX_CHARS}
               >
-                {loading ? 'Guardando...' : 'Guardar'}
+                {loading ? "Guardando..." : "Guardar"}
               </Button>
             </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
-      <AlertDialog open={!!categoryToDelete} onOpenChange={() => setCategoryToDelete(null)}>
+      <AlertDialog
+        open={!!categoryToDelete}
+        onOpenChange={() => setCategoryToDelete(null)}
+      >
         <AlertDialogContent className="bg-card">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-foreground">¿Eliminar esta categoría?</AlertDialogTitle>
+            <AlertDialogTitle className="text-foreground">
+              ¿Eliminar esta categoría?
+            </AlertDialogTitle>
             <AlertDialogDescription className="text-muted-foreground">
-              Esta acción no se puede deshacer. La categoría será eliminada permanentemente.
+              Esta acción no se puede deshacer. La categoría será eliminada
+              permanentemente.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
