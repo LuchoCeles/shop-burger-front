@@ -1,27 +1,27 @@
-import { useState, useEffect } from 'react';
-import { Plus, Pencil, Trash2, Eye, EyeOff, ListPlus } from 'lucide-react';
-import ApiService from '../../services/api';
-import { Button } from '../../components/ui/button';
-import { Input } from '../../components/ui/input';
-import { Textarea } from '../../components/ui/textarea';
-import { Product, Category } from 'src/intefaces/interfaz';
-import ImageEditor from '../../components/ImageEditor';
-import AsignarAdicionalesDialog from '../../components/AsignarAdicionalesDialog';
+import { useState, useEffect } from "react";
+import { Plus, Pencil, Trash2, Eye, EyeOff, ListPlus } from "lucide-react";
+import ApiService from "../../services/api";
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
+import { Textarea } from "../../components/ui/textarea";
+import { Product, Category } from "src/intefaces/interfaz";
+import ImageEditor from "../../components/ImageEditor";
+import AsignarAdicionalesDialog from "../../components/AsignarAdicionalesDialog";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from '../../components/ui/dialog';
+} from "../../components/ui/dialog";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../../components/ui/select';
-import { toast } from 'sonner';
+} from "../../components/ui/select";
+import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,8 +31,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '../../components/ui/alert-dialog';
-
+} from "../../components/ui/alert-dialog";
 
 const ProductosManager = () => {
   const [productos, setProductos] = useState<Product[]>([]);
@@ -40,12 +39,12 @@ const ProductosManager = () => {
   const [showDialog, setShowDialog] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product>(null);
   const [formData, setFormData] = useState({
-    nombre: '',
-    descripcion: '',
-    precio: '',
-    stock: '',
-    descuento: '',
-    idCategoria: '',
+    nombre: "",
+    descripcion: "",
+    precio: "",
+    stock: "",
+    descuento: "",
+    idCategoria: "",
     isPromocion: false,
   });
   const [imagen, setImagen] = useState<File | null>(null);
@@ -53,7 +52,8 @@ const ProductosManager = () => {
   const [loading, setLoading] = useState(false);
   const [productToDelete, setProductToDelete] = useState<number | null>(null);
   const [adicionalesDialogOpen, setAdicionalesDialogOpen] = useState(false);
-  const [selectedProductForAdicionales, setSelectedProductForAdicionales] = useState<Product | null>(null);
+  const [selectedProductForAdicionales, setSelectedProductForAdicionales] =
+    useState<Product | null>(null);
 
   useEffect(() => {
     loadData();
@@ -61,11 +61,14 @@ const ProductosManager = () => {
 
   const loadData = async () => {
     try {
-      const [prodData, catData] = await Promise.all([ApiService.getProducts(false), ApiService.getCategories()]);
+      const [prodData, catData] = await Promise.all([
+        ApiService.getProducts(false),
+        ApiService.getCategories(),
+      ]);
       setProductos(prodData.data);
       setCategorias(catData.data);
     } catch (error) {
-      toast.error('Error al cargar datos');
+      toast.error("Error al cargar datos");
     }
   };
 
@@ -74,41 +77,43 @@ const ProductosManager = () => {
     setLoading(true);
 
     if (categorias.length === 0) {
-      toast.error('Debes crear al menos una categoría antes de crear productos');
+      toast.error(
+        "Debes crear al menos una categoría antes de crear productos"
+      );
       setLoading(false);
       return;
     }
     if (!formData.idCategoria) {
-      toast.error('Selecciona una categoría');
+      toast.error("Selecciona una categoría");
       setLoading(false);
       return;
     }
 
     try {
       const formDataToSend = new FormData();
-      formDataToSend.append('nombre', formData.nombre);
-      formDataToSend.append('descripcion', formData.descripcion);
-      formDataToSend.append('precio', formData.precio);
-      formDataToSend.append('stock', formData.stock);
-      formDataToSend.append('descuento', formData.descuento);
-      formDataToSend.append('idCategoria', formData.idCategoria);
+      formDataToSend.append("nombre", formData.nombre);
+      formDataToSend.append("descripcion", formData.descripcion);
+      formDataToSend.append("precio", formData.precio);
+      formDataToSend.append("stock", formData.stock);
+      formDataToSend.append("descuento", formData.descuento);
+      formDataToSend.append("idCategoria", formData.idCategoria);
       if (imagen) {
-        formDataToSend.append('imagen', imagen);
+        formDataToSend.append("imagen", imagen);
       }
 
       if (editingProduct) {
         await ApiService.updateProduct(editingProduct.id, formDataToSend);
-        toast.success('Producto actualizado');
+        toast.success("Producto actualizado");
       } else {
         await ApiService.createProduct(formDataToSend);
-        toast.success('Producto creado');
+        toast.success("Producto creado");
       }
 
       setShowDialog(false);
       resetForm();
       loadData();
     } catch (error) {
-      toast.error(error.message || 'Error al guardar producto');
+      toast.error(error.message || "Error al guardar producto");
     } finally {
       setLoading(false);
     }
@@ -119,10 +124,10 @@ const ProductosManager = () => {
 
     try {
       await ApiService.deleteProducto(productToDelete);
-      toast.success('Producto eliminado');
+      toast.success("Producto eliminado");
       loadData();
     } catch (error) {
-      toast.error(error.message || 'Error al eliminar');
+      toast.error(error.message || "Error al eliminar");
     } finally {
       setProductToDelete(null);
     }
@@ -132,11 +137,11 @@ const ProductosManager = () => {
     setEditingProduct(product);
     setFormData({
       nombre: product.nombre,
-      descripcion: product.descripcion || '',
+      descripcion: product.descripcion || "",
       precio: product.precio.toString(),
-      stock: product.stock?.toString() || '',
-      idCategoria: product.idCategoria?.toString() || '',
-      descuento: product.descuento?.toString() || '',
+      stock: product.stock?.toString() || "",
+      idCategoria: product.idCategoria?.toString() || "",
+      descuento: product.descuento?.toString() || "",
       isPromocion: product.descuento ? true : false,
     });
     setShowDialog(true);
@@ -145,12 +150,12 @@ const ProductosManager = () => {
   const resetForm = () => {
     setEditingProduct(null);
     setFormData({
-      nombre: '',
-      descripcion: '',
-      precio: '',
-      stock: '',
-      idCategoria: '',
-      descuento: '',
+      nombre: "",
+      descripcion: "",
+      precio: "",
+      stock: "",
+      idCategoria: "",
+      descuento: "",
       isPromocion: false,
     });
     setImagen(null);
@@ -179,10 +184,39 @@ const ProductosManager = () => {
     loadData();
   };
 
+  const handleNumeric = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    fieldName: keyof typeof formData,
+    options?: { allowNegative?: boolean; max?: number }
+  ) => {
+    const value = e.target.value;
+
+    if (value === "") {
+      setFormData({ ...formData, [fieldName]: "" });
+      return;
+    }
+    const numValue = parseFloat(value);
+
+    if (isNaN(numValue)) {
+      return;
+    }
+
+    if (!options?.allowNegative && numValue < 0) {
+      return;
+    }
+
+    if (options?.max !== undefined && numValue > options.max) {
+      return; 
+    }
+    setFormData({ ...formData, [fieldName]: value });
+  };
+
   return (
     <div className="space-y-4 md:space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-2xl font-bold text-foreground md:text-3xl">Productos</h1>
+        <h1 className="text-2xl font-bold text-foreground md:text-3xl">
+          Productos
+        </h1>
         <Button
           onClick={() => {
             resetForm();
@@ -209,23 +243,35 @@ const ProductosManager = () => {
               />
             )}
             <div className="p-4">
-              <h3 className="mb-2 font-semibold text-foreground">{product.nombre}</h3>
+              <h3 className="mb-2 font-semibold text-foreground">
+                {product.nombre}
+              </h3>
               <p className="mb-2 text-sm text-muted-foreground line-clamp-2">
                 {product.descripcion}
               </p>
-              <p className="mb-2 text-lg font-bold text-primary">${product.precio}</p>
-              <p className="mb-4 text-xs text-muted-foreground">Stock: {product.stock || 'N/A'}</p>
+              <p className="mb-2 text-lg font-bold text-primary">
+                ${product.precio}
+              </p>
+              <p className="mb-4 text-xs text-muted-foreground">
+                Stock: {product.stock || "N/A"}
+              </p>
 
               <div className="flex flex-col gap-2">
                 <div className="flex flex-wrap gap-2">
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleToggleEstado(product.id, product.estado)}
-                    title={product.estado ? 'Desactivar' : 'Activar'}
+                    onClick={() =>
+                      handleToggleEstado(product.id, product.estado)
+                    }
+                    title={product.estado ? "Desactivar" : "Activar"}
                     className="flex-shrink-0"
                   >
-                    {product.estado ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
+                    {product.estado ? (
+                      <Eye className="h-3 w-3" />
+                    ) : (
+                      <EyeOff className="h-3 w-3" />
+                    )}
                   </Button>
                   <Button
                     variant="outline"
@@ -237,7 +283,7 @@ const ProductosManager = () => {
                     <span className="truncate">Editar</span>
                   </Button>
                   <Button
-                    variant="secondary"
+                    variant="outline"
                     size="sm"
                     className="flex-1 min-w-0"
                     onClick={() => {
@@ -259,79 +305,105 @@ const ProductosManager = () => {
         <DialogContent className="bg-card max-h-[90vh] overflow-y-auto max-w-[95vw] sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle className="text-foreground">
-              {editingProduct ? 'Editar Producto' : 'Nuevo Producto'}
+              {editingProduct ? "Editar Producto" : "Nuevo Producto"}
             </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="mb-2 block text-sm font-medium text-foreground">Nombre</label>
+              <label className="mb-2 block text-sm font-medium text-foreground">
+                Nombre
+              </label>
               <Input
                 value={formData.nombre}
-                onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, nombre: e.target.value })
+                }
                 required
                 className="bg-background"
               />
             </div>
             <div>
-              <label className="mb-2 block text-sm font-medium text-foreground">Descripción</label>
+              <label className="mb-2 block text-sm font-medium text-foreground">
+                Descripción
+              </label>
               <Textarea
                 value={formData.descripcion}
-                onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, descripcion: e.target.value })
+                }
                 className="bg-background"
               />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="mb-2 block text-sm font-medium text-foreground">Precio</label>
+                <label className="mb-2 block text-sm font-medium text-foreground">
+                  Precio
+                </label>
                 <Input
                   type="number"
-                  step="0.01"
                   value={formData.precio}
-                  onChange={(e) => setFormData({ ...formData, precio: e.target.value })}
+                  onChange={(e) => handleNumeric(e, "precio",{max: 99999999})}
+                  max = "99999999"
                   required
                   className="bg-background"
                 />
               </div>
               <div>
-                <label className="mb-2 block text-sm font-medium text-foreground">Stock</label>
+                <label className="mb-2 block text-sm font-medium text-foreground">
+                  Stock
+                </label>
                 <Input
                   type="number"
-                  min="1"
                   value={formData.stock}
-                  onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+                  onChange={(e) => handleNumeric(e, "stock", {max: 9999})}
+                  max = "9999"
                   className="bg-background"
                 />
               </div>
             </div>
             <div>
-              <label className="mb-2 block text-sm font-medium text-foreground">Descuento %</label>
+              <label className="mb-2 block text-sm font-medium text-foreground">
+                Descuento %
+              </label>
               <Input
                 type="number"
-                min="0"
-                max="100"
                 value={formData.descuento}
-                onChange={(e) => setFormData({ ...formData, descuento: e.target.value })}
+                onChange={(e) => handleNumeric(e, "descuento", { max: 100 })}
+                max = "100"
                 className="bg-background"
               />
             </div>
             <div>
-              <label className="mb-2 block text-sm font-medium text-foreground">Precio Final</label>
+              <label className="mb-2 block text-sm font-medium text-foreground">
+                Precio Final
+              </label>
               <Input
                 type="number"
                 min="1"
-                value={formData.precio && formData.descuento
-                  ? (parseFloat(formData.precio) * (1 - parseFloat(formData.descuento) / 100)).toFixed(2)
-                  : formData.precio}
+                value={
+                  formData.precio && formData.descuento
+                    ? (
+                        parseFloat(formData.precio) *
+                        (1 - parseFloat(formData.descuento) / 100)
+                      ).toFixed(2)
+                    : formData.precio
+                }
                 readOnly
-                onChange={(e) => setFormData({ ...formData, descuento: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, descuento: e.target.value })
+                }
                 className="bg-background"
               />
             </div>
             <div>
-              <label className="mb-2 block text-sm font-medium text-foreground">Categoría</label>
+              <label className="mb-2 block text-sm font-medium text-foreground">
+                Categoría
+              </label>
               <Select
                 value={formData.idCategoria}
-                onValueChange={(value) => setFormData({ ...formData, idCategoria: value })}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, idCategoria: value })
+                }
               >
                 <SelectTrigger className="bg-background">
                   <SelectValue placeholder="Selecciona una categoría" />
@@ -346,7 +418,9 @@ const ProductosManager = () => {
               </Select>
             </div>
             <div>
-              <label className="mb-2 block text-sm font-medium text-foreground">Imagen</label>
+              <label className="mb-2 block text-sm font-medium text-foreground">
+                Imagen
+              </label>
               <Input
                 type="file"
                 accept="image/*"
@@ -355,7 +429,9 @@ const ProductosManager = () => {
               />
               {imagen && !imagenParaEditar && (
                 <div className="mt-2">
-                  <p className="text-xs text-muted-foreground mb-1">Vista previa:</p>
+                  <p className="text-xs text-muted-foreground mb-1">
+                    Vista previa:
+                  </p>
                   <img
                     src={URL.createObjectURL(imagen)}
                     alt="Vista previa"
@@ -377,7 +453,7 @@ const ProductosManager = () => {
                 className="bg-primary text-primary-foreground hover:bg-primary/90"
                 disabled={loading || categorias.length === 0}
               >
-                {loading ? 'Guardando...' : 'Guardar'}
+                {loading ? "Guardando..." : "Guardar"}
               </Button>
             </DialogFooter>
           </form>
@@ -389,12 +465,18 @@ const ProductosManager = () => {
         onSave={handleImageSave}
         onCancel={handleImageCancel}
       />
-      <AlertDialog open={!!productToDelete} onOpenChange={() => setProductToDelete(null)}>
+      <AlertDialog
+        open={!!productToDelete}
+        onOpenChange={() => setProductToDelete(null)}
+      >
         <AlertDialogContent className="bg-card">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-foreground">¿Eliminar este producto?</AlertDialogTitle>
+            <AlertDialogTitle className="text-foreground">
+              ¿Eliminar este producto?
+            </AlertDialogTitle>
             <AlertDialogDescription className="text-muted-foreground">
-              Esta acción no se puede deshacer. El producto será eliminado permanentemente.
+              Esta acción no se puede deshacer. El producto será eliminado
+              permanentemente.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

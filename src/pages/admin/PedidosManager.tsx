@@ -69,6 +69,16 @@ const PedidosManager = () => {
     }
   };
 
+  const handleEstadoPagoChange = async (idPedido: number, nuevoEstado: string) => {
+    try {
+      await ApiService.updateEstadoPago(idPedido, nuevoEstado);
+      toast.success("Estado de pago actualizado");
+      loadPedidos();
+    } catch (error) {
+      toast.error("Error al actualizar el estado del pago");
+    }
+  };
+
   const confirmarCambioEstado = async (id: number, estado: string) => {
     try {
       const r = await ApiService.updateOrder({ id: id, estado: estado });
@@ -88,6 +98,9 @@ const PedidosManager = () => {
       pendiente: 'text-yellow-500',
       entregado: 'text-green-500',
       cancelado: 'text-red-500',
+      pagado: 'text-green-500',
+      rechazado: 'text-red-500',
+      expirado: 'text-red-500',
     };
     return colors[estado] || 'text-muted-foreground';
   };
@@ -112,27 +125,52 @@ const PedidosManager = () => {
                   PEDIDO #{pedido.id}
                 </h3>
               </div>
-              <div className="flex items-center gap-2">
-                <span className={`font-medium ${getEstadoColor(pedido.estado)}`}>
-                  {pedido.estado.charAt(0).toUpperCase() + pedido.estado.slice(1)}
-                </span>
+              <div className="flex items-end gap-6">
+                <div className="flex items-center gap-2">
+                  <span className={`font-medium ${getEstadoColor(pedido.Pago?.estado.toLowerCase())}`}>
+                    Estado del Pago:
+                  </span>
 
-                <Select
-                  value={pedido.estado}
-                  onValueChange={(value) => handleEstadoChange(pedido.id, value)}
-                  disabled={pedido.estado === "entregado" || pedido.estado === "cancelado"}
-                >
-                  <SelectTrigger className="w-40 bg-background">
-                    <SelectValue placeholder="Seleccionar estado" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="pendiente">Pendiente</SelectItem>
-                    <SelectItem value="entregado">Entregado</SelectItem>
-                    <SelectItem value="cancelado">Cancelado</SelectItem>
-                  </SelectContent>
-                </Select>
+                  <Select
+                    value={pedido.Pago?.estado || "Pendiente"}
+                    onValueChange={(value) => handleEstadoPagoChange(pedido.id, value)}
+                  >
+                    <SelectTrigger className="w-40 bg-background">
+                      <SelectValue placeholder="Seleccionar estado de pago" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Pendiente">Pendiente</SelectItem>
+                      <SelectItem value="Pagado">Pagado</SelectItem>
+                      <SelectItem value="Rechazado" hidden>Rechazado</SelectItem>
+                      <SelectItem value="Expirado" hidden>Expirado</SelectItem>
+                      <SelectItem value="Pendiente" >Cancelado</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className={`font-medium ${getEstadoColor(pedido.estado)}`}>
+                    Estado del Pedido:
+                  </span>
+
+                  <Select
+                    value={pedido.estado}
+                    onValueChange={(value) => handleEstadoChange(pedido.id, value)}
+                    disabled={pedido.estado === "entregado" || pedido.estado === "cancelado"}
+                  >
+                    <SelectTrigger className="w-40 bg-background">
+                      <SelectValue placeholder="Seleccionar estado" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pendiente">Pendiente</SelectItem>
+                      <SelectItem value="entregado">Entregado</SelectItem>
+                      <SelectItem value="cancelado">Cancelado</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
+
 
             <div className="mb-4 grid gap-2 text-sm">
               <p className="text-foreground">
