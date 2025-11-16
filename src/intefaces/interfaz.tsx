@@ -76,6 +76,11 @@ export interface Orders {
     nombre: string;
     precio: number;
     cantidad: number;
+    adicionales?: {
+      nombre: string;
+      precio: number;
+      cantidad: number;
+    }[];
   }[];
 }
 /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -94,6 +99,7 @@ export interface CartItem {
   stock?: number;
   adicionales?: CartItemAdicional[];
   metodoDePago: string;
+  idCategoria?: number;
 }
 
 export interface CartItemAdicional {
