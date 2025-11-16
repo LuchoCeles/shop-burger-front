@@ -50,12 +50,13 @@ const OrderNotification: React.FC = () => {
   useEffect(() => {
     if (!socket || !isAuthenticated) return;
 
-    const handleNuevoPedido = () => {
+    const handleNuevoPedido = (data: any) => {
+      console.log('Notificación nuevo pedido:', data);
       playNotificationSound();
 
       if (!isOnPedidosPage) {
         toast.info('Nuevo pedido recibido', {
-          description: 'Haz click aquí para ver los pedidos',
+          description: data?.message || 'Haz click aquí para ver los pedidos',
           icon: <ShoppingBag className="h-5 w-5" />,
           duration: 10000,
           action: {
