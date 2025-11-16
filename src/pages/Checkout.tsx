@@ -248,7 +248,7 @@ const Checkout = () => {
                 </div>
                 <Button
                   type={!mpReady ? "submit" : "button"}
-                  className={`w-full text-primary-foreground hover:bg-primary/90 ${mpReady ? "bg-[rgb(50,111,190)] hover:bg-[rgb(67,129,209)]" : "bg-primary"}`}
+                  className={`w-full text-primary-foreground hover:bg-primary/90 ${mpReady ? "bg-[rgb(99,159,236)] hover:bg-[rgb(127,180,248)]" : "bg-primary"}`}
                   disabled={submitting || waitingMp}
                   onClick={() => {
                     if (mpReady && mpLink) {
