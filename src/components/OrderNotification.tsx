@@ -28,7 +28,7 @@ const OrderNotification: React.FC = () => {
       oscillator.connect(gainNode);
       gainNode.connect(context.destination);
 
-      oscillator.type = 'sine'; // O 'sine' para más suave
+      oscillator.type = 'sine';
 
       // Frecuencia más alta para sonido agudo
       oscillator.frequency.setValueAtTime(100, context.currentTime);
@@ -51,11 +51,10 @@ const OrderNotification: React.FC = () => {
     if (!socket || !isAuthenticated) return;
 
     const handleNuevoPedido = (data: any) => {
-      console.log('Notificación nuevo pedido:', data);
       playNotificationSound();
 
       if (!isOnPedidosPage) {
-        toast.info('Nuevo pedido recibido', {
+        toast.info('Nuevo Pedido', {
           description: data?.message || 'Haz click aquí para ver los pedidos',
           icon: <ShoppingBag className="h-5 w-5" />,
           duration: 10000,
@@ -70,10 +69,8 @@ const OrderNotification: React.FC = () => {
     };
 
     const handleNuevoPago = () => {
-      playNotificationSound();
-
       if (!isOnPedidosPage) {
-        toast.success('Nuevo pago recibido', {
+        toast.success('Pago Aprobado', {
           description: 'Haz click aquí para ver los pedidos',
           icon: <ShoppingBag className="h-5 w-5" />,
           duration: 10000,
@@ -88,9 +85,8 @@ const OrderNotification: React.FC = () => {
     };
 
     const handlePagoRechazado = () => {
-      playNotificationSound();
       if (!isOnPedidosPage) {
-        toast.error('Pago rechazado', {
+        toast.error('Pago Rechazado', {
           description: 'Haz click aquí para ver los pedidos',
           icon: <ShoppingBag className="h-5 w-5" />,
           duration: 10000,
@@ -105,9 +101,8 @@ const OrderNotification: React.FC = () => {
     };
 
     const handlePagoExpirado = () => {
-      playNotificationSound();
       if (!isOnPedidosPage) {
-        toast.error('Pago expirado', {
+        toast.error('Pago Expirado', {
           description: 'Haz click aquí para ver los pedidos',
           icon: <ShoppingBag className="h-5 w-5" />,
           duration: 10000,

@@ -42,22 +42,18 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
       // listeners
       newSocket.on("nuevoPedido", (data) => {
-        console.log("nuevoPedido:", data);
         setNewOrderCount((prev) => prev + 1);
       });
 
       newSocket.on("pagoAprobado", (data) => {
-        console.log("pagoAprobado:", data);
         setNewPaymentCount((prev) => prev + 1);
       });
 
       newSocket.on("pagoRechazado", (data) => {
-        console.log("pagoRechazado:", data);
         setNewPaymentCount((prev) => prev + 1);
       });
 
       newSocket.on("pagoExpirado", (data) => {
-        console.log("pagoExpirado:", data);
         setNewPaymentCount((prev) => prev + 1);
       });
 

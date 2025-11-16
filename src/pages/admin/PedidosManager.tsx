@@ -39,28 +39,22 @@ const PedidosManager = () => {
 
   useEffect(() => {
     if (socket) {
-      console.log('[PedidosManager] Socket conectado, registrando listeners...');
-      
       const handleNuevoPedido = (data: any) => {
-        console.log('[PedidosManager] ✅ Evento nuevoPedido recibido:', data);
         loadPedidos();
         toast.success(data?.message || '¡Nuevo pedido recibido!');
       };
 
       const handlePagoAprobado = (data: any) => {
-        console.log('[PedidosManager] ✅ Evento pagoAprobado recibido:', data);
         loadPedidos();
-        toast.success('Pago aprobado');
+        toast.success('Pago Aprobado');
       };
 
       const handlePagoRechazado = (data: any) => {
-        console.log('[PedidosManager] ✅ Evento pagoRechazado recibido:', data);
         loadPedidos();
-        toast.error('Pago rechazado');
+        toast.error('Pago Rechazado');
       };
 
       const handlePagoExpirado = (data: any) => {
-        console.log('[PedidosManager] ✅ Evento pagoExpirado recibido:', data);
         loadPedidos();
         toast.warning('Pago expirado automáticamente');
       };
@@ -69,18 +63,14 @@ const PedidosManager = () => {
       socket.on('pagoAprobado', handlePagoAprobado);
       socket.on('pagoRechazado', handlePagoRechazado);
       socket.on('pagoExpirado', handlePagoExpirado);
-      
-      console.log('[PedidosManager] Listeners registrados: nuevoPedido, pagoAprobado, pagoRechazado, pagoExpirado');
+
 
       return () => {
-        console.log('[PedidosManager] Limpiando listeners...');
         socket.off('nuevoPedido', handleNuevoPedido);
         socket.off('pagoAprobado', handlePagoAprobado);
         socket.off('pagoRechazado', handlePagoRechazado);
         socket.off('pagoExpirado', handlePagoExpirado);
       };
-    } else {
-      console.log('[PedidosManager] Socket NO disponible');
     }
   }, [socket]);
 
