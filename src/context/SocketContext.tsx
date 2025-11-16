@@ -34,19 +34,23 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         setConnected(false);
       });
 
-      newSocket.on('nuevoPedido', () => {
+      newSocket.on('nuevoPedido', (data) => {
+        console.log('Nuevo pedido recibido:', data);
         setNewOrderCount(prev => prev + 1);
       });
 
-      newSocket.on('pagoAprobado', () => {
+      newSocket.on('pagoAprobado', (data) => {
+        console.log('Pago aprobado:', data);
         setNewOrderCount(prev => prev + 1);
       });
 
-      newSocket.on('pagoRechazado', () => {
+      newSocket.on('pagoRechazado', (data) => {
+        console.log('Pago rechazado:', data);
         setNewOrderCount(prev => prev + 1);
       });
 
-      newSocket.on('pagoExpirado', () => {
+      newSocket.on('pagoExpirado', (data) => {
+        console.log('Pago expirado:', data);
         setNewOrderCount(prev => prev + 1);
       });
       

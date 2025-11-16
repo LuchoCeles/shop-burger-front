@@ -39,13 +39,40 @@ const PedidosManager = () => {
 
   useEffect(() => {
     if (socket) {
-      socket.on('nuevoPedido', () => {
+      const handleNuevoPedido = (data: any) => {
+        console.log('Nuevo pedido en manager:', data);
         loadPedidos();
-        toast.success('¡Nuevo pedido recibido!');
-      });
+        toast.success(data?.message || '¡Nuevo pedido recibido!');
+      };
+
+      const handlePagoAprobado = (data: any) => {
+        console.log('Pago aprobado:', data);
+        loadPedidos();
+        toast.success('Pago aprobado');
+      };
+
+      const handlePagoRechazado = (data: any) => {
+        console.log('Pago rechazado:', data);
+        loadPedidos();
+        toast.error('Pago rechazado');
+      };
+
+      const handlePagoExpirado = (data: any) => {
+        console.log('Pago expirado:', data);
+        loadPedidos();
+        toast.warning('Pago expirado automáticamente');
+      };
+
+      socket.on('nuevoPedido', handleNuevoPedido);
+      socket.on('pagoAprobado', handlePagoAprobado);
+      socket.on('pagoRechazado', handlePagoRechazado);
+      socket.on('pagoExpirado', handlePagoExpirado);
 
       return () => {
-        socket.off('nuevoPedido');
+        socket.off('nuevoPedido', handleNuevoPedido);
+        socket.off('pagoAprobado', handlePagoAprobado);
+        socket.off('pagoRechazado', handlePagoRechazado);
+        socket.off('pagoExpirado', handlePagoExpirado);
       };
     }
   }, [socket]);
