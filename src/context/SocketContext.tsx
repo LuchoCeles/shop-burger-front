@@ -38,6 +38,18 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         setNewOrderCount(prev => prev + 1);
       });
 
+      newSocket.on('pagoAprobado', () => {
+        setNewOrderCount(prev => prev + 1);
+      });
+
+      newSocket.on('pagoRechazado', () => {
+        setNewOrderCount(prev => prev + 1);
+      });
+
+      newSocket.on('pagoExpirado', () => {
+        setNewOrderCount(prev => prev + 1);
+      });
+      
       newSocket.on('connect_error', (error) => {
         console.error('Error de conexión Socket.IO:', error);
       });
