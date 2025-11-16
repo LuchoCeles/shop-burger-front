@@ -9,6 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { toast } from 'sonner';
 import Navbar from '../components/Navbar';
 import { Cliente, BankData, Category } from '@/intefaces/interfaz';
+import { useLocation } from "react-router-dom";
+
 const Numero_Whatsapp = import.meta.env.VITE_NUM_WHATSAPP;
 
 const Checkout = () => {
@@ -27,7 +29,53 @@ const Checkout = () => {
   const [mpLink, setMpLink] = useState<string | null>(null);
   const [waitingMp, setWaitingMp] = useState(false);
   const [mpReady, setMpReady] = useState(false);
+  const location = useLocation();
 
+  // ---------------------------
+  // 1) Restaurar pedido MP pendiente o limpiar aprobado
+  // ---------------------------
+  useEffect(() => {
+    const mpStatus = localStorage.getItem("mp_status");
+
+    if (mpStatus === "pending") {
+      const data = sessionStorage.getItem("pedido_mp_temp");
+      if (data) {
+        const parsed = JSON.parse(data);
+        setMpLink(parsed.mpLink);
+        setMpReady(true);
+      }
+    }
+
+    if (mpStatus === "approved") {
+      sessionStorage.removeItem("pedido_mp_temp");
+      localStorage.removeItem("mp_status");
+      setMpReady(false);
+      setMpLink(null);
+    }
+  }, []);
+
+  // ---------------------------
+  // 2) Cleanup: salir del checkout sin pagar
+  // ---------------------------
+  useEffect(() => {
+    return () => {
+      const mpStatus = localStorage.getItem("mp_status");
+
+      if (location.pathname === "/checkout" && mpStatus === "pending") {
+        clearCart();
+        sessionStorage.removeItem("pedido_mp_temp");
+        localStorage.removeItem("mp_status");
+        setMpReady(false);
+        setMpLink(null);
+        setWaitingMp(false);
+        setSubmitting(false);
+      }
+    };
+  }, [location.pathname]);
+
+  // ---------------------------
+  // Fetch inicial
+  // ---------------------------
   useEffect(() => {
     fetchBankData();
   }, []);
@@ -47,6 +95,9 @@ const Checkout = () => {
     }
   };
 
+  // ---------------------------
+  // Handle submit
+  // ---------------------------
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -94,12 +145,22 @@ const Checkout = () => {
 
       if (metodoDePago === 'Mercado Pago') {
         if (response.data.init_point) {
+          localStorage.setItem("mp_status", "pending");
+
+          sessionStorage.setItem(
+            "pedido_mp_temp",
+            JSON.stringify({
+              pedido,
+              orderId: response.data.id,
+              mpLink: response.data.init_point
+            })
+          );
+
           setMpLink(response.data.init_point);
           setWaitingMp(false);
+          setSubmitting(false);
           setMpReady(true);
           return;
-        } else {
-          toast.error('No se recibió el link de pago de Mercado Pago');
         }
       } else {
         const whatsappMessage = encodeURIComponent(
@@ -121,11 +182,27 @@ const Checkout = () => {
     }
   };
 
+  // ---------------------------
+  // Pago MP → abrir link y limpiar
+  // ---------------------------
   const clearCartMp = () => {
-    window.open(mpLink, "_blank");
-    clearCart();
-  }
+    if (mpLink) {
+      window.open(mpLink, "_blank");
+    }
 
+    clearCart();
+    sessionStorage.removeItem("pedido_mp_temp");
+    localStorage.removeItem("mp_status");
+
+    setMpReady(false);
+    setMpLink(null);
+    setWaitingMp(false);
+    setSubmitting(false);
+  };
+
+  // ---------------------------
+  // UI: carrito vacío
+  // ---------------------------
   if (cart.length === 0) {
     return (
       <div className="min-h-screen bg-background">
@@ -140,6 +217,9 @@ const Checkout = () => {
     );
   }
 
+  // ---------------------------
+  // Loading screen
+  // ---------------------------
   if (loadingData) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background text-foreground">
@@ -148,6 +228,9 @@ const Checkout = () => {
     );
   }
 
+  // ---------------------------
+  // Render principal
+  // ---------------------------
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -171,6 +254,7 @@ const Checkout = () => {
                     type="tel"
                     placeholder="+54 9 11 1234-5678"
                     value={cliente.telefono}
+                    disabled={submitting || waitingMp}
                     onChange={(e) =>
                       setCliente({ ...cliente, telefono: e.target.value })
                     }
@@ -178,6 +262,7 @@ const Checkout = () => {
                     className="bg-background"
                   />
                 </div>
+
                 <div>
                   <label className="mb-2 block text-sm font-medium text-foreground">
                     Dirección
@@ -186,6 +271,7 @@ const Checkout = () => {
                     type="text"
                     placeholder="Calle 123, Ciudad"
                     value={cliente.direccion}
+                    disabled={submitting || waitingMp}
                     onChange={(e) =>
                       setCliente({ ...cliente, direccion: e.target.value })
                     }
@@ -193,39 +279,46 @@ const Checkout = () => {
                     className="bg-background"
                   />
                 </div>
+
                 <div>
                   <label className="mb-2 block text-sm font-medium text-foreground">
                     Método de pago
                   </label>
+
                   <div className="space-y-2">
                     <label className="flex items-center space-x-3 rounded-lg border border-border bg-background p-3 cursor-pointer hover:bg-accent transition-colors">
                       <input
                         type="radio"
                         name="metodoDePago"
                         value="Efectivo"
+                        disabled={submitting || waitingMp}
                         checked={metodoDePago === 'Efectivo'}
                         onChange={(e) => setMetodoDePago(e.target.value as 'Efectivo')}
                         className="h-4 w-4 text-primary"
                       />
                       <span className="text-foreground">Efectivo</span>
                     </label>
+
                     <label className="flex items-center space-x-3 rounded-lg border border-border bg-background p-3 cursor-pointer hover:bg-accent transition-colors">
                       <input
                         type="radio"
                         name="metodoDePago"
                         value="Transferencia"
                         checked={metodoDePago === 'Transferencia'}
+                        disabled={submitting || waitingMp}
                         onChange={(e) => setMetodoDePago(e.target.value as 'Transferencia')}
                         className="h-4 w-4 text-primary"
                       />
                       <span className="text-foreground">Transferencia</span>
                     </label>
+
                     {Boolean(bankData?.mpEstado) && (
                       <label className="flex items-center space-x-3 rounded-lg border border-border bg-background p-3 cursor-pointer hover:bg-accent transition-colors">
                         <input
                           type="radio"
                           name="metodoDePago"
                           value="Mercado Pago"
+                          disabled={submitting || waitingMp}
                           checked={metodoDePago === 'Mercado Pago'}
                           onChange={(e) => setMetodoDePago(e.target.value as 'Mercado Pago')}
                           className="h-4 w-4 text-primary"
@@ -235,6 +328,7 @@ const Checkout = () => {
                     )}
                   </div>
                 </div>
+
                 <div>
                   <label className="mb-2 block text-sm font-medium text-foreground">
                     Notas adicionales (Opcional)
@@ -243,9 +337,11 @@ const Checkout = () => {
                     placeholder="Agregar instrucciones de entrega o notas adicionales..."
                     value={descripcion}
                     onChange={(e) => setDescripcion(e.target.value)}
+                    disabled={submitting || waitingMp}
                     className="bg-background"
                   />
                 </div>
+
                 <Button
                   type={!mpReady ? "submit" : "button"}
                   className={`w-full text-primary-foreground hover:bg-primary/90 ${mpReady ? "bg-[rgb(99,159,236)] hover:bg-[rgb(127,180,248)]" : "bg-primary"}`}
@@ -267,13 +363,16 @@ const Checkout = () => {
             </CardContent>
           </Card>
 
+          {/* --------------------------- */}
+          {/* RESUMEN DEL PEDIDO */}
+          {/* --------------------------- */}
           <Card className="bg-card">
             <CardHeader>
               <CardTitle className="text-foreground">Resumen del pedido</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
-                {/* Agrupar productos por categoría */}
+
                 {Object.entries(
                   cart.reduce((acc, item) => {
                     const categoryId = item.idCategoria || 0;
@@ -292,38 +391,37 @@ const Checkout = () => {
                       <h3 className="text-lg font-semibold text-primary border-b border-border pb-2">
                         {categoryName}
                       </h3>
+
                       <div className="space-y-4">
                         {items.map((item) => (
                           <div key={item.cartId} className="flex justify-between">
                             <div className="text-foreground text-xl">
-                              <p>
-                                {item.nombre} x{item.cantidad}
-                              </p>
-                              {/* Mostrar adicionales si existen */}
-                              {item.adicionales && item.adicionales.filter(adicional => adicional.cantidad > 0).length > 0 && (
+                              <p>{item.nombre} x{item.cantidad}</p>
+
+                              {item.adicionales && item.adicionales.filter(ad => ad.cantidad > 0).length > 0 && (
                                 <ul className="ml-4 list-disc text-sm text-muted-foreground">
                                   {item.adicionales
-                                    .filter(adicional => adicional.cantidad > 0)
-                                    .map((adicional) => (
-                                      <li key={adicional.id}>
-                                        {adicional.nombre} x{adicional.cantidad}
-                                      </li>
+                                    .filter(ad => ad.cantidad > 0)
+                                    .map((ad) => (
+                                      <li key={ad.id}>{ad.nombre} x{ad.cantidad}</li>
                                     ))}
                                 </ul>
                               )}
                             </div>
+
                             <div className="text-foreground text-xl text-right">
                               <span className="font-semibold text-foreground text-xl">
                                 ${(item.precio * item.cantidad).toFixed(2)}
                               </span>
 
-                              {item.adicionales && item.adicionales.filter(adicional => adicional.cantidad > 0).length > 0 && (
+                              {item.adicionales && item.adicionales.filter(ad => ad.cantidad > 0).length > 0 && (
                                 <ul className="text-sm text-muted-foreground text-right">
-                                  {item.adicionales
-                                    .filter(adicional => adicional.cantidad > 0)
-                                    .map((adicional) => (
-                                      <li key={adicional.id}>${(adicional.precio * adicional.cantidad).toFixed(2)}</li>
-                                    ))}
+                                  {item.adicionales.map(
+                                    (ad) =>
+                                      ad.cantidad > 0 && (
+                                        <li key={ad.id}>${(ad.precio * ad.cantidad).toFixed(2)}</li>
+                                      )
+                                  )}
                                 </ul>
                               )}
                             </div>
@@ -340,22 +438,21 @@ const Checkout = () => {
                     <span className="text-primary">${total.toFixed(2)}</span>
                   </div>
                 </div>
+
                 {metodoDePago === 'Transferencia' && bankData && (
                   <div className="rounded-lg bg-muted p-4 text-sm text-muted-foreground">
-                    <p className="mb-2 font-semibold text-foreground">
-                      Datos de pago:
-                    </p>
+                    <p className="mb-2 font-semibold text-foreground">Datos de pago:</p>
                     <p>Nombre: {bankData.nombre}</p>
                     <p>Apellido: {bankData.apellido}</p>
                     <p>CUIT / DNI: {bankData.cuit}</p>
                     <p>Alias: {bankData.alias}</p>
                     <p>CBU: {bankData.cbu}</p>
                     <p className="mt-2 text-xs">
-                      Después de confirmar, recibirás un mensaje para enviarnos el
-                      comprobante por WhatsApp.
+                      Después de confirmar, recibirás un mensaje para enviarnos el comprobante por WhatsApp.
                     </p>
                   </div>
                 )}
+
               </div>
             </CardContent>
           </Card>
