@@ -9,79 +9,76 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [socket, setSocket] = useState<Socket | null>(null);
   const [connected, setConnected] = useState(false);
   const [newOrderCount, setNewOrderCount] = useState(0);
+  const [newPaymentCount, setNewPaymentCount] = useState(0);
   const { isAuthenticated } = useAuth();
   const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
-    if (isAuthenticated && !socketRef.current) {
+    if (!isAuthenticated) {
+      if (socketRef.current) socketRef.current.disconnect();
+      socketRef.current = null;
+      setSocket(null);
+      setConnected(false);
+      setNewOrderCount(0);
+      setNewPaymentCount(0);
+      return;
+    }
+
+    if (!socketRef.current) {
       const API_URL = import.meta.env.VITE_API_URL;
-      const token = localStorage.getItem('token');
-      
+      const token = localStorage.getItem("token");
+
       const newSocket = io(API_URL, {
-        auth: {
-          token: token
-        },
-        transports: ['websocket', 'polling']
-      });
-
-      newSocket.on('connect', () => {
-        console.log('Socket.IO conectado');
-        setConnected(true);
-      });
-
-      newSocket.on('disconnect', () => {
-        console.log('Socket.IO desconectado');
-        setConnected(false);
-      });
-
-      newSocket.on('nuevoPedido', (data) => {
-        console.log('Nuevo pedido recibido:', data);
-        setNewOrderCount(prev => prev + 1);
-      });
-
-      newSocket.on('pagoAprobado', (data) => {
-        console.log('Pago aprobado:', data);
-        setNewOrderCount(prev => prev + 1);
-      });
-
-      newSocket.on('pagoRechazado', (data) => {
-        console.log('Pago rechazado:', data);
-        setNewOrderCount(prev => prev + 1);
-      });
-
-      newSocket.on('pagoExpirado', (data) => {
-        console.log('Pago expirado:', data);
-        setNewOrderCount(prev => prev + 1);
-      });
-      
-      newSocket.on('connect_error', (error) => {
-        console.error('Error de conexión Socket.IO:', error);
+        auth: { token },
+        transports: ["websocket", "polling"],
       });
 
       socketRef.current = newSocket;
       setSocket(newSocket);
 
+      // conexión
+      newSocket.on("connect", () => setConnected(true));
+      newSocket.on("disconnect", () => setConnected(false));
+
+      // listeners
+      newSocket.on("nuevoPedido", (data) => {
+        console.log("nuevoPedido:", data);
+        setNewOrderCount((prev) => prev + 1);
+      });
+
+      newSocket.on("pagoAprobado", (data) => {
+        console.log("pagoAprobado:", data);
+        setNewPaymentCount((prev) => prev + 1);
+      });
+
+      newSocket.on("pagoRechazado", (data) => {
+        console.log("pagoRechazado:", data);
+        setNewPaymentCount((prev) => prev + 1);
+      });
+
+      newSocket.on("pagoExpirado", (data) => {
+        console.log("pagoExpirado:", data);
+        setNewPaymentCount((prev) => prev + 1);
+      });
+
+      newSocket.on("connect_error", (err) =>
+        console.error("Socket error:", err)
+      );
+
       return () => {
-        if (socketRef.current) {
-          socketRef.current.disconnect();
-          socketRef.current = null;
-        }
+        if (socketRef.current) socketRef.current.disconnect();
+        socketRef.current = null;
       };
-    } else if (!isAuthenticated && socketRef.current) {
-      socketRef.current.disconnect();
-      socketRef.current = null;
-      setSocket(null);
-      setConnected(false);
-      setNewOrderCount(0);
     }
   }, [isAuthenticated]);
+
 
   const clearNewOrderCount = () => {
     setNewOrderCount(0);
   };
 
   return (
-    <SocketContext.Provider value={{ socket, connected, newOrderCount, clearNewOrderCount }}>
+    <SocketContext.Provider value={{ socket, connected, newOrderCount, newPaymentCount, clearNewOrderCount }}>
       {children}
     </SocketContext.Provider>
   );

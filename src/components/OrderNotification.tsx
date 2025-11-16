@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { ShoppingBag } from 'lucide-react';
 
 const OrderNotification: React.FC = () => {
-  const { socket, newOrderCount, clearNewOrderCount } = useSocket();
+  const { socket, newOrderCount, newPaymentCount, clearNewOrderCount } = useSocket();
   const { isAuthenticated } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
@@ -69,10 +69,68 @@ const OrderNotification: React.FC = () => {
       }
     };
 
+    const handleNuevoPago = () => {
+      playNotificationSound();
+
+      if (!isOnPedidosPage) {
+        toast.success('Nuevo pago recibido', {
+          description: 'Haz click aquí para ver los pedidos',
+          icon: <ShoppingBag className="h-5 w-5" />,
+          duration: 10000,
+          action: {
+            label: 'Ver pedidos',
+            onClick: () => {
+              navigate('/admin/pedidos');
+            },
+          },
+        });
+      }
+    };
+
+    const handlePagoRechazado = () => {
+      playNotificationSound();
+      if (!isOnPedidosPage) {
+        toast.error('Pago rechazado', {
+          description: 'Haz click aquí para ver los pedidos',
+          icon: <ShoppingBag className="h-5 w-5" />,
+          duration: 10000,
+          action: {
+            label: 'Ver pedidos',
+            onClick: () => {
+              navigate('/admin/pedidos');
+            },
+          },
+        });
+      }
+    };
+
+    const handlePagoExpirado = () => {
+      playNotificationSound();
+      if (!isOnPedidosPage) {
+        toast.error('Pago expirado', {
+          description: 'Haz click aquí para ver los pedidos',
+          icon: <ShoppingBag className="h-5 w-5" />,
+          duration: 10000,
+          action: {
+            label: 'Ver pedidos',
+            onClick: () => {
+              navigate('/admin/pedidos');
+            },
+          },
+        });
+      }
+    }
+
     socket.on('nuevoPedido', handleNuevoPedido);
+    socket.on('pagoAprobado', handleNuevoPago);
+    socket.on('pagoRechazado', handlePagoRechazado);
+    socket.on('pagoExpirado', handlePagoExpirado);
 
     return () => {
       socket.off('nuevoPedido', handleNuevoPedido);
+      socket.off('pagoAprobado', handleNuevoPago);
+      socket.off('pagoRechazado', handlePagoRechazado);
+      socket.off('pagoExpirado', handlePagoExpirado);
     };
   }, [socket, isAuthenticated, isOnPedidosPage, navigate]);
 

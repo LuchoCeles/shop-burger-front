@@ -187,5 +187,6 @@ export interface SocketContextType {
   socket: Socket | null;
   connected: boolean;
   newOrderCount: number;
+  newPaymentCount: number;
   clearNewOrderCount: () => void;
 }
