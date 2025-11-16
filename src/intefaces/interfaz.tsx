@@ -68,6 +68,10 @@ export interface Orders {
     telefono: string;
     direccion: string;
   }
+  Pago?: {
+    id: number;
+    estado: string;
+  }
   productos: {
     nombre: string;
     precio: number;
