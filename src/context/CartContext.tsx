@@ -71,7 +71,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const addToCart = (product: Omit<CartItem, 'cantidad'>) => {
     setCart((prev) => {
-      // Buscamos item igual por contenido, NO por cartId
+      // Buscamos item igual por contenido
       const existing = prev.find((item) => areItemsEqual(item, product));
 
       if (existing) {

@@ -28,6 +28,7 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
         nombre: product.nombre,
         precio: product.precio * (1 - product.descuento / 100),
         descuento: product.descuento,
+        idCategoria: product.idCategoria,
         url_imagen: product.url_imagen,
         stock: product.stock,
         metodoDePago: "",
@@ -44,8 +45,9 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
       nombre: product.nombre,
       precio: product.precio * (1 - product.descuento / 100),
       descuento: product.descuento,
-      url_imagen: product.url_imagen,
       stock: product.stock,
+      idCategoria: product.idCategoria,
+      url_imagen: product.url_imagen,
       adicionales,
       metodoDePago: "",
     });
