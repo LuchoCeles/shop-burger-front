@@ -214,28 +214,50 @@ const PedidosManager = () => {
             </div>
 
             <div className="border-t border-border pt-4">
-              <p className="mb-2 font-medium text-foreground">Productos:</p>
-              <div className="space-y-2 text-sm">
+              <p className="mb-3 text-lg font-semibold text-foreground">Productos del Pedido:</p>
+              <div className="space-y-3">
                 {pedido.productos?.map((prod, idx: number) => (
-                  <div key={idx}>
-                    <p className="text-muted-foreground font-medium">
-                      {prod.nombre} x{prod.cantidad} - ${prod.precio * prod.cantidad}
-                    </p>
-                    {prod.adicionales && prod.adicionales.length > 0 && (
-                      <div className="ml-4 mt-1 space-y-1">
-                        {prod.adicionales.map((adicional: any, adIdx: number) => (
-                          <p key={adIdx} className="text-muted-foreground text-xs">
-                            + {adicional.nombre} x{adicional.cantidad} - ${adicional.precio * adicional.cantidad}
-                          </p>
-                        ))}
+                  <div key={idx} className="rounded-md border border-border bg-muted/30 p-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <p className="text-base font-semibold text-foreground">
+                          {prod.nombre}
+                        </p>
+                        {prod.adicionales && prod.adicionales.filter((a: any) => a.precio > 0).length > 0 && (
+                          <div className="mt-2 space-y-1.5">
+                            <p className="text-xs font-medium text-muted-foreground">Adicionales:</p>
+                            {prod.adicionales
+                              .filter((adicional: any) => adicional.precio > 0)
+                              .map((adicional: any, adIdx: number) => (
+                                <div key={adIdx} className="flex items-center gap-2 rounded-sm bg-background/50 px-2 py-1">
+                                  <span className="text-xs text-foreground">
+                                    + {adicional.nombre}
+                                  </span>
+                                  <span className="text-xs font-medium text-muted-foreground">
+                                    x{adicional.cantidad}
+                                  </span>
+                                  <span className="ml-auto text-xs font-semibold text-primary">
+                                    ${adicional.precio * adicional.cantidad}
+                                  </span>
+                                </div>
+                              ))}
+                          </div>
+                        )}
                       </div>
-                    )}
+                      <div className="ml-4 text-right">
+                        <p className="text-sm font-medium text-muted-foreground">Cantidad</p>
+                        <p className="text-2xl font-bold text-foreground">{prod.cantidad}</p>
+                        <p className="mt-1 text-lg font-bold text-primary">${prod.precio * prod.cantidad}</p>
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
-              <p className="mt-4 text-right text-xl font-bold text-primary">
-                Total: ${pedido.precioTotal}
-              </p>
+              <div className="mt-6 rounded-md bg-primary/10 p-4">
+                <p className="text-right text-2xl font-bold text-primary">
+                  Total: ${pedido.precioTotal}
+                </p>
+              </div>
             </div>
           </div>
         ))
