@@ -223,26 +223,36 @@ const PedidosManager = () => {
                         <p className="text-base font-semibold text-foreground">
                           {prod.nombre}
                         </p>
-                        {prod.adicionales && prod.adicionales.filter((a: any) => a.precio > 0).length > 0 && (
-                          <div className="mt-2 space-y-1.5">
-                            <p className="text-xs font-medium text-muted-foreground">Adicionales:</p>
-                            {prod.adicionales
-                              .filter((adicional: any) => adicional.precio > 0)
-                              .map((adicional: any, adIdx: number) => (
-                                <div key={adIdx} className="flex items-center gap-2 rounded-sm bg-background/50 px-2 py-1">
-                                  <span className="text-xs text-foreground">
-                                    + {adicional.nombre}
-                                  </span>
-                                  <span className="text-xs font-medium text-muted-foreground">
-                                    x{adicional.cantidad}
-                                  </span>
-                                  <span className="ml-auto text-xs font-semibold text-primary">
-                                    ${adicional.precio * adicional.cantidad}
-                                  </span>
-                                </div>
-                              ))}
-                          </div>
-                        )}
+                        <div className="mt-2 space-y-1.5">
+                          <p className="text-xs font-medium text-muted-foreground">Adicionales:</p>
+                          {Array.isArray(prod.adicionales) && (
+                            (() => {
+                              const adicionalesValidos = prod.adicionales.filter(a => a.cantidad > 0);
+
+                              if (adicionalesValidos.length === 0) return null;
+                              return (
+                                <>
+                                  {adicionalesValidos.map((adicional, adIdx) => (
+                                    <div
+                                      key={adIdx}
+                                      className="flex items-center gap-2 rounded-sm bg-background/50 px-2 py-1"
+                                    >
+                                      <span className="text-xs text-foreground">+ {adicional.nombre}</span>
+
+                                      <span className="text-xs font-medium text-muted-foreground">
+                                        x{adicional.cantidad}
+                                      </span>
+
+                                      <span className="ml-auto text-xs font-semibold text-primary">
+                                        ${adicional.precio * adicional.cantidad}
+                                      </span>
+                                    </div>
+                                  ))}
+                                </>
+                              );
+                            })()
+                          )}
+                        </div>
                       </div>
                       <div className="ml-4 text-right">
                         <p className="text-sm font-medium text-muted-foreground">Cantidad</p>

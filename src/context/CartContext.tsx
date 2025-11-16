@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { CartItem, CartContextType } from '../intefaces/interfaz';
+import { CartItem, CartContextType, CartItemAdicional } from '../intefaces/interfaz';
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
@@ -26,6 +26,39 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return [];
   });
 
+  const sortExtras = (extras: CartItemAdicional[] = []) => {
+    return [...extras].sort((a, b) => {
+      const idA = Number(a.id) || 0;
+      const idB = Number(b.id) || 0;
+      return idA - idB;
+    });
+  };
+
+
+  const areItemsEqual = (item1: CartItem, item2: Omit<CartItem, 'cantidad'>) => {
+    // 1. mismo producto
+    if (item1.id !== item2.id) return false;
+
+    // 2. mismos adicionales (si no hay adicionales, ok)
+    const a1 = item1.adicionales || [];
+    const a2 = item2.adicionales || [];
+
+    if (a1.length !== a2.length) return false;
+
+    // ordenar por id para comparar sin importar el orden
+    const s1 = sortExtras(a1);
+    const s2 = sortExtras(a2);
+
+    // comparar cada adicional
+    for (let i = 0; i < s1.length; i++) {
+      if (s1[i].id !== s2[i].id) return false;
+      if (s1[i].cantidad !== s2[i].cantidad) return false;
+    }
+
+    return true;
+  }
+
+
   useEffect(() => {
     if (cart.length > 0) {
       localStorage.setItem('cart', JSON.stringify(cart));
@@ -38,20 +71,28 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const addToCart = (product: Omit<CartItem, 'cantidad'>) => {
     setCart((prev) => {
-      // Buscar por cartId en lugar de solo id
-      const existing = prev.find((item) => item.cartId === product.cartId);
+      // Buscamos item igual por contenido, NO por cartId
+      const existing = prev.find((item) => areItemsEqual(item, product));
+
       if (existing) {
-        // Validar que no exceda el stock
+        // Validar stock
         if (product.stock !== undefined && existing.cantidad >= product.stock) {
-          return prev; // No agregar más si ya alcanzó el stock
+          return prev;
         }
+
+        // Merge: sumar cantidad
         return prev.map((item) =>
-          item.cartId === product.cartId ? { ...item, cantidad: item.cantidad + 1, stock: product.stock } : item
+          areItemsEqual(item, product)
+            ? { ...item, cantidad: item.cantidad + 1 }
+            : item
         );
       }
+
+      // Crear ítem nuevo
       return [...prev, { ...product, cantidad: 1 }];
     });
   };
+
 
   const removeFromCart = (cartId: string) => {
     setCart((prev) => prev.filter((item) => item.cartId !== cartId));
