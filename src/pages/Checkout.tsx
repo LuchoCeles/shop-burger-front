@@ -27,15 +27,15 @@ const Checkout = () => {
   const [descripcion, setDescripcion] = useState('');
   const [metodoDePago, setMetodoDePago] = useState<'Efectivo' | 'Transferencia' | 'Mercado Pago'>('Efectivo');
   const [mpLink, setMpLink] = useState<string | null>(null);
-  const [waitingMp, setWaitingMp] = useState(false);
+  const [orderId, setOrderId] = useState<number | null>(null);
   const [mpReady, setMpReady] = useState(false);
   const location = useLocation();
 
   // ---------------------------
-  // 1) Restaurar pedido MP pendiente o limpiar aprobado
+  // Restaurar pedido MP pendiente o limpiar aprobado
   // ---------------------------
   useEffect(() => {
-    const mpStatus = localStorage.getItem("mp_status");
+    const mpStatus = sessionStorage.getItem("mp_status");
 
     if (mpStatus === "pending") {
       const data = sessionStorage.getItem("pedido_mp_temp");
@@ -45,30 +45,17 @@ const Checkout = () => {
         setMpReady(true);
       }
     }
-
-    if (mpStatus === "approved") {
-      sessionStorage.removeItem("pedido_mp_temp");
-      localStorage.removeItem("mp_status");
-      setMpReady(false);
-      setMpLink(null);
-    }
   }, []);
 
   // ---------------------------
-  // 2) Cleanup: salir del checkout sin pagar
+  // Cleanup: salir del checkout sin pagar
   // ---------------------------
   useEffect(() => {
     return () => {
-      const mpStatus = localStorage.getItem("mp_status");
+      const mpStatus = sessionStorage.getItem("mp_status");
 
       if (location.pathname === "/checkout" && mpStatus === "pending") {
-        clearCart();
-        sessionStorage.removeItem("pedido_mp_temp");
-        localStorage.removeItem("mp_status");
-        setMpReady(false);
-        setMpLink(null);
-        setWaitingMp(false);
-        setSubmitting(false);
+        clearCartMp();
       }
     };
   }, [location.pathname]);
@@ -98,6 +85,26 @@ const Checkout = () => {
   // ---------------------------
   // Handle submit
   // ---------------------------
+  const cargarPedido = () => {
+    const pedido = {
+      cliente: {
+        telefono: cliente.telefono,
+        direccion: cliente.direccion,
+      },
+      descripcion,
+      metodoDePago,
+      productos: cart.map((item) => ({
+        id: item.id,
+        cantidad: item.cantidad,
+        adicionales: item.adicionales?.map((ad) => ({
+          id: ad.id,
+          cantidad: ad.cantidad,
+        })) || [],
+      })),
+    };
+    return pedido;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -113,68 +120,20 @@ const Checkout = () => {
 
     setSubmitting(true);
 
-    if (metodoDePago === "Mercado Pago") {
-      setWaitingMp(true);
-    }
-
     try {
-      const pedido = {
-        cliente: {
-          telefono: cliente.telefono,
-          direccion: cliente.direccion,
-        },
-        descripcion,
-        metodoDePago,
-        productos: cart.map((item) => ({
-          id: item.id,
-          cantidad: item.cantidad,
-          adicionales: item.adicionales?.map((ad) => ({
-            id: ad.id,
-            cantidad: ad.cantidad,
-          })) || [],
-        })),
-      };
+      const pedido = cargarPedido();
 
       const response = await ApiService.createOrder(pedido);
 
-      if (metodoDePago !== "Mercado Pago") {
-        clearCart();
-      }
+      sessionStorage.setItem("mp_status", "pending");
 
       toast.success('Pedido creado exitosamente');
 
-      if (metodoDePago === 'Mercado Pago') {
-        if (response.data.init_point) {
-          localStorage.setItem("mp_status", "pending");
+      setSubmitting(false);
+      setMpReady(true);
+      setOrderId(response.data.id);
+      cargarPedidoMP(response.data, pedido);
 
-          sessionStorage.setItem(
-            "pedido_mp_temp",
-            JSON.stringify({
-              pedido,
-              orderId: response.data.id,
-              mpLink: response.data.init_point
-            })
-          );
-
-          setMpLink(response.data.init_point);
-          setWaitingMp(false);
-          setSubmitting(false);
-          setMpReady(true);
-          return;
-        }
-      } else {
-        const whatsappMessage = encodeURIComponent(
-          `¡Hola! Te paso el comprobante de mi pedido #${response.data.id}.`
-        );
-
-        setTimeout(() => {
-          window.open(
-            `https://wa.me/${Numero_Whatsapp}?text=${whatsappMessage}`,
-            '_blank'
-          );
-          navigate('/');
-        }, 1500);
-      }
     } catch (error: any) {
       toast.error(error.message || 'Error al crear el pedido');
     } finally {
@@ -182,21 +141,70 @@ const Checkout = () => {
     }
   };
 
+  const cargarPedidoMP = (data, pedido) => {
+    if (data.init_point) {
+      setMpLink(data.init_point);
+    }
+    sessionStorage.setItem(
+      "pedido_mp_temp",
+      JSON.stringify({
+        pedido,
+        orderId: data.id,
+        mpLink: data.init_point || null,
+      })
+    );
+    return;
+  }
+
   // ---------------------------
-  // Pago MP → abrir link y limpiar
+  // Funciones de pago
   // ---------------------------
-  const clearCartMp = () => {
-    if (mpLink) {
-      window.open(mpLink, "_blank");
+  const pagarConEfectivo = () => {
+    const whatsappMessage = encodeURIComponent(
+      `¡Hola! Tengo que pagar en efectivo mi pedido #${orderId}.`
+    );
+    return `https://wa.me/${Numero_Whatsapp}?text=${whatsappMessage}`;
+  };
+
+  const pagarConTransferencia = () => {
+    const whatsappMessage = encodeURIComponent(
+      `¡Hola! Te paso el comprobante de mi pedido #${orderId}.`
+    );
+    return `https://wa.me/${Numero_Whatsapp}?text=${whatsappMessage}`;
+  }
+
+  // ---------------------------
+  // Pago → abrir link y limpiar
+  // ---------------------------
+  const Payment = () => {
+    let url = "";
+
+    if (metodoDePago === "Mercado Pago" && mpLink) {
+      url = mpLink;
     }
 
+    if (metodoDePago === "Transferencia") {
+      url = pagarConTransferencia();
+    }
+
+    if (metodoDePago === "Efectivo") {
+      url = pagarConEfectivo();
+    }
+
+    if (url) {
+      window.open(url, "_blank");
+    }
+
+    // Limpiar todo
+    clearCartMp();
+  };
+
+  const clearCartMp = () => {
     clearCart();
     sessionStorage.removeItem("pedido_mp_temp");
-    localStorage.removeItem("mp_status");
-
+    sessionStorage.removeItem("mp_status");
     setMpReady(false);
     setMpLink(null);
-    setWaitingMp(false);
     setSubmitting(false);
   };
 
@@ -254,7 +262,7 @@ const Checkout = () => {
                     type="tel"
                     placeholder="+54 9 11 1234-5678"
                     value={cliente.telefono}
-                    disabled={submitting || waitingMp}
+                    disabled={submitting}
                     onChange={(e) =>
                       setCliente({ ...cliente, telefono: e.target.value })
                     }
@@ -271,7 +279,7 @@ const Checkout = () => {
                     type="text"
                     placeholder="Calle 123, Ciudad"
                     value={cliente.direccion}
-                    disabled={submitting || waitingMp}
+                    disabled={submitting}
                     onChange={(e) =>
                       setCliente({ ...cliente, direccion: e.target.value })
                     }
@@ -291,7 +299,7 @@ const Checkout = () => {
                         type="radio"
                         name="metodoDePago"
                         value="Efectivo"
-                        disabled={submitting || waitingMp}
+                        disabled={submitting}
                         checked={metodoDePago === 'Efectivo'}
                         onChange={(e) => setMetodoDePago(e.target.value as 'Efectivo')}
                         className="h-4 w-4 text-primary"
@@ -305,7 +313,7 @@ const Checkout = () => {
                         name="metodoDePago"
                         value="Transferencia"
                         checked={metodoDePago === 'Transferencia'}
-                        disabled={submitting || waitingMp}
+                        disabled={submitting}
                         onChange={(e) => setMetodoDePago(e.target.value as 'Transferencia')}
                         className="h-4 w-4 text-primary"
                       />
@@ -318,7 +326,7 @@ const Checkout = () => {
                           type="radio"
                           name="metodoDePago"
                           value="Mercado Pago"
-                          disabled={submitting || waitingMp}
+                          disabled={submitting}
                           checked={metodoDePago === 'Mercado Pago'}
                           onChange={(e) => setMetodoDePago(e.target.value as 'Mercado Pago')}
                           className="h-4 w-4 text-primary"
@@ -337,18 +345,19 @@ const Checkout = () => {
                     placeholder="Agregar instrucciones de entrega o notas adicionales..."
                     value={descripcion}
                     onChange={(e) => setDescripcion(e.target.value)}
-                    disabled={submitting || waitingMp}
+                    disabled={submitting}
                     className="bg-background"
                   />
                 </div>
 
                 <Button
                   type={!mpReady ? "submit" : "button"}
-                  className={`w-full text-primary-foreground hover:bg-primary/90 ${mpReady ? "bg-[rgb(99,159,236)] hover:bg-[rgb(127,180,248)]" : "bg-primary"}`}
-                  disabled={submitting || waitingMp}
+                  className={`w-full text-primary-foreground hover:bg-primary/90 ${mpReady ? "bg-[rgb(99,159,236)] hover:bg-[rgb(127,180,248)]" : "bg-primary"
+                    }`}
+                  disabled={submitting}
                   onClick={() => {
-                    if (mpReady && mpLink) {
-                      clearCartMp();
+                    if (mpReady) {
+                      Payment();
                     }
                   }}
                 >
@@ -358,6 +367,7 @@ const Checkout = () => {
                       ? "Cargando..."
                       : "Confirmar Pedido"}
                 </Button>
+
 
               </form>
             </CardContent>
