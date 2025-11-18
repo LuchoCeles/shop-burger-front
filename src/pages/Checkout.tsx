@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import ApiService from '../services/api';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Textarea } from '../components/ui/textarea';
@@ -10,6 +11,7 @@ import { toast } from 'sonner';
 import Navbar from '../components/Navbar';
 import { Cliente, BankData, Category } from '@/intefaces/interfaz';
 import { useLocation } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 
 const Numero_Whatsapp = import.meta.env.VITE_NUM_WHATSAPP;
 
@@ -25,6 +27,7 @@ const Checkout = () => {
     direccion: '',
   });
   const [descripcion, setDescripcion] = useState('');
+  const [tipoEntrega, setTipoEntrega] = useState<'retiro' | 'domicilio'>('retiro');
   const [metodoDePago, setMetodoDePago] = useState<'Efectivo' | 'Transferencia' | 'Mercado Pago'>('Efectivo');
   const [mpLink, setMpLink] = useState<string | null>(null);
   const [orderId, setOrderId] = useState<number | null>(null);
@@ -108,8 +111,8 @@ const Checkout = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!cliente.telefono || !cliente.direccion) {
-      toast.error('Completa todos los campos requeridos');
+    if (tipoEntrega === 'domicilio' && (!cliente.telefono || !cliente.direccion)) {
+      toast.error('Completa teléfono y dirección');
       return;
     }
 
@@ -254,39 +257,76 @@ const Checkout = () => {
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-foreground">
-                    Teléfono
-                  </label>
-                  <Input
-                    type="tel"
-                    placeholder="+54 9 11 1234-5678"
-                    value={cliente.telefono}
-                    disabled={submitting}
-                    onChange={(e) =>
-                      setCliente({ ...cliente, telefono: e.target.value })
-                    }
-                    required
-                    className="bg-background"
-                  />
-                </div>
+                <Select
+                  value={tipoEntrega}
+                  onValueChange={(value: 'retiro' | 'domicilio') => {
+                    setTipoEntrega(value);
 
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-foreground">
-                    Dirección
-                  </label>
-                  <Input
-                    type="text"
-                    placeholder="Calle 123, Ciudad"
-                    value={cliente.direccion}
-                    disabled={submitting}
-                    onChange={(e) =>
-                      setCliente({ ...cliente, direccion: e.target.value })
+                    if (value === 'retiro') {
+                      setCliente({ telefono: "N/A", direccion: "Retira en local" });
+                    } else {
+                      setCliente({ telefono: "", direccion: "" });
                     }
-                    required
-                    className="bg-background"
-                  />
-                </div>
+                  }}
+                >
+                  <SelectTrigger className="w-full bg-background border border-border [&>svg:last-child]:hidden">
+                    <SelectValue placeholder="Tipo de entrega" />
+                  </SelectTrigger>
+
+                  <SelectContent>
+                    <SelectItem value="retiro">Para retirar</SelectItem>
+                    <SelectItem value="domicilio">Entrega a domicilio</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <AnimatePresence mode="wait">
+                  {tipoEntrega === 'domicilio' && (
+                    <motion.div
+                      key="domicilio-fields"
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.25 }}
+                      className="space-y-4"
+                    >
+
+                      <div>
+                        <label className="mb-2 block text-sm font-medium text-foreground">
+                          Teléfono
+                        </label>
+                        <Input
+                          type="tel"
+                          placeholder="+54 9 11 1234-5678"
+                          value={cliente.telefono}
+                          disabled={submitting}
+                          onChange={(e) =>
+                            setCliente({ ...cliente, telefono: e.target.value })
+                          }
+                          required={tipoEntrega === 'domicilio'}
+                          className="bg-background"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="mb-2 block text-sm font-medium text-foreground">
+                          Dirección
+                        </label>
+                        <Input
+                          type="text"
+                          placeholder="Calle 123, Ciudad"
+                          value={cliente.direccion}
+                          disabled={submitting}
+                          onChange={(e) =>
+                            setCliente({ ...cliente, direccion: e.target.value })
+                          }
+                          required={tipoEntrega === 'domicilio'}
+                          className="bg-background"
+                        />
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
 
                 <div>
                   <label className="mb-2 block text-sm font-medium text-foreground">
