@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import ApiService from '../services/api';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Textarea } from '../components/ui/textarea';
@@ -12,6 +11,8 @@ import Navbar from '../components/Navbar';
 import { Cliente, BankData, Category } from '@/intefaces/interfaz';
 import { useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 
 const Numero_Whatsapp = import.meta.env.VITE_NUM_WHATSAPP;
 
@@ -257,27 +258,34 @@ const Checkout = () => {
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-4">
-                <Select
+                <Tabs
                   value={tipoEntrega}
-                  onValueChange={(value: 'retiro' | 'domicilio') => {
-                    setTipoEntrega(value);
+                  onValueChange={(v) => {
+                    setTipoEntrega(v as "retiro" | "domicilio");
 
-                    if (value === 'retiro') {
+                    if (v === "retiro") {
                       setCliente({ telefono: "N/A", direccion: "Retira en local" });
                     } else {
                       setCliente({ telefono: "", direccion: "" });
                     }
                   }}
                 >
-                  <SelectTrigger className="w-full bg-background border border-border [&>svg:last-child]:hidden">
-                    <SelectValue placeholder="Tipo de entrega" />
-                  </SelectTrigger>
+                  <TabsList className="w-full bg-[#1b1b1b] rounded-xl p-1 flex">
+                    <TabsTrigger
+                      value="retiro"
+                      className="flex-1 data-[state=active]:bg-black data-[state=active]:text-white text-gray-400"
+                    >
+                      Para retirar
+                    </TabsTrigger>
 
-                  <SelectContent>
-                    <SelectItem value="retiro">Para retirar</SelectItem>
-                    <SelectItem value="domicilio">Entrega a domicilio</SelectItem>
-                  </SelectContent>
-                </Select>
+                    <TabsTrigger
+                      value="domicilio"
+                      className="flex-1 data-[state=active]:bg-black data-[state=active]:text-white text-gray-400"
+                    >
+                      Entrega a domicilio
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
 
                 <AnimatePresence mode="wait">
                   {tipoEntrega === 'domicilio' && (
@@ -445,18 +453,34 @@ const Checkout = () => {
                       <div className="space-y-4">
                         {items.map((item) => (
                           <div key={item.cartId} className="flex justify-between">
-                            <div className="text-foreground text-xl">
-                              <p>{item.nombre} x{item.cantidad}</p>
+                            <div className="flex items-start gap-4">
+                              <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-md bg-muted">
+                                {item.url_imagen ? (
+                                  <img
+                                    src={item.url_imagen}
+                                    alt={item.nombre}
+                                    className="h-full w-full object-cover"
+                                  />
+                                ) : (
+                                  <div className="flex h-full w-full items-center justify-center text-2xl">
+                                    🍽️
+                                  </div>
+                                )}
+                              </div>
 
-                              {item.adicionales && item.adicionales.filter(ad => ad.cantidad > 0).length > 0 && (
-                                <ul className="ml-4 list-disc text-sm text-muted-foreground">
-                                  {item.adicionales
-                                    .filter(ad => ad.cantidad > 0)
-                                    .map((ad) => (
-                                      <li key={ad.id}>{ad.nombre} x{ad.cantidad}</li>
-                                    ))}
-                                </ul>
-                              )}
+                              <div className="text-foreground text-xl ">
+                                <p>{item.nombre} x{item.cantidad}</p>
+
+                                {item.adicionales && item.adicionales.filter(ad => ad.cantidad > 0).length > 0 && (
+                                  <ul className="ml-4 list-disc text-sm text-muted-foreground">
+                                    {item.adicionales
+                                      .filter(ad => ad.cantidad > 0)
+                                      .map((ad) => (
+                                        <li key={ad.id}>{ad.nombre} x{ad.cantidad}</li>
+                                      ))}
+                                  </ul>
+                                )}
+                              </div>
                             </div>
 
                             <div className="text-foreground text-xl text-right">
