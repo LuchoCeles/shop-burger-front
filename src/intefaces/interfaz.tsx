@@ -13,6 +13,10 @@ export interface Product {
   url_imagen?: string;
   imagen?: File | null;
   stock?: number;
+  categoria?: {
+    estado: boolean;
+    nombre: string;
+  };
   idCategoria?: number;
   descuento?: number;
   isPromocion?: boolean;

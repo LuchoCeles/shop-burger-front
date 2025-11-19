@@ -18,6 +18,7 @@ import CategoriasManager from "./pages/admin/CategoriasManager";
 import AdicionalesManager from "./pages/admin/AdicionalesManager";
 import PedidosManager from "./pages/admin/PedidosManager";
 import ConfiguracionManager from "./pages/admin/ConfiguracionManager";
+import HorariosManager from "./pages/admin/HorariosManager";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -50,6 +51,7 @@ const App = () => (
                   <Route path="categorias" element={<CategoriasManager />} />
                   <Route path="adicionales" element={<AdicionalesManager />} />
                   <Route path="pedidos" element={<PedidosManager />} />
+                  <Route path="horarios" element={<HorariosManager />} />
                   <Route path="configuracion" element={<ConfiguracionManager />} />
                 </Route>
                 <Route path="*" element={<NotFound />} />

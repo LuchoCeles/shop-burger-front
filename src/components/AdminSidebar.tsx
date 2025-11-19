@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Package, FolderKanban, ShoppingBag, Settings, LogOut, Plus, Home } from 'lucide-react';
+import { LayoutDashboard, Package, FolderKanban, ShoppingBag, Settings, LogOut, Plus, Home, Timer } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { Button } from './ui/button';
 import {
@@ -22,6 +22,7 @@ const menuItems = [
   { icon: FolderKanban, label: 'Categorías', path: '/admin/categorias' },
   { icon: Plus, label: 'Adicionales', path: '/admin/adicionales' },
   { icon: ShoppingBag, label: 'Pedidos', path: '/admin/pedidos' },
+  { icon: Timer, label: 'Horarios', path: '/admin/horarios' },
   { icon: Settings, label: 'Configuración', path: '/admin/configuracion' },
 ];
 

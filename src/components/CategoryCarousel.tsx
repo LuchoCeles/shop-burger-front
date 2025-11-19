@@ -28,18 +28,19 @@ const CategoryCarousel: React.FC<CategoryCarouselProps> = ({
           Todos
         </Button>
         {categories.map((category) => (
-          <Button
-            key={category.id}
-            variant={selectedCategory === category.id ? 'default' : 'outline'}
-            className={cn(
-              'flex-shrink-0 transition-all',
-              selectedCategory === category.id && 'bg-primary text-primary-foreground shadow-lg'
-            )}
-            onClick={() => onSelectCategory(category.id)}
-          >
-            {category.nombre}
-          </Button>
-        ))}
+          Boolean(category.estado) && (
+            <Button
+              key={category.id}
+              variant={selectedCategory === category.id ? 'default' : 'outline'}
+              className={cn(
+                'flex-shrink-0 transition-all',
+                selectedCategory === category.id && 'bg-primary text-primary-foreground shadow-lg'
+              )}
+              onClick={() => onSelectCategory(category.id)}
+            >
+              {category.nombre}
+            </Button>
+          )))}
       </div>
     </div>
   );
