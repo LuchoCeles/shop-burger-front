@@ -20,7 +20,7 @@ const Home = () => {
   const loadData = async () => {
     try {
       const [productsData, categoriesData] = await Promise.all([
-        ApiService.getProducts(),
+        ApiService.getProducts(true),
         ApiService.getCategories(),
       ]);
       setProducts(Array.isArray(productsData.data) ? productsData.data : []);
