@@ -48,12 +48,13 @@ const ProductosManager = () => {
     isPromocion: false,
   });
   const [imagen, setImagen] = useState<File | null>(null);
+  const [imagenOriginal, setImagenOriginal] = useState<File | null>(null);
   const [imagenParaEditar, setImagenParaEditar] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [productToDelete, setProductToDelete] = useState<number | null>(null);
   const [adicionalesDialogOpen, setAdicionalesDialogOpen] = useState(false);
-  const [selectedProductForAdicionales, setSelectedProductForAdicionales] =
-    useState<Product | null>(null);
+  const [selectedProductForAdicionales, setSelectedProductForAdicionales] = useState<Product | null>(null);
+
 
   useEffect(() => {
     loadData();
@@ -69,6 +70,12 @@ const ProductosManager = () => {
       setCategorias(catData.data);
     } catch (error) {
       toast.error("Error al cargar datos");
+    }
+  };
+
+  const handleReopenEditor = () => {
+    if (imagenOriginal) {
+      setImagenParaEditar(imagenOriginal);
     }
   };
 
@@ -164,10 +171,16 @@ const ProductosManager = () => {
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
+
     if (file) {
+      setImagenOriginal(file);
+      setImagen(null);
       setImagenParaEditar(file);
+      e.target.value = "";
     }
   };
+
+
 
   const handleImageSave = (croppedImage: File) => {
     setImagen(croppedImage);
@@ -206,7 +219,7 @@ const ProductosManager = () => {
     }
 
     if (options?.max !== undefined && numValue > options.max) {
-      return; 
+      return;
     }
     setFormData({ ...formData, [fieldName]: value });
   };
@@ -342,8 +355,8 @@ const ProductosManager = () => {
                 <Input
                   type="number"
                   value={formData.precio}
-                  onChange={(e) => handleNumeric(e, "precio",{max: 99999999})}
-                  max = "99999999"
+                  onChange={(e) => handleNumeric(e, "precio", { max: 99999999 })}
+                  max="99999999"
                   required
                   className="bg-background"
                 />
@@ -355,8 +368,8 @@ const ProductosManager = () => {
                 <Input
                   type="number"
                   value={formData.stock}
-                  onChange={(e) => handleNumeric(e, "stock", {max: 9999})}
-                  max = "9999"
+                  onChange={(e) => handleNumeric(e, "stock", { max: 9999 })}
+                  max="9999"
                   className="bg-background"
                 />
               </div>
@@ -369,7 +382,7 @@ const ProductosManager = () => {
                 type="number"
                 value={formData.descuento}
                 onChange={(e) => handleNumeric(e, "descuento", { max: 100 })}
-                max = "100"
+                max="100"
                 className="bg-background"
               />
             </div>
@@ -383,9 +396,9 @@ const ProductosManager = () => {
                 value={
                   formData.precio && formData.descuento
                     ? (
-                        parseFloat(formData.precio) *
-                        (1 - parseFloat(formData.descuento) / 100)
-                      ).toFixed(2)
+                      parseFloat(formData.precio) *
+                      (1 - parseFloat(formData.descuento) / 100)
+                    ).toFixed(2)
                     : formData.precio
                 }
                 readOnly
@@ -428,14 +441,14 @@ const ProductosManager = () => {
                 className="bg-background"
               />
               {imagen && !imagenParaEditar && (
-                <div className="mt-2">
+                <div className="mt-2 cursor-pointer" onClick={handleReopenEditor}>
                   <p className="text-xs text-muted-foreground mb-1">
-                    Vista previa:
+                    Vista previa (click para editar):
                   </p>
                   <img
                     src={URL.createObjectURL(imagen)}
                     alt="Vista previa"
-                    className="h-32 w-32 object-contain rounded border border-border"
+                    className="h-32 w-32 object-contain rounded border border-border hover:opacity-80 transition"
                   />
                 </div>
               )}
