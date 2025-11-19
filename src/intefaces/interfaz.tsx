@@ -75,6 +75,7 @@ export interface Orders {
   Pago?: {
     id: number;
     estado: string;
+    metodoDePago?: string;
   }
   productos: {
     nombre: string;

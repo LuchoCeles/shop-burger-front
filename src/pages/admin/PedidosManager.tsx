@@ -32,10 +32,24 @@ const PedidosManager = () => {
     nuevoEstado: '',
   });
   const { socket } = useSocket();
+  const [estadoManual, setEstadoManual] = useState<Record<number, string>>({});
+
 
   useEffect(() => {
     loadPedidos();
   }, []);
+
+  useEffect(() => {
+    if (pedidos.length > 0) {
+      const inicial: Record<number, string> = {};
+
+      pedidos.forEach(p => {
+        inicial[p.id] = p.Pago?.estado || "Pendiente";
+      });
+
+      setEstadoManual(inicial);
+    }
+  }, [pedidos]);
 
   useEffect(() => {
     if (socket) {
@@ -143,36 +157,70 @@ const PedidosManager = () => {
             key={pedido.id}
             className="rounded-lg border border-border bg-card p-6"
           >
-            <div className="mb-4 flex items-start justify-between">
+            <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <h3 className="text-lg font-semibold text-foreground">
                   PEDIDO #{pedido.id}
                 </h3>
               </div>
-              <div className="flex items-end gap-6">
-                <div className="flex items-center gap-2">
-                  <span className={`font-medium ${getEstadoColor(pedido.Pago?.estado.toLowerCase())}`}>
-                    Estado del Pago:
+
+              <div className="flex flex-col gap-4 sm:flex-row sm:gap-6">
+                {/* SELECT 1 - Estado real (si es MP) */}
+                {pedido.Pago?.metodoDePago === "Mercado Pago" && (
+                  <div className="flex items-center justify-between sm:justify-start gap-2 w-full">
+                    <span className={`font-medium ${getEstadoColor(pedido.Pago.estado.toLowerCase())}`}>
+                      Estado MP:
+                    </span>
+
+                    <Select value={pedido.Pago.estado} disabled>
+                      <SelectTrigger className="w-full sm:w-40 bg-background opacity-70 cursor-not-allowed">
+                        <SelectValue placeholder="Estado de pago" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Pendiente">Pendiente</SelectItem>
+                        <SelectItem value="Pagado">Pagado</SelectItem>
+                        <SelectItem value="Rechazado">Rechazado</SelectItem>
+                        <SelectItem value="Expirado">Expirado</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
+                {/* SELECT 2 - Estado manual editable */}
+                <div className="flex items-center justify-between sm:justify-start gap-2 w-full">
+                  <span className={`font-medium ${getEstadoColor(estadoManual[pedido.id]?.toLowerCase?.())}`}>
+                    Estado Manual:
                   </span>
 
                   <Select
-                    value={pedido.Pago?.estado || "Pendiente"}
-                    onValueChange={(value) => handleEstadoPagoChange(pedido.id, value)}
+                    value={estadoManual[pedido.id]}
+                    onValueChange={(value) => {
+                      setEstadoManual(prev => ({ ...prev, [pedido.id]: value }));
+                      handleEstadoPagoChange(pedido.id, value);
+                    }}
+                    disabled={
+                      ["Pagado", "Cancelado"].includes(estadoManual[pedido.id]) ||
+                      ["Pagado", "Rechazado", "Expirado"].includes(pedido.Pago?.estado)
+                    }
                   >
-                    <SelectTrigger className="w-40 bg-background">
-                      <SelectValue placeholder="Seleccionar estado de pago" />
+                    <SelectTrigger
+                      className={`w-full sm:w-40 bg-background ${["Pagado", "Cancelado"].includes(estadoManual[pedido.id])
+                          ? "opacity-70 cursor-not-allowed"
+                          : ""
+                        }`}
+                    >
+                      <SelectValue placeholder="Seleccionar estado manual" />
                     </SelectTrigger>
+
                     <SelectContent>
                       <SelectItem value="Pendiente">Pendiente</SelectItem>
                       <SelectItem value="Pagado">Pagado</SelectItem>
-                      <SelectItem value="Rechazado" hidden>Rechazado</SelectItem>
-                      <SelectItem value="Expirado" hidden>Expirado</SelectItem>
-                      <SelectItem value="Pendiente" >Cancelado</SelectItem>
+                      <SelectItem value="Cancelado">Cancelado</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-between sm:justify-start gap-2 w-full">
                   <span className={`font-medium ${getEstadoColor(pedido.estado)}`}>
                     Estado del Pedido:
                   </span>
@@ -182,7 +230,7 @@ const PedidosManager = () => {
                     onValueChange={(value) => handleEstadoChange(pedido.id, value)}
                     disabled={pedido.estado === "entregado" || pedido.estado === "cancelado"}
                   >
-                    <SelectTrigger className="w-40 bg-background">
+                    <SelectTrigger className="w-full sm:w-40 bg-background">
                       <SelectValue placeholder="Seleccionar estado" />
                     </SelectTrigger>
                     <SelectContent>
