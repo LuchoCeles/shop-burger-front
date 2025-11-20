@@ -21,105 +21,89 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import ApiService from '@/services/api';
-import { Adicional } from '@/intefaces/interfaz';
+import { Tamaños } from '@/intefaces/interfaz';
 import { toast } from 'sonner';
 
-export default function AdicionalesManager() {
-  const [adicionales, setAdicionales] = useState<Adicional[]>([]);
+export default function TamañosManager() {
+  const [tamaño, setTamaño] = useState<Tamaños[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [selectedAdicional, setSelectedAdicional] = useState<Adicional | null>(null);
+  const [selectedTamaño, setSelectedTamaño] = useState<Tamaños | null>(null);
   const [formData, setFormData] = useState({
     nombre: '',
-    precio: '',
-    stock: '',
-    maxCantidad: '',
   });
   const maxLength = 25;
 
   useEffect(() => {
-    loadAdicionales();
+    loadTamaños();
   }, []);
 
-  const loadAdicionales = async () => {
+  const loadTamaños = async () => {
     try {
-      const data = await ApiService.getAdicionales();
-      setAdicionales(data.data);
+      const data = await ApiService.getTamaños();
+      setTamaño(data.data);
     } catch (error) {
-      toast.error('Error al cargar los adicionales');
+      toast.error('Error al cargar los tamaños');
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const adicionalData = {
-      nombre: formData.nombre,
-      stock: parseInt(formData.stock),
-      precio: parseFloat(formData.precio),
-      maxCantidad: parseInt(formData.maxCantidad),
-    };
-
     try {
-      if (selectedAdicional) {
-        await ApiService.updateAdicional(selectedAdicional.id, adicionalData);
-        toast.success("El adicional se actualizó correctamente");
+      if (selectedTamaño) {
+        await ApiService.updateTamaño(selectedTamaño.id, formData.nombre);
+        toast.success("El tamaño se actualizó correctamente");
       } else {
-        await ApiService.createAdicional(adicionalData);
-        toast.success("El adicional se creó correctamente");
+        await ApiService.createTamaño(formData.nombre);
+        toast.success("El tamaño se creó correctamente");
       }
-      loadAdicionales();
+      loadTamaños();
       resetForm();
       setIsDialogOpen(false);
     } catch (error) {
-      toast.error("Error al crear o actualizar el adicional");
+      toast.error("Error al crear o actualizar el tamaño");
     }
   };
 
-  const handleEdit = (adicional: Adicional) => {
-    setSelectedAdicional(adicional);
+  const handleEdit = (tamaño: Tamaños) => {
+    setSelectedTamaño(tamaño);
     setFormData({
-      nombre: adicional.nombre,
-      precio: adicional.precio.toString(),
-      stock: adicional.stock.toString(),
-      maxCantidad: adicional.maxCantidad.toString(),
+      nombre: tamaño.nombre
     });
     setIsDialogOpen(true);
   };
 
   const handleDelete = async () => {
-    if (!selectedAdicional) return;
+    if (!selectedTamaño) return;
 
     try {
-      await ApiService.deleteAdicional(selectedAdicional.id);
-      toast.success('El adicional se eliminó correctamente');
-      loadAdicionales();
+      await ApiService.deleteTamaño(selectedTamaño.id);
+      toast.success('El tamaño se eliminó correctamente');
+      loadTamaños();
       setIsDeleteDialogOpen(false);
-      setSelectedAdicional(null);
+      setSelectedTamaño(null);
     } catch (error) {
-      toast.error('Error al eliminar el adicional');
+      toast.error('Error al eliminar el tamaño');
     }
   };
 
-  const handleToggleEstado = async (adicional: Adicional) => {
+  const handleToggleEstado = async (tamaño: Tamaños) => {
     try {
-      const a = await ApiService.changeStateAdicional(adicional.id);
-      const estado = a.data.estado ? 'Adicional activado' : 'Adicional desactivado';
+      const a = await ApiService.updateStateTamaño(tamaño.id);
+      const estado = a.data.estado ? 'Tamaño activado' : 'Tamaño desactivado';
       toast.info(estado);
-      loadAdicionales();
+      loadTamaños();
     } catch (error) {
-      toast.error('Error al cambiar el estado del adicional');
+      toast.error('Error al cambiar el estado del tamaño');
     }
   };
 
   const resetForm = () => {
     setFormData({
-      nombre: '',
-      precio: '',
-      stock: '',
-      maxCantidad: '',
+      nombre: ''
     });
-    setSelectedAdicional(null);
+    setSelectedTamaño(null);
   };
 
   const openCreateDialog = () => {
@@ -130,43 +114,32 @@ export default function AdicionalesManager() {
   return (
     <div className="space-y-4 md:space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-2xl font-bold text-foreground md:text-3xl">Adicionales</h1>
+        <h1 className="text-2xl font-bold text-foreground md:text-3xl">Tamaños</h1>
         <Button onClick={openCreateDialog} className="w-full sm:w-auto">
           <Plus className="mr-2 h-4 w-4" />
-          Nuevo Adicional
+          Nuevo Tamaño
         </Button>
       </div>
 
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-        {adicionales.map((adicional) => (
+        {tamaño.map((tamaño) => (
           <div
-            key={adicional.id}
-            className="border border-border rounded-lg p-4 bg-card space-y-3"
+            key={tamaño.id}
+            className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-lg border border-border bg-card p-4 min-h-[72px]"
           >
             <div className="flex justify-between items-start">
-              <div className="flex-1">
-                <h3 className="font-semibold text-foreground">{adicional.nombre}</h3>
-                <p className="text-2xl font-bold text-primary mt-1">
-                  ${adicional.precio}
-                </p>
-              </div>
+              <h3 className="font-semibold text-foreground">{tamaño.nombre}</h3>
 
-            </div>
-
-            <div className="text-sm text-muted-foreground space-y-1">
-              <p>Estado: {adicional.estado ? 'Activo' : 'Inactivo'}</p>
-              <p>Cantidad Disponible: {adicional.stock}</p>
-              <p>Cantidad Máxima por Producto: {adicional.maxCantidad}</p>
             </div>
 
             <div className="flex flex-wrap gap-2 pt-2">
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => handleToggleEstado(adicional)}
+                onClick={() => handleToggleEstado(tamaño)}
                 className="flex-shrink-0"
               >
-                {adicional.estado ? (
+                {tamaño.estado ? (
                   <Eye className="h-3 w-3" />
                 ) : (
                   <EyeOff className="h-3 w-3" />
@@ -175,17 +148,16 @@ export default function AdicionalesManager() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => handleEdit(adicional)}
+                onClick={() => handleEdit(tamaño)}
                 className="flex-1 min-w-0"
               >
-                <Pencil className="mr-2 h-4 w-4" />
-                <span className="truncate">Editar</span>
+                <Pencil className="h-4 w-4" />
               </Button>
               <Button
                 variant="destructive"
                 size="sm"
                 onClick={() => {
-                  setSelectedAdicional(adicional);
+                  setSelectedTamaño(tamaño);
                   setIsDeleteDialogOpen(true);
                 }}
                 className="flex-shrink-0"
@@ -197,10 +169,10 @@ export default function AdicionalesManager() {
         ))}
       </div>
 
-      {adicionales.length === 0 && (
+      {tamaño.length === 0 && (
         <div className="text-center py-12 text-muted-foreground">
-          <p>No hay adicionales creados</p>
-          <p className="text-sm mt-1">Crea tu primer adicional para comenzar</p>
+          <p>No hay tamaños creados</p>
+          <p className="text-sm mt-1">Crea tu primer tamaño para comenzar</p>
         </div>
       )}
 
@@ -208,7 +180,7 @@ export default function AdicionalesManager() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {selectedAdicional ? 'Editar Adicional' : 'Nuevo Adicional'}
+              {selectedTamaño ? 'Editar Tamaño' : 'Nuevo Tamaño'}
             </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -231,49 +203,6 @@ export default function AdicionalesManager() {
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="precio">Precio</Label>
-              <Input
-                id="precio"
-                type="number"
-                step="0.01"
-                min="0"
-                value={formData.precio}
-                onChange={(e) =>
-                  setFormData({ ...formData, precio: e.target.value })
-                }
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="stock">Stock</Label>
-              <Input
-                id="stock"
-                type="number"
-                min="0"
-                value={formData.stock}
-                onChange={(e) =>
-                  setFormData({ ...formData, stock: e.target.value })
-                }
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="maxCantidad">Cantidad Máxima por Producto</Label>
-              <Input
-                id="maxCantidad"
-                type="number"
-                min="1"
-                value={formData.maxCantidad}
-                onChange={(e) =>
-                  setFormData({ ...formData, maxCantidad: e.target.value })
-                }
-                required
-              />
-            </div>
-
             <DialogFooter>
               <Button
                 type="button"
@@ -286,7 +215,7 @@ export default function AdicionalesManager() {
                 Cancelar
               </Button>
               <Button type="submit">
-                {selectedAdicional ? 'Actualizar' : 'Crear'}
+                {selectedTamaño ? 'Actualizar' : 'Crear'}
               </Button>
             </DialogFooter>
           </form>
@@ -298,7 +227,7 @@ export default function AdicionalesManager() {
           <AlertDialogHeader>
             <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta acción eliminará el adicional "{selectedAdicional?.nombre}" de forma
+              Esta acción eliminará el tamaño "{selectedTamaño?.nombre}" de forma
               permanente.
             </AlertDialogDescription>
           </AlertDialogHeader>

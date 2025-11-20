@@ -328,6 +328,9 @@ const ProductosManager = () => {
               </label>
               <Input
                 value={formData.nombre}
+                type="text"
+                placeholder="Nombre del producto"
+                maxLength={50}
                 onChange={(e) =>
                   setFormData({ ...formData, nombre: e.target.value })
                 }
@@ -341,6 +344,8 @@ const ProductosManager = () => {
               </label>
               <Textarea
                 value={formData.descripcion}
+                maxLength={255}
+                placeholder="Descripción del producto"
                 onChange={(e) =>
                   setFormData({ ...formData, descripcion: e.target.value })
                 }
@@ -383,6 +388,7 @@ const ProductosManager = () => {
                 value={formData.descuento}
                 onChange={(e) => handleNumeric(e, "descuento", { max: 100 })}
                 max="100"
+                min="0"
                 className="bg-background"
               />
             </div>
@@ -398,7 +404,7 @@ const ProductosManager = () => {
                     ? (
                       parseFloat(formData.precio) *
                       (1 - parseFloat(formData.descuento) / 100)
-                    ).toFixed(2)
+                    ).toFixed(0)
                     : formData.precio
                 }
                 readOnly

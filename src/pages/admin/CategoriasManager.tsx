@@ -31,7 +31,7 @@ const CategoriasManager = () => {
   const [estado, setEstado] = useState(true);
   const [loading, setLoading] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState<number | null>(null);
-  const MAX_CHARS = 25;
+  const MAX_CHARS = 30;
 
   useEffect(() => {
     loadCategorias();
@@ -207,9 +207,14 @@ const CategoriasManager = () => {
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
         <DialogContent className="bg-card">
           <DialogHeader>
-            <DialogTitle className="text-foreground">
-              {editingCategory ? "Editar Categoría" : "Nueva Categoría"}
-            </DialogTitle>
+            <div className="flex items-center justify-between pr-4">
+              <DialogTitle className="text-foreground">
+                {editingCategory ? "Editar Categoría" : "Nueva Categoría"}
+              </DialogTitle>
+              <div className="text-right text-sm text-gray-500">
+                {nombre.length} / {MAX_CHARS}
+              </div>
+            </div>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -217,14 +222,12 @@ const CategoriasManager = () => {
                 type="text"
                 value={nombre}
                 onChange={handleNombreChange}
-                maxLength={MAX_CHARS} // ¡La prevención en el navegador!
+                maxLength={MAX_CHARS}
                 placeholder="Nombre de la categoría"
                 className="tu-clase-de-estilo"
               />
             </div>
-            <div className="text-right text-sm text-gray-500">
-              {nombre.length} / {MAX_CHARS}
-            </div>
+
             <DialogFooter>
               <Button
                 type="button"

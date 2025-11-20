@@ -7,6 +7,8 @@ import { Socket } from 'socket.io-client';
   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 export interface Product {
   id: number;
+  idCategoria?: number;
+  idTam?: number;
   nombre: string;
   descripcion?: string;
   precio: number;
@@ -17,11 +19,12 @@ export interface Product {
     estado: boolean;
     nombre: string;
   };
-  idCategoria?: number;
   descuento?: number;
   isPromocion?: boolean;
   estado?: boolean;
   adicionales?: Adicional[];
+  guarniciones?: Guarniciones[];
+  tamaños?: Tamaños[];
 }
 
 export interface Category {
@@ -87,6 +90,20 @@ export interface Orders {
       cantidad: number;
     }[];
   }[];
+}
+
+export interface Guarniciones{
+  id?: number;
+  nombre: string;
+  stock: number;
+  estado?: boolean;
+}
+
+export interface Tamaños{
+  id?: number;
+  nombre: string;
+  precio?: number;
+  estado?: boolean;
 }
 /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   +                                                                                              +

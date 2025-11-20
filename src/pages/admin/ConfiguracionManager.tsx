@@ -225,6 +225,7 @@ const ConfiguracionManager = () => {
                     id="nombre"
                     name="nombre"
                     value={formData.nombre}
+                    maxLength={50}
                     onChange={handleInputChange}
                     placeholder="Nombre del titular"
                   />
@@ -235,6 +236,7 @@ const ConfiguracionManager = () => {
                     id="apellido"
                     name="apellido"
                     value={formData.apellido}
+                    maxLength={50}
                     onChange={handleInputChange}
                     placeholder="Apellido del titular"
                   />
@@ -247,6 +249,7 @@ const ConfiguracionManager = () => {
                   id="cuit"
                   name="cuit"
                   value={formData.cuit}
+                  maxLength={20}
                   onChange={handleInputChange}
                   placeholder="XX-XXXXXXXX-X"
                 />
@@ -258,6 +261,7 @@ const ConfiguracionManager = () => {
                   id="cbu"
                   name="cbu"
                   value={formData.cbu}
+                  maxLength={50}
                   onChange={handleInputChange}
                   placeholder="XXXXXXXXXXXXXXXXXXXXXX"
                 />
@@ -269,6 +273,7 @@ const ConfiguracionManager = () => {
                   id="alias"
                   name="alias"
                   value={formData.alias}
+                  maxLength={50}
                   onChange={handleInputChange}
                   placeholder="alias.banco"
                 />

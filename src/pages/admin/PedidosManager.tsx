@@ -60,17 +60,17 @@ const PedidosManager = () => {
 
       const handlePagoAprobado = (data: any) => {
         loadPedidos();
-        toast.success('Pago Aprobado');
+        toast.success(data?.message || 'Pago Aprobado');
       };
 
       const handlePagoRechazado = (data: any) => {
         loadPedidos();
-        toast.error('Pago Rechazado');
+        toast.error(data?.message || 'Pago Rechazado');
       };
 
       const handlePagoExpirado = (data: any) => {
         loadPedidos();
-        toast.warning('Pago expirado automáticamente');
+        toast.warning(data?.message || 'Pago expirado automáticamente');
       };
 
       socket.on('nuevoPedido', handleNuevoPedido);
@@ -205,8 +205,8 @@ const PedidosManager = () => {
                   >
                     <SelectTrigger
                       className={`w-full sm:w-40 bg-background ${["Pagado", "Cancelado"].includes(estadoManual[pedido.id])
-                          ? "opacity-70 cursor-not-allowed"
-                          : ""
+                        ? "opacity-70 cursor-not-allowed"
+                        : ""
                         }`}
                     >
                       <SelectValue placeholder="Seleccionar estado manual" />
