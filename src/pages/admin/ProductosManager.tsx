@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import { Plus, Pencil, Trash2, Eye, EyeOff, ListPlus } from "lucide-react";
+import { Plus, Pencil, Eye, EyeOff, ListPlus } from "lucide-react";
 import ApiService from "../../services/api";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Textarea } from "../../components/ui/textarea";
-import { Product, Category } from "src/intefaces/interfaz";
+import { Product, Category, Tamaños } from "src/intefaces/interfaz";
 import ImageEditor from "../../components/ImageEditor";
 import AsignarAdicionalesDialog from "../../components/AsignarAdicionalesDialog";
 import {
@@ -21,6 +21,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../components/ui/select";
+import {
+  Checkbox,
+} from "../../components/ui/checkbox";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -36,24 +39,26 @@ import {
 const ProductosManager = () => {
   const [productos, setProductos] = useState<Product[]>([]);
   const [categorias, setCategorias] = useState<Category[]>([]);
+  const [tamaños, setTamaños] = useState<Tamaños[]>([]);
   const [showDialog, setShowDialog] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product>(null);
   const [formData, setFormData] = useState({
     nombre: "",
     descripcion: "",
-    precio: "",
     stock: "",
     descuento: "",
     idCategoria: "",
     isPromocion: false,
   });
+  const [preciosPorTam, setPreciosPorTam] = useState<{ idTam: number; precio: string }[]>([]);
   const [imagen, setImagen] = useState<File | null>(null);
+  const [imagenOriginal, setImagenOriginal] = useState<File | null>(null);
   const [imagenParaEditar, setImagenParaEditar] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [productToDelete, setProductToDelete] = useState<number | null>(null);
   const [adicionalesDialogOpen, setAdicionalesDialogOpen] = useState(false);
-  const [selectedProductForAdicionales, setSelectedProductForAdicionales] =
-    useState<Product | null>(null);
+  const [selectedProductForAdicionales, setSelectedProductForAdicionales] = useState<Product | null>(null);
+
 
   useEffect(() => {
     loadData();
@@ -61,14 +66,22 @@ const ProductosManager = () => {
 
   const loadData = async () => {
     try {
-      const [prodData, catData] = await Promise.all([
+      const [prodData, catData, tamData] = await Promise.all([
         ApiService.getProducts(false),
         ApiService.getCategories(),
+        ApiService.getTamaños(),
       ]);
       setProductos(prodData.data);
       setCategorias(catData.data);
+      setTamaños(tamData.data);
     } catch (error) {
       toast.error("Error al cargar datos");
+    }
+  };
+
+  const handleReopenEditor = () => {
+    if (imagenOriginal) {
+      setImagenParaEditar(imagenOriginal);
     }
   };
 
@@ -88,15 +101,36 @@ const ProductosManager = () => {
       setLoading(false);
       return;
     }
+    if (preciosPorTam.length === 0) {
+      toast.error("Selecciona al menos un tamaño");
+      setLoading(false);
+      return;
+    }
+
+    // Validar que todos los tamaños tengan precio
+    const sinPrecio = preciosPorTam.find(p => !p.precio || parseFloat(p.precio) <= 0);
+    if (sinPrecio) {
+      toast.error("Todos los tamaños deben tener un precio válido");
+      setLoading(false);
+      return;
+    }
 
     try {
       const formDataToSend = new FormData();
       formDataToSend.append("nombre", formData.nombre);
       formDataToSend.append("descripcion", formData.descripcion);
-      formDataToSend.append("precio", formData.precio);
       formDataToSend.append("stock", formData.stock);
       formDataToSend.append("descuento", formData.descuento);
       formDataToSend.append("idCategoria", formData.idCategoria);
+      formDataToSend.append("isPromocion", formData.isPromocion ? "true" : "false");
+
+      // Enviar precios por tamaño
+      const preciosFormatted = preciosPorTam.map(p => ({
+        idTam: p.idTam,
+        precio: parseFloat(p.precio)
+      }));
+      formDataToSend.append("preciosPorTam", JSON.stringify(preciosFormatted));
+
       if (imagen) {
         formDataToSend.append("imagen", imagen);
       }
@@ -138,12 +172,21 @@ const ProductosManager = () => {
     setFormData({
       nombre: product.nombre,
       descripcion: product.descripcion || "",
-      precio: product.precio.toString(),
       stock: product.stock?.toString() || "",
       idCategoria: product.idCategoria?.toString() || "",
       descuento: product.descuento?.toString() || "",
       isPromocion: product.descuento ? true : false,
     });
+
+    // Cargar precios por tamaño
+    if (product.tamaños && product.tamaños.length > 0) {
+      const precios = product.tamaños.map(t => ({
+        idTam: t.id!,
+        precio: t.precio?.toString() || ""
+      }));
+      setPreciosPorTam(precios);
+    }
+
     setShowDialog(true);
   };
 
@@ -152,22 +195,28 @@ const ProductosManager = () => {
     setFormData({
       nombre: "",
       descripcion: "",
-      precio: "",
       stock: "",
       idCategoria: "",
       descuento: "",
       isPromocion: false,
     });
+    setPreciosPorTam([]);
     setImagen(null);
     setImagenParaEditar(null);
   };
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
+
     if (file) {
+      setImagenOriginal(file);
+      setImagen(null);
       setImagenParaEditar(file);
+      e.target.value = "";
     }
   };
+
+
 
   const handleImageSave = (croppedImage: File) => {
     setImagen(croppedImage);
@@ -206,9 +255,27 @@ const ProductosManager = () => {
     }
 
     if (options?.max !== undefined && numValue > options.max) {
-      return; 
+      return;
     }
     setFormData({ ...formData, [fieldName]: value });
+  };
+
+  const handleTamañoToggle = (tamId: number) => {
+    const existe = preciosPorTam.find(p => p.idTam === tamId);
+
+    if (existe) {
+      // Remover tamaño
+      setPreciosPorTam(preciosPorTam.filter(p => p.idTam !== tamId));
+    } else {
+      // Agregar tamaño
+      setPreciosPorTam([...preciosPorTam, { idTam: tamId, precio: "" }]);
+    }
+  };
+
+  const handlePrecioChange = (tamId: number, precio: string) => {
+    setPreciosPorTam(preciosPorTam.map(p =>
+      p.idTam === tamId ? { ...p, precio } : p
+    ));
   };
 
   return (
@@ -315,6 +382,9 @@ const ProductosManager = () => {
               </label>
               <Input
                 value={formData.nombre}
+                type="text"
+                placeholder="Nombre del producto"
+                maxLength={50}
                 onChange={(e) =>
                   setFormData({ ...formData, nombre: e.target.value })
                 }
@@ -328,72 +398,49 @@ const ProductosManager = () => {
               </label>
               <Textarea
                 value={formData.descripcion}
+                maxLength={255}
+                placeholder="Descripción del producto"
                 onChange={(e) =>
                   setFormData({ ...formData, descripcion: e.target.value })
                 }
                 className="bg-background"
               />
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="mb-2 block text-sm font-medium text-foreground">
-                  Precio
-                </label>
-                <Input
-                  type="number"
-                  value={formData.precio}
-                  onChange={(e) => handleNumeric(e, "precio",{max: 99999999})}
-                  max = "99999999"
-                  required
-                  className="bg-background"
-                />
-              </div>
-              <div>
+            <div
+              className={
+                editingProduct
+                  ? "grid grid-cols-1 sm:grid-cols-2 gap-4"
+                  : "w-full"
+              }
+            >
+              <div className={editingProduct ? "" : "col-span-2"}>
                 <label className="mb-2 block text-sm font-medium text-foreground">
                   Stock
                 </label>
                 <Input
                   type="number"
                   value={formData.stock}
-                  onChange={(e) => handleNumeric(e, "stock", {max: 9999})}
-                  max = "9999"
+                  onChange={(e) => handleNumeric(e, "stock", { max: 9999 })}
+                  max="9999"
                   className="bg-background"
                 />
               </div>
-            </div>
-            <div>
-              <label className="mb-2 block text-sm font-medium text-foreground">
-                Descuento %
-              </label>
-              <Input
-                type="number"
-                value={formData.descuento}
-                onChange={(e) => handleNumeric(e, "descuento", { max: 100 })}
-                max = "100"
-                className="bg-background"
-              />
-            </div>
-            <div>
-              <label className="mb-2 block text-sm font-medium text-foreground">
-                Precio Final
-              </label>
-              <Input
-                type="number"
-                min="1"
-                value={
-                  formData.precio && formData.descuento
-                    ? (
-                        parseFloat(formData.precio) *
-                        (1 - parseFloat(formData.descuento) / 100)
-                      ).toFixed(2)
-                    : formData.precio
-                }
-                readOnly
-                onChange={(e) =>
-                  setFormData({ ...formData, descuento: e.target.value })
-                }
-                className="bg-background"
-              />
+
+              {editingProduct && (
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-foreground">
+                    Descuento %
+                  </label>
+                  <Input
+                    type="number"
+                    value={formData.descuento}
+                    onChange={(e) => handleNumeric(e, "descuento", { max: 100 })}
+                    max="100"
+                    min="0"
+                    className="bg-background"
+                  />
+                </div>
+              )}
             </div>
             <div>
               <label className="mb-2 block text-sm font-medium text-foreground">
@@ -417,6 +464,68 @@ const ProductosManager = () => {
                 </SelectContent>
               </Select>
             </div>
+            {formData.idCategoria && (
+              <>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-foreground">
+                    Tamaños
+                  </label>
+                  <div className="flex flex-wrap gap-4">
+                    {tamaños.map((tam) => {
+                      const checked = preciosPorTam.some(p => p.idTam === tam.id);
+
+                      return (
+                        <label
+                          key={tam.id}
+                          className="flex items-center gap-3 cursor-pointer group"
+                        >
+                          <Checkbox
+                            checked={checked}
+                            onCheckedChange={() => handleTamañoToggle(tam.id!)}
+                          />
+                          <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
+                            {tam.nombre}
+                          </span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {preciosPorTam.length > 0 && (
+                  <div className="space-y-4">
+                    <label className="block text-sm font-medium text-foreground">
+                      Precios por Tamaño
+                    </label>
+                    {preciosPorTam.map((precio, index) => {
+                      const tamaño = tamaños.find(t => t.id === precio.idTam);
+                      return (
+                        <div key={precio.idTam}>
+                          {index > 0 && (
+                            <div className="border-t border-border/50 mb-4" />
+                          )}
+                          <div className="flex items-center gap-3">
+                            <span className="text-sm font-medium text-foreground min-w-[100px]">
+                              {tamaño?.nombre}:
+                            </span>
+                            <Input
+                              type="number"
+                              placeholder="Precio"
+                              value={precio.precio}
+                              onChange={(e) => handlePrecioChange(precio.idTam, e.target.value)}
+                              min="0"
+                              step="0.01"
+                              required
+                              className="bg-background"
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </>
+            )}
             <div>
               <label className="mb-2 block text-sm font-medium text-foreground">
                 Imagen
@@ -428,14 +537,14 @@ const ProductosManager = () => {
                 className="bg-background"
               />
               {imagen && !imagenParaEditar && (
-                <div className="mt-2">
+                <div className="mt-2 cursor-pointer" onClick={handleReopenEditor}>
                   <p className="text-xs text-muted-foreground mb-1">
-                    Vista previa:
+                    Vista previa (click para editar):
                   </p>
                   <img
                     src={URL.createObjectURL(imagen)}
                     alt="Vista previa"
-                    className="h-32 w-32 object-contain rounded border border-border"
+                    className="h-32 w-32 object-contain rounded border border-border hover:opacity-80 transition"
                   />
                 </div>
               )}

@@ -7,17 +7,24 @@ import { Socket } from 'socket.io-client';
   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 export interface Product {
   id: number;
+  idCategoria?: number;
+  idTam?: number;
   nombre: string;
   descripcion?: string;
   precio: number;
   url_imagen?: string;
   imagen?: File | null;
   stock?: number;
-  idCategoria?: number;
+  categoria?: {
+    estado: boolean;
+    nombre: string;
+  };
   descuento?: number;
   isPromocion?: boolean;
   estado?: boolean;
   adicionales?: Adicional[];
+  guarniciones?: Guarniciones[];
+  tamaños?: Tamaños[];
 }
 
 export interface Category {
@@ -71,6 +78,7 @@ export interface Orders {
   Pago?: {
     id: number;
     estado: string;
+    metodoDePago?: string;
   }
   productos: {
     nombre: string;
@@ -82,6 +90,21 @@ export interface Orders {
       cantidad: number;
     }[];
   }[];
+}
+
+export interface Guarniciones{
+  id?: number;
+  nombre: string;
+  stock: number;
+  estado?: boolean;
+}
+
+export interface Tamaños{
+  id?: number;
+  idCategoria?: number;
+  nombre: string;
+  precio?: number;
+  estado?: boolean;
 }
 /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   +                                                                                              +

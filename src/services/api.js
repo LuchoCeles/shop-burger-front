@@ -88,7 +88,6 @@ class ApiService {
     return rsp.json();
   }
 
-
   async getProduct(id) {
     const rsp = await this.GET(`api/producto/${id}`);
     return rsp.json();
@@ -111,6 +110,53 @@ class ApiService {
 
   async deleteProduct(id) {
     const rsp = await this.DELETE(`api/producto/${id}`);
+    return rsp.json();
+  }
+
+  // Tamaños endpoints
+  async getTamaños() {
+    const rsp = await this.GET('api/tam/');
+    return rsp.json();
+  }
+
+  async createTamaño(nombre) {
+    const rsp = await this.POST('api/tam/', { nombre: nombre });
+    return rsp.json();
+  }
+
+  async updateTamaño(id, nombre) {
+    const rsp = await this.PATCH(`api/tam/${id}`, { nombre: nombre });
+    return rsp.json();
+  }
+
+  async updateStateTamaño(id, estado) {
+    const rsp = await this.PATCH(`api/tam/${id}/estado`, { estado: estado });
+    return rsp.json();
+  }
+
+  async deleteTamaño(id) {
+    const rsp = await this.DELETE(`api/tam/${id}`);
+    return rsp.json();
+  }
+
+  // Guarniciones endpoints
+  async getGuarniciones() {
+    const rsp = await this.GET('api/guarnicion/');
+    return rsp.json();
+  }
+
+  async createGuarnicion(guarnicionData) {
+    const rsp = await this.POST('api/guarnicion/', guarnicionData);
+    return rsp.json();
+  }
+
+  async updateGuarnicion(id, guarnicionData) {
+    const rsp = await this.PATCH(`api/guarnicion/${id}`, guarnicionData);
+    return rsp.json();
+  }
+
+  async updateStateGuarnicion(id, estado) {
+    const rsp = await this.PATCH(`api/guarnicion/${id}/estado`, { estado: estado });
     return rsp.json();
   }
 
@@ -182,13 +228,12 @@ class ApiService {
     return rsp.json();
   }
 
-  async changeState(id) {
+  async changeStateAdicional(id) {
     const rsp = await this.PATCH(`api/adicional/${id}/state`);
     return rsp.json();
   }
 
   // Conexion entre productos y adicionales
-
   async addAdicionalToProducto(idProducto, idAdicional) {
     const rsp = await this.POST('admin/adicionalxproducto/create', { idProducto, idAdicional });
     return rsp.json();

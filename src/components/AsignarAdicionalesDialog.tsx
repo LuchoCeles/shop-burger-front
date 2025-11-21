@@ -35,7 +35,6 @@ export default function AsignarAdicionalesDialog({ open, onOpenChange, Product }
       } else {
         setAsignados([]);
       }
-
     } catch (error) {
       toast({
         title: 'Error',
