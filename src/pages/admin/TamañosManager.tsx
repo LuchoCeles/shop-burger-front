@@ -21,15 +21,24 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import ApiService from '@/services/api';
-import { Tamaños } from '@/intefaces/interfaz';
+import { Tamaños, Category } from '@/intefaces/interfaz';
 import { toast } from 'sonner';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../components/ui/select";
 
 export default function TamañosManager() {
   const [tamaño, setTamaño] = useState<Tamaños[]>([]);
+  const [categorias, setCategorias] = useState<Category[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedTamaño, setSelectedTamaño] = useState<Tamaños | null>(null);
   const [formData, setFormData] = useState({
+    idCategoria: '',
     nombre: '',
   });
   const maxLength = 25;
@@ -40,8 +49,12 @@ export default function TamañosManager() {
 
   const loadTamaños = async () => {
     try {
-      const data = await ApiService.getTamaños();
-      setTamaño(data.data);
+      const [dataCategories, dataTam] = await Promise.all([
+        ApiService.getCategories(),
+        ApiService.getTamaños(),
+      ]);
+      setCategorias(dataCategories.data);
+      setTamaño(dataTam.data);
     } catch (error) {
       toast.error('Error al cargar los tamaños');
     }
@@ -69,6 +82,7 @@ export default function TamañosManager() {
   const handleEdit = (tamaño: Tamaños) => {
     setSelectedTamaño(tamaño);
     setFormData({
+      idCategoria: tamaño.idCategoria ? String(tamaño.idCategoria) : '',
       nombre: tamaño.nombre
     });
     setIsDialogOpen(true);
@@ -101,6 +115,7 @@ export default function TamañosManager() {
 
   const resetForm = () => {
     setFormData({
+      idCategoria: '',
       nombre: ''
     });
     setSelectedTamaño(null);
@@ -125,33 +140,41 @@ export default function TamañosManager() {
         {tamaño.map((tamaño) => (
           <div
             key={tamaño.id}
-            className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-lg border border-border bg-card p-4 min-h-[72px]"
+            className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4"
           >
-            <div className="flex justify-between items-start">
+            <div className="flex-1">
               <h3 className="font-semibold text-foreground">{tamaño.nombre}</h3>
-
+            </div>
+            <div className="text-sm text-muted-foreground space-y-1">
+              <p>
+                Categoria: {
+                  categorias.find(cat => cat.id === tamaño.idCategoria)?.nombre || "Sin categoría"
+                }
+              </p>
             </div>
 
-            <div className="flex flex-wrap gap-2 pt-2">
+            <div className="flex gap-2 w-full">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => handleToggleEstado(tamaño)}
-                className="flex-shrink-0"
+                className="w-12"
+                title={tamaño.estado ? "Desactivar" : "Activar"}
               >
                 {tamaño.estado ? (
-                  <Eye className="h-3 w-3" />
+                  <Eye className="h-4 w-4" />
                 ) : (
-                  <EyeOff className="h-3 w-3" />
+                  <EyeOff className="h-4 w-4" />
                 )}
               </Button>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => handleEdit(tamaño)}
-                className="flex-1 min-w-0"
+                className="flex-1"
               >
                 <Pencil className="h-4 w-4" />
+                <span className="truncate">Editar</span>
               </Button>
               <Button
                 variant="destructive"
@@ -160,7 +183,7 @@ export default function TamañosManager() {
                   setSelectedTamaño(tamaño);
                   setIsDeleteDialogOpen(true);
                 }}
-                className="flex-shrink-0"
+                className="w-12"
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
@@ -194,6 +217,7 @@ export default function TamañosManager() {
 
               <Input
                 id="nombre"
+                autoComplete='off'
                 value={formData.nombre}
                 maxLength={maxLength}
                 onChange={(e) =>
@@ -201,6 +225,28 @@ export default function TamañosManager() {
                 }
                 required
               />
+            </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium text-foreground">
+                Categoría
+              </label>
+              <Select
+                value={formData.idCategoria}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, idCategoria: value })
+                }
+              >
+                <SelectTrigger className="bg-background">
+                  <SelectValue placeholder="Selecciona una categoría" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categorias.map((cat) => (
+                    <SelectItem key={cat.id} value={cat.id.toString()}>
+                      {cat.nombre}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <DialogFooter>

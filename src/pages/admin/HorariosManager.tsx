@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Plus, Pencil, Trash2, Eye, EyeOff } from "lucide-react";
 import ApiService from "../../services/api";
 import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
+import { TimePickerInput } from "../../components/TimePickerInput";
 import {
   Dialog,
   DialogContent,
@@ -170,15 +170,19 @@ const HorariosManager = () => {
           </DialogHeader>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="text-sm">Hora inicio</label>
-              <Input type="time" value={horarioInicio} onChange={(e) => setHorarioInicio(e.target.value)} required />
-            </div>
+            <TimePickerInput
+              label="Hora de apertura"
+              value={horarioInicio}
+              onChange={setHorarioInicio}
+              required
+            />
 
-            <div>
-              <label className="text-sm">Hora fin</label>
-              <Input type="time" value={horarioFin} onChange={(e) => setHorarioFin(e.target.value)} required />
-            </div>
+            <TimePickerInput
+              label="Hora de cierre"
+              value={horarioFin}
+              onChange={setHorarioFin}
+              required
+            />
 
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowDialog(false)}>Cancelar</Button>

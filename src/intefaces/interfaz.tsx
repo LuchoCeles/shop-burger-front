@@ -101,6 +101,7 @@ export interface Guarniciones{
 
 export interface Tamaños{
   id?: number;
+  idCategoria?: number;
   nombre: string;
   precio?: number;
   estado?: boolean;

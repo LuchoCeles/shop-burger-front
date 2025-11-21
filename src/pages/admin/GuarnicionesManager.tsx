@@ -143,7 +143,6 @@ export default function GuarnicionesManager() {
             </div>
 
             <div className="text-sm text-muted-foreground space-y-1">
-              <p>Estado: {guarnicion.estado ? 'Activo' : 'Inactivo'}</p>
               <p>Cantidad Disponible: {guarnicion.stock}</p>
             </div>
 
