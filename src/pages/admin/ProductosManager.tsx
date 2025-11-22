@@ -129,7 +129,7 @@ const ProductosManager = () => {
         idTam: p.idTam,
         precio: parseFloat(p.precio)
       }));
-      formDataToSend.append("preciosPorTam", JSON.stringify(preciosFormatted));
+      formDataToSend.append("tam", JSON.stringify(preciosFormatted));
 
       if (imagen) {
         formDataToSend.append("imagen", imagen);
@@ -298,6 +298,7 @@ const ProductosManager = () => {
 
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {productos.map((product) => (
+          
           <div
             key={product.id}
             className="overflow-hidden rounded-lg border border-border bg-card"

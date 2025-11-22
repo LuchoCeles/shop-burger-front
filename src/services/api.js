@@ -1,3 +1,4 @@
+
 const API_URL = import.meta.env.VITE_API_URL;
 
 class ApiService {
@@ -124,8 +125,8 @@ class ApiService {
     return rsp.json();
   }
 
-  async updateTamaño(id, nombre) {
-    const rsp = await this.PATCH(`api/tam/${id}`, { nombre: nombre });
+  async updateTamaño(id, data) {
+    const rsp = await this.PATCH(`api/tam/${id}`,data);
     return rsp.json();
   }
 
