@@ -157,7 +157,7 @@ class ApiService {
   }
 
   async updateStateGuarnicion(id, estado) {
-    const rsp = await this.PATCH(`api/guarnicion/${id}/estado`, { estado: estado });
+    const rsp = await this.PATCH(`api/guarnicion/${id}/estado`, {});
     return rsp.json();
   }
 
