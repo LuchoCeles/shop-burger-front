@@ -24,7 +24,7 @@ export interface Product {
   estado?: boolean;
   adicionales?: Adicional[];
   guarniciones?: Guarniciones[];
-  tamaños?: Tamaños[];
+  tam?: Tamaños[];
 }
 
 export interface Category {
@@ -102,8 +102,10 @@ export interface Guarniciones{
 export interface Tamaños{
   id?: number;
   idCategoria?: number;
+  idPxT?: number;
   nombre: string;
   precio?: number;
+  precioFinal?: number;
   estado?: boolean;
 }
 /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

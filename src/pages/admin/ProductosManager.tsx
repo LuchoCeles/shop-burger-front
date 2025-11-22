@@ -179,8 +179,8 @@ const ProductosManager = () => {
     });
 
     // Cargar precios por tamaño
-    if (product.tamaños && product.tamaños.length > 0) {
-      const precios = product.tamaños.map(t => ({
+    if (product.tam && product.tam.length > 0) {
+      const precios = product.tam.map(t => ({
         idTam: t.id!,
         precio: t.precio?.toString() || ""
       }));
@@ -318,7 +318,7 @@ const ProductosManager = () => {
                 {product.descripcion}
               </p>
               <p className="mb-2 text-lg font-bold text-primary">
-                ${product.precio}
+                {product.tam[0].nombre} ${product.tam[0].precio}
               </p>
               <p className="mb-4 text-xs text-muted-foreground">
                 Stock: {product.stock || "N/A"}
