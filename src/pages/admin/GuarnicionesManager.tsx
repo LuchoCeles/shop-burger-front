@@ -97,7 +97,7 @@ export default function GuarnicionesManager() {
 
   const handleToggleEstado = async (guarnicion: Guarniciones) => {
     try {
-      const a = await ApiService.changeState(guarnicion.id);
+      const a = await ApiService.updateStateGuarnicion(guarnicion.id);
       const estado = a.data.estado ? 'Guarnicion activado' : 'Guarnicion desactivado';
       toast.info(estado);
       loadGuarniciones();
