@@ -16,16 +16,15 @@ import {
 } from './ui/accordion';
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
 import { Label } from './ui/label';
-import { Checkbox } from './ui/checkbox';
-import { 
-  Adicional, 
-  CartItemAdicional, 
-  Guarniciones, 
+import {
+  Adicional,
+  CartItemAdicional,
+  Guarniciones,
   Tamaños,
-  Product 
+  Product
 } from '@/intefaces/interfaz';
-import ApiService from '@/services/api';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
+
 
 export interface ProductConfigModalProps {
   open: boolean;
@@ -52,16 +51,18 @@ export default function ProductConfigModal({
 }: ProductConfigModalProps) {
   const [loading, setLoading] = useState(false);
   const [openAccordion, setOpenAccordion] = useState<string>('tamaños');
-  
+
   // Estados para las opciones disponibles
   const [tamañosDisponibles, setTamañosDisponibles] = useState<Tamaños[]>([]);
   const [guarnicionesDisponibles, setGuarnicionesDisponibles] = useState<Guarniciones[]>([]);
   const [adicionalesDisponibles, setAdicionalesDisponibles] = useState<Adicional[]>([]);
-  
+
   // Estados para las selecciones
   const [selectedTamaño, setSelectedTamaño] = useState<number | null>(null);
-  const [selectedGuarniciones, setSelectedGuarniciones] = useState<Set<number>>(new Set());
+  const [selectedGuarnicion, setSelectedGuarnicion] = useState<number | null>(null);
   const [selectedAdicionales, setSelectedAdicionales] = useState<Map<number, number>>(new Map());
+
+  const [precioTotal, setPrecioTotal] = useState<number | null>(null);
 
   useEffect(() => {
     if (open) {
@@ -70,12 +71,25 @@ export default function ProductConfigModal({
     }
   }, [open, product.id]);
 
+  useEffect(() => {
+    let total = 0;
+
+    if (selectedTamaño) {
+      const t = tamañosDisponibles.find(t => t.id === selectedTamaño);
+      if (t) total += t.precio || 0;
+    }
+
+    total += calcularTotalAdicionales();
+
+    setPrecioTotal(total);
+  }, [selectedTamaño, selectedAdicionales, tamañosDisponibles]);
+
   const loadData = async () => {
     setLoading(true);
     try {
       // Cargar tamaños
       if (product.tam && product.tam.length > 0) {
-        setTamañosDisponibles(product.tam.filter(t => t.estado !== false));
+        setTamañosDisponibles(product.tam);
       }
 
       // Cargar guarniciones
@@ -88,11 +102,7 @@ export default function ProductConfigModal({
         setAdicionalesDisponibles(product.adicionales);
       }
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'No se pudieron cargar las opciones del producto',
-        variant: 'destructive',
-      });
+      toast.error(error.message || 'Error al cargar datos');
     } finally {
       setLoading(false);
     }
@@ -104,8 +114,9 @@ export default function ProductConfigModal({
         setSelectedTamaño(initialConfig.tamaño.id || null);
       }
       if (initialConfig.guarniciones) {
-        setSelectedGuarniciones(new Set(initialConfig.guarniciones.map(g => g.id!)));
+        setSelectedGuarnicion(initialConfig.guarniciones.id || null);
       }
+
       if (initialConfig.adicionales) {
         const initial = new Map<number, number>();
         initialConfig.adicionales.forEach(adic => {
@@ -118,16 +129,6 @@ export default function ProductConfigModal({
     }
   };
 
-  const handleToggleGuarnicion = (guarnicionId: number) => {
-    const newSet = new Set(selectedGuarniciones);
-    if (newSet.has(guarnicionId)) {
-      newSet.delete(guarnicionId);
-    } else {
-      newSet.add(guarnicionId);
-    }
-    setSelectedGuarniciones(newSet);
-  };
-
   const handleIncrementAdicional = (adicional: Adicional) => {
     const current = selectedAdicionales.get(adicional.id!) || 0;
     if (current < adicional.maxCantidad && current < adicional.stock) {
@@ -135,17 +136,9 @@ export default function ProductConfigModal({
       newMap.set(adicional.id!, current + 1);
       setSelectedAdicionales(newMap);
     } else if (current >= adicional.maxCantidad) {
-      toast({
-        title: 'Límite alcanzado',
-        description: `Máximo ${adicional.maxCantidad} unidades de ${adicional.nombre}`,
-        variant: 'destructive',
-      });
+      toast.warning(`Máximo de ${adicional.maxCantidad} seleccionados`);
     } else {
-      toast({
-        title: 'Sin stock',
-        description: `Solo hay ${adicional.stock} unidades disponibles`,
-        variant: 'destructive',
-      });
+      toast.error(`No hay más stock de ${adicional.nombre}`);
     }
   };
 
@@ -164,14 +157,14 @@ export default function ProductConfigModal({
 
   const handleConfirm = () => {
     // Preparar tamaño seleccionado
-    const tamaño = selectedTamaño 
+    const tamaño = selectedTamaño
       ? tamañosDisponibles.find(t => t.id === selectedTamaño)
       : undefined;
 
     // Preparar guarniciones seleccionadas
-    const guarniciones = guarnicionesDisponibles.filter(g => 
-      selectedGuarniciones.has(g.id!)
-    );
+    const guarniciones = selectedGuarnicion
+      ? guarnicionesDisponibles.find(g => g.id === selectedGuarnicion)
+      : undefined;
 
     // Preparar adicionales seleccionados
     const adicionales: CartItemAdicional[] = adicionalesDisponibles.map(adicional => ({
@@ -201,9 +194,15 @@ export default function ProductConfigModal({
     return total;
   };
 
-  const hayOpciones = tamañosDisponibles.length > 0 || 
-                      guarnicionesDisponibles.length > 0 || 
-                      adicionalesDisponibles.length > 0;
+  const calcularPrecioTotal = (id) => {
+    const total = tamañosDisponibles.find(t => t.id === id)?.precio;
+
+    setPrecioTotal(total + calcularTotalAdicionales());
+  }
+
+  const hayOpciones = tamañosDisponibles.length > 0 ||
+    guarnicionesDisponibles.length > 0 ||
+    adicionalesDisponibles.length > 0;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -232,7 +231,7 @@ export default function ProductConfigModal({
             {tamañosDisponibles.length > 0 && (
               <AccordionItem value="tamaños">
                 <AccordionTrigger className="text-base font-semibold">
-                  Tamaños
+                  Tamaño
                 </AccordionTrigger>
                 <AccordionContent>
                   <RadioGroup
@@ -241,25 +240,25 @@ export default function ProductConfigModal({
                     className="space-y-3"
                   >
                     {tamañosDisponibles.map((tamaño) => (
-                      <div
+                      <label
                         key={tamaño.id}
-                        className="flex items-center space-x-3 p-3 border border-border rounded-lg bg-card hover:bg-accent/50 transition-colors"
+                        htmlFor={`tamaño-${tamaño.id}`}
+                        className="flex items-center space-x-3 p-3 border border-border rounded-lg bg-card hover:bg-accent/50 transition-colors cursor-pointer"
                       >
-                        <RadioGroupItem value={tamaño.id!.toString()} id={`tamaño-${tamaño.id}`} />
-                        <Label
-                          htmlFor={`tamaño-${tamaño.id}`}
-                          className="flex-1 cursor-pointer"
-                        >
-                          <div className="flex justify-between items-center">
-                            <span className="font-medium">{tamaño.nombre}</span>
-                            {tamaño.precio && tamaño.precio > 0 && (
-                              <span className="text-sm text-primary font-semibold">
-                                +${tamaño.precio}
-                              </span>
-                            )}
-                          </div>
-                        </Label>
-                      </div>
+                        <RadioGroupItem
+                          value={tamaño.id.toString()}
+                          id={`tamaño-${tamaño.id}`}
+                        />
+
+                        <div className="flex justify-between items-center flex-1">
+                          <span className="font-medium">{tamaño.nombre}</span>
+                          {tamaño.precio > 0 && (
+                            <span className="text-sm text-primary font-semibold">
+                              +${tamaño.precio}
+                            </span>
+                          )}
+                        </div>
+                      </label>
                     ))}
                   </RadioGroup>
                 </AccordionContent>
@@ -270,36 +269,31 @@ export default function ProductConfigModal({
             {guarnicionesDisponibles.length > 0 && (
               <AccordionItem value="guarniciones">
                 <AccordionTrigger className="text-base font-semibold">
-                  Guarniciones
-                  {selectedGuarniciones.size > 0 && (
-                    <span className="ml-2 text-sm font-normal text-primary">
-                      ({selectedGuarniciones.size} seleccionadas)
-                    </span>
-                  )}
+                  Guarnición
                 </AccordionTrigger>
                 <AccordionContent>
-                  <div className="space-y-3">
-                    {guarnicionesDisponibles.map((guarnicion) => (
-                      <div
-                        key={guarnicion.id}
-                        className="flex items-center space-x-3 p-3 border border-border rounded-lg bg-card hover:bg-accent/50 transition-colors"
+                  <RadioGroup
+                    value={selectedGuarnicion?.toString()}
+                    onValueChange={(value) => setSelectedGuarnicion(Number(value))}
+                    className="space-y-3"
+                  >
+                    {guarnicionesDisponibles.map((g) => (
+                      <Label
+                        key={g.id}
+                        htmlFor={`guarnicion-${g.id}`}
+                        className="flex items-center space-x-3 p-3 border border-border rounded-lg 
+                            bg-card hover:bg-accent/50 transition-colors cursor-pointer"
                       >
-                        <Checkbox
-                          id={`guarnicion-${guarnicion.id}`}
-                          checked={selectedGuarniciones.has(guarnicion.id!)}
-                          onCheckedChange={() => handleToggleGuarnicion(guarnicion.id!)}
+                        <RadioGroupItem
+                          value={g.id!.toString()}
+                          id={`guarnicion-${g.id}`}
                         />
-                        <Label
-                          htmlFor={`guarnicion-${guarnicion.id}`}
-                          className="flex-1 cursor-pointer"
-                        >
-                          <div className="flex justify-between items-center">
-                            <span className="font-medium">{guarnicion.nombre}</span>
-                          </div>
-                        </Label>
-                      </div>
+
+                        <span className="flex-1">{g.nombre}</span>
+                      </Label>
                     ))}
-                  </div>
+                  </RadioGroup>
+
                 </AccordionContent>
               </AccordionItem>
             )}
@@ -353,7 +347,6 @@ export default function ProductConfigModal({
                       );
                     })}
                   </div>
-                  
                   {selectedAdicionales.size > 0 && (
                     <div className="mt-4 pt-3 border-t border-border">
                       <div className="flex justify-between items-center text-sm">
@@ -370,6 +363,13 @@ export default function ProductConfigModal({
           </Accordion>
         )}
 
+
+        <div className="flex justify-between items-center text-sm">
+          <span className="text-muted-foreground">Total:</span>
+          <span className="font-bold text-primary">
+            ${precioTotal?.toFixed(2) ?? '0.00'}
+          </span>
+        </div>
         <DialogFooter>
           <Button
             type="button"
