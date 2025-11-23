@@ -4,13 +4,17 @@ import { Button } from "./ui/button";
 import { Card, CardContent, CardFooter } from "./ui/card";
 import { useCart } from "../context/CartContext";
 import { toast } from "sonner";
-import { Product, CartItemAdicional } from "../intefaces/interfaz";
-import AdicionalesModal from "./AdicionalesModal";
+import { Product } from "../intefaces/interfaz";
+import ProductConfigModal from "./ProductConfigModal";
 
 const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
   const { addToCart } = useCart();
-  const [showAdicionalesModal, setShowAdicionalesModal] = useState(false);
-  const hasAdicionales = product.adicionales && product.adicionales.length > 0;
+  const [showConfigModal, setShowConfigModal] = useState(false);
+  
+  const hasOpciones = 
+    (product.tamaños && product.tamaños.length > 0) ||
+    (product.guarniciones && product.guarniciones.length > 0) ||
+    (product.adicionales && product.adicionales.length > 0);
 
   const handleAddToCart = () => {
     if (product.stock !== undefined && product.stock <= 0) {
@@ -18,15 +22,15 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
       return;
     }
 
-    if (hasAdicionales) {
-      setShowAdicionalesModal(true);
+    if (hasOpciones) {
+      setShowConfigModal(true);
     } else {
       const cartId = `${product.id}-${Date.now()}`;
       addToCart({
         id: product.id,
         cartId,
         nombre: product.nombre,
-        precio: product.precio * (1 - product.descuento / 100),
+        precio: product.precio * (1 - (product.descuento || 0) / 100),
         descuento: product.descuento,
         idCategoria: product.idCategoria,
         url_imagen: product.url_imagen,
@@ -37,21 +41,36 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
     }
   };
 
-  const handleAdicionalesConfirm = (adicionales: CartItemAdicional[]) => {
+  const handleConfigConfirm = (config: {
+    tamaño?: any;
+    guarniciones: any[];
+    adicionales: any[];
+  }) => {
     const cartId = `${product.id}-${Date.now()}`;
+    
+    // Calcular precio base con descuento
+    let precioFinal = product.precio * (1 - (product.descuento || 0) / 100);
+    
+    // Agregar precio del tamaño si existe
+    if (config.tamaño && config.tamaño.precio) {
+      precioFinal += config.tamaño.precio;
+    }
+    
     addToCart({
       id: product.id,
       cartId,
       nombre: product.nombre,
-      precio: product.precio * (1 - product.descuento / 100),
+      precio: precioFinal,
       descuento: product.descuento,
       stock: product.stock,
       idCategoria: product.idCategoria,
       url_imagen: product.url_imagen,
-      adicionales,
+      tamaño: config.tamaño,
+      guarniciones: config.guarniciones,
+      adicionales: config.adicionales,
       metodoDePago: "",
     });
-    toast.success("Agregado al carrito con adicionales");
+    toast.success("Agregado al carrito");
   };
 
   return (
@@ -124,11 +143,11 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
         )}
       </CardFooter>
 
-      <AdicionalesModal
-        open={showAdicionalesModal}
-        onOpenChange={setShowAdicionalesModal}
-        Product={product}
-        onConfirm={handleAdicionalesConfirm}
+      <ProductConfigModal
+        open={showConfigModal}
+        onOpenChange={setShowConfigModal}
+        product={product}
+        onConfirm={handleConfigConfirm}
       />
     </Card>
   );

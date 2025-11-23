@@ -65,10 +65,10 @@ export default function TamañosManager() {
 
     try {
       if (selectedTamaño) {
-        await ApiService.updateTamaño(selectedTamaño.id, formData.nombre, formData.idCategoria);
+        await ApiService.updateTamaño(selectedTamaño.id, formData.nombre);
         toast.success("El tamaño se actualizó correctamente");
       } else {
-        await ApiService.createTamaño(formData);
+        await ApiService.createTamaño(formData.nombre);
         toast.success("El tamaño se creó correctamente");
       }
       loadTamaños();

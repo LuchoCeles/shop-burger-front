@@ -12,10 +12,10 @@ import {
   DialogTitle,
   DialogFooter,
 } from './ui/dialog';
-import AdicionalesModal from './AdicionalesModal';
+import ProductConfigModal from './ProductConfigModal';
 
 const CartModal: React.FC<CartModalProps> = ({ open, onOpenChange }) => {
-  const { cart, removeFromCart, updateQuantity, total, updateAdicionales } = useCart();
+  const { cart, removeFromCart, updateQuantity, total, updateItemConfig } = useCart();
   const [editingItem, setEditingItem] = useState<CartItem | null>(null);
   const navigate = useNavigate();
 
@@ -83,6 +83,29 @@ const CartModal: React.FC<CartModalProps> = ({ open, onOpenChange }) => {
                         <h4 className="font-semibold text-foreground">{item.nombre}</h4>
                         <p className="text-lg font-bold text-primary">${item.precio}</p>
 
+                        {/* Tamaño */}
+                        {item.tamaño && (
+                          <div className="mt-1">
+                            <p className="text-xs text-muted-foreground">
+                              <span className="font-medium">Tamaño:</span> {item.tamaño.nombre}
+                              {item.tamaño.precio && item.tamaño.precio > 0 && (
+                                <span> (+${item.tamaño.precio})</span>
+                              )}
+                            </p>
+                          </div>
+                        )}
+
+                        {/* Guarniciones */}
+                        {item.guarniciones && item.guarniciones.length > 0 && (
+                          <div className="mt-1">
+                            <p className="text-xs text-muted-foreground">
+                              <span className="font-medium">Guarniciones:</span>{' '}
+                              {item.guarniciones.map(g => g.nombre).join(', ')}
+                            </p>
+                          </div>
+                        )}
+
+                        {/* Adicionales */}
                         {item.adicionales && item.adicionales.filter(adic => adic.cantidad > 0).length > 0 && (
                           <div className="mt-2 space-y-1">
                             <p className="text-xs text-muted-foreground font-medium">Adicionales:</p>
@@ -142,7 +165,7 @@ const CartModal: React.FC<CartModalProps> = ({ open, onOpenChange }) => {
                           onClick={() => setEditingItem(item)}
                         >
                           <Edit className="h-3 w-3 mr-1" />
-                          Editar adicionales
+                          Editar configuración
                         </Button>
 
                         {isMaxStock && (
@@ -183,11 +206,13 @@ const CartModal: React.FC<CartModalProps> = ({ open, onOpenChange }) => {
       </Dialog>
 
       {editingItem && (
-        <AdicionalesModal
+        <ProductConfigModal
           open={!!editingItem}
           onOpenChange={(open) => !open && setEditingItem(null)}
-          Product={{
+          product={{
             ...editingItem,
+            tamaños: editingItem.tamaño ? [editingItem.tamaño] : [],
+            guarniciones: editingItem.guarniciones || [],
             adicionales: editingItem.adicionales?.map(adic => ({
               id: adic.id,
               nombre: adic.nombre,
@@ -197,12 +222,36 @@ const CartModal: React.FC<CartModalProps> = ({ open, onOpenChange }) => {
               estado: true,
             })) || []
           }}
-          onConfirm={(adicionales) => {
-            updateAdicionales(editingItem.cartId, adicionales);
+          onConfirm={(config) => {
+            // Calcular nuevo precio si cambió el tamaño
+            let newPrice = editingItem.precio;
+            
+            if (editingItem.tamaño?.precio && config.tamaño?.precio) {
+              // Ambos tienen precio, reemplazar
+              newPrice = newPrice - editingItem.tamaño.precio + config.tamaño.precio;
+            } else if (config.tamaño?.precio) {
+              // Solo el nuevo tiene precio, agregar
+              newPrice = newPrice + config.tamaño.precio;
+            } else if (editingItem.tamaño?.precio) {
+              // Solo el anterior tenía precio, quitar
+              newPrice = newPrice - editingItem.tamaño.precio;
+            }
+            
+            updateItemConfig(editingItem.cartId, {
+              tamaño: config.tamaño,
+              guarniciones: config.guarniciones,
+              adicionales: config.adicionales,
+              precio: newPrice,
+            });
+            
             setEditingItem(null);
-            toast.success('Adicionales actualizados');
+            toast.success('Configuración actualizada');
           }}
-          initialAdicionales={editingItem.adicionales || []}
+          initialConfig={{
+            tamaño: editingItem.tamaño,
+            guarniciones: editingItem.guarniciones,
+            adicionales: editingItem.adicionales,
+          }}
         />
       )}
     </>

@@ -7,6 +7,7 @@ import { Textarea } from "../../components/ui/textarea";
 import { Product, Category, Tamaños } from "src/intefaces/interfaz";
 import ImageEditor from "../../components/ImageEditor";
 import AsignarAdicionalesDialog from "../../components/AsignarAdicionalesDialog";
+import AsignarGuarnicionesDialog from "../../components/AsignarGuarnicionesDialog";
 import {
   Dialog,
   DialogContent,
@@ -57,7 +58,10 @@ const ProductosManager = () => {
   const [loading, setLoading] = useState(false);
   const [productToDelete, setProductToDelete] = useState<number | null>(null);
   const [adicionalesDialogOpen, setAdicionalesDialogOpen] = useState(false);
+  const [guarnicionesDialogOpen, setGuarnicionesDialogOpen] = useState(false);
   const [selectedProductForAdicionales, setSelectedProductForAdicionales] = useState<Product | null>(null);
+  const [selectedProductForGuarniciones, setSelectedProductForGuarniciones] = useState<Product | null>(null);
+
 
 
   useEffect(() => {
@@ -66,7 +70,7 @@ const ProductosManager = () => {
 
   const loadData = async () => {
     try {
-      const [prodData, catData, tamData] = await Promise.all([
+      const [prodData, catData, tamData, guarData] = await Promise.all([
         ApiService.getProducts(false),
         ApiService.getCategories(),
         ApiService.getTamaños(),
@@ -75,7 +79,7 @@ const ProductosManager = () => {
       setCategorias(catData.data);
       setTamaños(tamData.data);
     } catch (error) {
-      toast.error("Error al cargar datos");
+      toast.error(error.message || "Error al cargar datos");
     }
   };
 
@@ -129,7 +133,7 @@ const ProductosManager = () => {
         idTam: p.idTam,
         precio: parseFloat(p.precio)
       }));
-      formDataToSend.append("tam", JSON.stringify(preciosFormatted));
+      formDataToSend.append("preciosPorTam", JSON.stringify(preciosFormatted));
 
       if (imagen) {
         formDataToSend.append("imagen", imagen);
@@ -298,7 +302,6 @@ const ProductosManager = () => {
 
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {productos.map((product) => (
-          
           <div
             key={product.id}
             className="overflow-hidden rounded-lg border border-border bg-card"
@@ -361,6 +364,18 @@ const ProductosManager = () => {
                   >
                     <ListPlus className="mr-1 h-3 w-3" />
                     <span className="truncate">Adicionales</span>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1 min-w-0"
+                    onClick={() => {
+                      setSelectedProductForGuarniciones(product);
+                      setGuarnicionesDialogOpen(true);
+                    }}
+                  >
+                    <ListPlus className="mr-1 h-3 w-3" />
+                    <span className="truncate">Guarniciones</span>
                   </Button>
                 </div>
               </div>
@@ -615,6 +630,17 @@ const ProductosManager = () => {
           Product={selectedProductForAdicionales}
         />
       )}
+      {selectedProductForGuarniciones && (
+        <AsignarGuarnicionesDialog
+          open={guarnicionesDialogOpen}
+          onOpenChange={(open) => {
+            setGuarnicionesDialogOpen(open);
+            if (!open) loadData();
+          }}
+          Product={selectedProductForGuarniciones}
+        />
+      )}
+
     </div>
   );
 };

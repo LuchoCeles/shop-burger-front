@@ -154,6 +154,7 @@ export default function AdicionalesManager() {
             </div>
 
             <div className="text-sm text-muted-foreground space-y-1">
+              <p>Estado: {adicional.estado ? 'Activo' : 'Inactivo'}</p>
               <p>Cantidad Disponible: {adicional.stock}</p>
               <p>Cantidad Máxima por Producto: {adicional.maxCantidad}</p>
             </div>
