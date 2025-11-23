@@ -19,11 +19,11 @@ import { toast } from "sonner";
  * - title: string
  * - fetchItems: () => Promise<{ data: any[] }>
  * - getProductItems: (product: Product) => any[]
- * - getIdARelacion: (item) => number | undefined   → opcional (para adicionales)
+ * - getIdARelacion: (item) => number | undefined   → opcional (para relaciones pivot)
  * - onAdd: (productId, itemId) => Promise
  * - onRemove: (idRelacion) => Promise
  * - itemLabel: (item) => string (mostrar título)
- * - itemDetails: (item) => ReactNode (mostrar subtítulos)
+ * - itemDetails: (item) => ReactNode html (mostrar subtítulos)
  * - itemDisabled?: (item) => boolean
  */
 export default function GenericAssignDialog({
@@ -73,10 +73,8 @@ export default function GenericAssignDialog({
 
     try {
       if (isAssigned) {
-        // Obtener SOLO el idAxp del item individual
         let relationId = getIdARelacion ? getIdARelacion(Product) : null;
 
-        // Si viniera como array, elegir el correcto
         if (Array.isArray(relationId)) {
           relationId = relationId.find((r) => r.id === id);
           if(relationId){

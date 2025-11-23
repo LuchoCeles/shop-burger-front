@@ -94,6 +94,7 @@ export interface Orders {
 
 export interface Guarniciones{
   id?: number;
+  idGxP?: number;
   nombre: string;
   stock: number;
   estado?: boolean;

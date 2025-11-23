@@ -24,13 +24,7 @@ export default function AsignarAdicionalesDialog(props) {
       }
       onRemove={(idAxp) => ApiService.removeAdicionalFromProducto(idAxp)}
       itemLabel={(a) => a.nombre}
-      itemDetails={(a) => (
-        <div className="flex gap-4 mt-1 text-sm text-muted-foreground">
-          <span>Precio: ${a.precio}</span>
-          <span>Stock: {a.stock}</span>
-          <span>Máx: {a.maxCantidad}</span>
-        </div>
-      )}
+      itemDetails={() => null}
     />
   );
 }
