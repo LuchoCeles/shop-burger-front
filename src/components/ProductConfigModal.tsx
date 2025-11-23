@@ -315,7 +315,7 @@ export default function ProductConfigModal({
                           <div className="flex-1">
                             <h4 className="font-medium text-foreground">{adicional.nombre}</h4>
                             <p className="text-sm text-muted-foreground">
-                              ${adicional.precio} - Máx: {adicional.maxCantidad}
+                              ${adicional.precio}
                             </p>
                           </div>
                           <div className="flex items-center gap-2">
