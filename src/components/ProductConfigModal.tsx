@@ -33,12 +33,12 @@ export interface ProductConfigModalProps {
   product: Product;
   onConfirm: (config: {
     tamaño?: Tamaños;
-    guarniciones: Guarniciones[];
+    guarniciones: Guarniciones;
     adicionales: CartItemAdicional[];
   }) => void;
   initialConfig?: {
     tamaño?: Tamaños;
-    guarniciones?: Guarniciones[];
+    guarniciones?: Guarniciones;
     adicionales?: CartItemAdicional[];
   };
 }
@@ -74,23 +74,18 @@ export default function ProductConfigModal({
     setLoading(true);
     try {
       // Cargar tamaños
-      if (product.tamaños && product.tamaños.length > 0) {
-        setTamañosDisponibles(product.tamaños.filter(t => t.estado !== false));
+      if (product.tam && product.tam.length > 0) {
+        setTamañosDisponibles(product.tam.filter(t => t.estado !== false));
       }
 
       // Cargar guarniciones
       if (product.guarniciones && product.guarniciones.length > 0) {
-        setGuarnicionesDisponibles(product.guarniciones.filter(g => g.estado !== false && g.stock > 0));
+        setGuarnicionesDisponibles(product.guarniciones);
       }
 
       // Cargar adicionales
       if (product.adicionales && product.adicionales.length > 0) {
-        const allAdicionales = await ApiService.getAdicionales();
-        const adicionalesIds = product.adicionales.map((pa: Adicional) => pa.id);
-        const filtered = allAdicionales.data?.filter((a: Adicional) =>
-          adicionalesIds.includes(a.id) && a.stock > 0
-        );
-        setAdicionalesDisponibles(filtered || []);
+        setAdicionalesDisponibles(product.adicionales);
       }
     } catch (error) {
       toast({
@@ -238,11 +233,6 @@ export default function ProductConfigModal({
               <AccordionItem value="tamaños">
                 <AccordionTrigger className="text-base font-semibold">
                   Tamaños
-                  {selectedTamaño && (
-                    <span className="ml-2 text-sm font-normal text-primary">
-                      (1 seleccionado)
-                    </span>
-                  )}
                 </AccordionTrigger>
                 <AccordionContent>
                   <RadioGroup
@@ -305,9 +295,6 @@ export default function ProductConfigModal({
                         >
                           <div className="flex justify-between items-center">
                             <span className="font-medium">{guarnicion.nombre}</span>
-                            <span className="text-sm text-muted-foreground">
-                              Stock: {guarnicion.stock}
-                            </span>
                           </div>
                         </Label>
                       </div>

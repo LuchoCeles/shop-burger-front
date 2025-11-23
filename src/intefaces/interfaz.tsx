@@ -126,6 +126,8 @@ export interface CartItem {
   adicionales?: CartItemAdicional[];
   metodoDePago: string;
   idCategoria?: number;
+  tam?: Tamaños;
+  guarniciones?: Guarniciones;
 }
 
 export interface CartItemAdicional {

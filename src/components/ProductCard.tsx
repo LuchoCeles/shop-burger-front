@@ -4,15 +4,15 @@ import { Button } from "./ui/button";
 import { Card, CardContent, CardFooter } from "./ui/card";
 import { useCart } from "../context/CartContext";
 import { toast } from "sonner";
-import { Product } from "../intefaces/interfaz";
+import { Product, Tamaños, Guarniciones, CartItemAdicional } from "../intefaces/interfaz";
 import ProductConfigModal from "./ProductConfigModal";
 
 const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
   const { addToCart } = useCart();
   const [showConfigModal, setShowConfigModal] = useState(false);
-  
-  const hasOpciones = 
-    (product.tamaños && product.tamaños.length > 0) ||
+
+  const hasOpciones =
+    (product.tam && product.tam.length > 0) ||
     (product.guarniciones && product.guarniciones.length > 0) ||
     (product.adicionales && product.adicionales.length > 0);
 
@@ -42,20 +42,20 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
   };
 
   const handleConfigConfirm = (config: {
-    tamaño?: any;
-    guarniciones: any[];
-    adicionales: any[];
+    tam?: Tamaños;
+    guarniciones: Guarniciones;
+    adicionales: CartItemAdicional[];
   }) => {
     const cartId = `${product.id}-${Date.now()}`;
-    
+
     // Calcular precio base con descuento
     let precioFinal = product.precio * (1 - (product.descuento || 0) / 100);
-    
-    // Agregar precio del tamaño si existe
-    if (config.tamaño && config.tamaño.precio) {
-      precioFinal += config.tamaño.precio;
+
+    // Agregar precio del tam si existe
+    if (config.tam && config.tam.precio) {
+      precioFinal += config.tam.precio;
     }
-    
+
     addToCart({
       id: product.id,
       cartId,
@@ -65,7 +65,7 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
       stock: product.stock,
       idCategoria: product.idCategoria,
       url_imagen: product.url_imagen,
-      tamaño: config.tamaño,
+      tam: config.tam,
       guarniciones: config.guarniciones,
       adicionales: config.adicionales,
       metodoDePago: "",
