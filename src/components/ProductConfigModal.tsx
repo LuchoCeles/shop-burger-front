@@ -194,12 +194,6 @@ export default function ProductConfigModal({
     return total;
   };
 
-  const calcularPrecioTotal = (id) => {
-    const total = tamañosDisponibles.find(t => t.id === id)?.precio;
-
-    setPrecioTotal(total + calcularTotalAdicionales());
-  }
-
   const hayOpciones = tamañosDisponibles.length > 0 ||
     guarnicionesDisponibles.length > 0 ||
     adicionalesDisponibles.length > 0;
