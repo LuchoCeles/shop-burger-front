@@ -39,7 +39,23 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // 1. mismo producto
     if (item1.id !== item2.id) return false;
 
-    // 2. mismos adicionales (si no hay adicionales, ok)
+    // 2. mismo tamaño
+    const t1Id = item1.tamaño?.id || null;
+    const t2Id = item2.tamaño?.id || null;
+    if (t1Id !== t2Id) return false;
+
+    // 3. mismas guarniciones
+    const g1 = item1.guarniciones || [];
+    const g2 = item2.guarniciones || [];
+    if (g1.length !== g2.length) return false;
+    
+    const g1Ids = g1.map(g => g.id).sort();
+    const g2Ids = g2.map(g => g.id).sort();
+    for (let i = 0; i < g1Ids.length; i++) {
+      if (g1Ids[i] !== g2Ids[i]) return false;
+    }
+
+    // 4. mismos adicionales
     const a1 = item1.adicionales || [];
     const a2 = item2.adicionales || [];
 
@@ -120,9 +136,35 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const clearCart = () => {
     setCart([]);
   };
+  
   const updateAdicionales = (cartId: string, adicionales: CartItem['adicionales']) => {
     setCart((prev) =>
       prev.map((item) => (item.cartId === cartId ? { ...item, adicionales } : item))
+    );
+  };
+
+  const updateItemConfig = (
+    cartId: string, 
+    config: { 
+      tamaño?: CartItem['tamaño'];
+      guarniciones?: CartItem['guarniciones'];
+      adicionales?: CartItem['adicionales'];
+      precio?: number;
+    }
+  ) => {
+    setCart((prev) =>
+      prev.map((item) => {
+        if (item.cartId === cartId) {
+          return {
+            ...item,
+            ...(config.tamaño !== undefined && { tamaño: config.tamaño }),
+            ...(config.guarniciones !== undefined && { guarniciones: config.guarniciones }),
+            ...(config.adicionales !== undefined && { adicionales: config.adicionales }),
+            ...(config.precio !== undefined && { precio: config.precio }),
+          };
+        }
+        return item;
+      })
     );
   };
 
@@ -137,7 +179,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   return (
     <CartContext.Provider
-      value={{ cart, addToCart, removeFromCart, updateQuantity, clearCart, total, itemCount, updateAdicionales }}
+      value={{ cart, addToCart, removeFromCart, updateQuantity, clearCart, total, itemCount, updateAdicionales, updateItemConfig }}
     >
       {children}
     </CartContext.Provider>

@@ -245,13 +245,14 @@ class ApiService {
     return rsp.json();
   }
 
-  async updateAdicionalXProducto(idAxp, idProducto, adicionales) {
-    const rsp = await this.PATCH(`admin/adicionalxproducto/${idAxp}`, { idProducto, adicionales });
+  // Conexion entre productos y guarniciones
+  async addGuarnicionToProducto(idProducto, idGuarnicion) {
+    const rsp = await this.POST('admin/guarnicionesxproducto/create', { idProducto, idGuarnicion });
     return rsp.json();
   }
 
-  async getProductoAdicionales(idProducto) {
-    const rsp = await this.GET(`admin/adicionalxproducto/${idProducto}`);
+  async removeGuarnicionFromProducto(idAxp) {
+    const rsp = await this.DELETE(`admin/guarnicionesxproducto/${idAxp}`);
     return rsp.json();
   }
 

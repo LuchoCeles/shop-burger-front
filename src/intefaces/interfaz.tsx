@@ -24,7 +24,7 @@ export interface Product {
   estado?: boolean;
   adicionales?: Adicional[];
   guarniciones?: Guarniciones[];
-  tamaños?: Tamaños[];
+  tam?: Tamaños[];
 }
 
 export interface Category {
@@ -94,6 +94,7 @@ export interface Orders {
 
 export interface Guarniciones{
   id?: number;
+  idGxP?: number;
   nombre: string;
   stock: number;
   estado?: boolean;
@@ -102,8 +103,10 @@ export interface Guarniciones{
 export interface Tamaños{
   id?: number;
   idCategoria?: number;
+  idPxT?: number;
   nombre: string;
   precio?: number;
+  precioFinal?: number;
   estado?: boolean;
 }
 /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -123,6 +126,8 @@ export interface CartItem {
   adicionales?: CartItemAdicional[];
   metodoDePago: string;
   idCategoria?: number;
+  tam?: Tamaños;
+  guarniciones?: Guarniciones;
 }
 
 export interface CartItemAdicional {

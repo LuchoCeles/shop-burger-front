@@ -97,7 +97,7 @@ export default function GuarnicionesManager() {
 
   const handleToggleEstado = async (guarnicion: Guarniciones) => {
     try {
-      const a = await ApiService.updateStateGuarnicion(guarnicion.id);
+      const a = await ApiService.changeState(guarnicion.id);
       const estado = a.data.estado ? 'Guarnicion activado' : 'Guarnicion desactivado';
       toast.info(estado);
       loadGuarniciones();
@@ -143,6 +143,7 @@ export default function GuarnicionesManager() {
             </div>
 
             <div className="text-sm text-muted-foreground space-y-1">
+              <p>Estado: {guarnicion.estado ? 'Activo' : 'Inactivo'}</p>
               <p>Cantidad Disponible: {guarnicion.stock}</p>
             </div>
 
