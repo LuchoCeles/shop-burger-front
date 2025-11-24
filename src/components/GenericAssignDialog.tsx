@@ -19,7 +19,7 @@ import { toast } from "sonner";
  * - title: string
  * - fetchItems: () => Promise<{ data: any[] }>
  * - getProductItems: (product: Product) => any[]
- * - getIdARelacion: (item) => number | undefined   → opcional (para relaciones pivot)
+ * - getIdRelacion: (item) => number | undefined   → opcional (para relaciones pivot)
  * - onAdd: (productId, itemId) => Promise
  * - onRemove: (idRelacion) => Promise
  * - itemLabel: (item) => string (mostrar título)
@@ -33,7 +33,7 @@ export default function GenericAssignDialog({
   title,
   fetchItems,
   getProductItems,
-  getIdARelacion,
+  getIdRelacion,
   onAdd,
   onRemove,
   itemLabel,
@@ -73,7 +73,7 @@ export default function GenericAssignDialog({
 
     try {
       if (isAssigned) {
-        let relationId = getIdARelacion ? getIdARelacion(Product) : null;
+        let relationId = getIdRelacion ? getIdRelacion(Product) : null;
 
         if (Array.isArray(relationId)) {
           relationId = relationId.find((r) => r.id === id);

@@ -84,12 +84,12 @@ const CartModal: React.FC<CartModalProps> = ({ open, onOpenChange }) => {
                         <p className="text-lg font-bold text-primary">${item.precio}</p>
 
                         {/* Tamaño */}
-                        {item.tamaño && (
+                        {item.tam && (
                           <div className="mt-1">
                             <p className="text-xs text-muted-foreground">
-                              <span className="font-medium">Tamaño:</span> {item.tamaño.nombre}
-                              {item.tamaño.precio && item.tamaño.precio > 0 && (
-                                <span> (+${item.tamaño.precio})</span>
+                              <span className="font-medium">Tamaño:</span> {item.tam.nombre}
+                              {item.tam.precio && item.tam.precio > 0 && (
+                                <span> (+${item.tam.precio})</span>
                               )}
                             </p>
                           </div>
@@ -211,8 +211,8 @@ const CartModal: React.FC<CartModalProps> = ({ open, onOpenChange }) => {
           onOpenChange={(open) => !open && setEditingItem(null)}
           product={{
             ...editingItem,
-            tamaños: editingItem.tamaño ? [editingItem.tamaño] : [],
-            guarniciones: editingItem.guarniciones || [],
+            tamaños: editingItem.tam ? [editingItem.tam] : [],
+            guarniciones: editingItem.guarniciones,
             adicionales: editingItem.adicionales?.map(adic => ({
               id: adic.id,
               nombre: adic.nombre,
@@ -226,15 +226,15 @@ const CartModal: React.FC<CartModalProps> = ({ open, onOpenChange }) => {
             // Calcular nuevo precio si cambió el tamaño
             let newPrice = editingItem.precio;
             
-            if (editingItem.tamaño?.precio && config.tamaño?.precio) {
+            if (editingItem.tam?.precio && config.tamaño?.precio) {
               // Ambos tienen precio, reemplazar
-              newPrice = newPrice - editingItem.tamaño.precio + config.tamaño.precio;
+              newPrice = newPrice - editingItem.tam.precio + config.tamaño.precio;
             } else if (config.tamaño?.precio) {
               // Solo el nuevo tiene precio, agregar
               newPrice = newPrice + config.tamaño.precio;
-            } else if (editingItem.tamaño?.precio) {
+            } else if (editingItem.tam?.precio) {
               // Solo el anterior tenía precio, quitar
-              newPrice = newPrice - editingItem.tamaño.precio;
+              newPrice = newPrice - editingItem.tam.precio;
             }
             
             updateItemConfig(editingItem.cartId, {
@@ -248,7 +248,7 @@ const CartModal: React.FC<CartModalProps> = ({ open, onOpenChange }) => {
             toast.success('Configuración actualizada');
           }}
           initialConfig={{
-            tamaño: editingItem.tamaño,
+            tamaño: editingItem.tam,
             guarniciones: editingItem.guarniciones,
             adicionales: editingItem.adicionales,
           }}

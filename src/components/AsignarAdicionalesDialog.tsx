@@ -18,7 +18,7 @@ export default function AsignarAdicionalesDialog(props) {
       title="Asignar Adicionales"
       fetchItems={() => ApiService.getAdicionales()}
       getProductItems={(p) => p.adicionales || []}
-      getIdARelacion={(p) => obtenerIdAxp(p)}
+      getIdRelacion={(p) => obtenerIdAxp(p)}
       onAdd={(productId, adicionalId) =>
         ApiService.addAdicionalToProducto(productId, adicionalId)
       }

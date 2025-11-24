@@ -18,7 +18,7 @@ export default function AsignarGuarnicionesDialog(props) {
       title="Asignar Guarniciones"
       fetchItems={() => ApiService.getGuarniciones()}
       getProductItems={(p) => p.guarniciones || []}
-      getIdARelacion={(p) => obtenerIdGxP(p)}
+      getIdRelacion={(p) => obtenerIdGxP(p)}
       onAdd={(productId, guarId) =>
         ApiService.addGuarnicionToProducto(productId, guarId)
       }

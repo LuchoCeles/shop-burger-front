@@ -133,7 +133,7 @@ const ProductosManager = () => {
         idTam: p.idTam,
         precio: parseFloat(p.precio)
       }));
-      formDataToSend.append("preciosPorTam", JSON.stringify(preciosFormatted));
+      formDataToSend.append("tam", JSON.stringify(preciosFormatted));
 
       if (imagen) {
         formDataToSend.append("imagen", imagen);
