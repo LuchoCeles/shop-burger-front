@@ -251,7 +251,7 @@ export default function ProductConfigModal({
                           <span className="font-medium">{tamaño.nombre}</span>
                           {tamaño.precio > 0 && (
                             <span className="text-sm text-primary font-semibold">
-                              +${tamaño.precio}
+                              ${tamaño.precio}
                             </span>
                           )}
                         </div>
