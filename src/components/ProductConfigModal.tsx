@@ -113,19 +113,22 @@ export default function ProductConfigModal({
       if (initialConfig.tamaño) {
         setSelectedTamaño(initialConfig.tamaño.id || null);
       }
-      if (initialConfig.guarniciones) {
-        setSelectedGuarnicion(initialConfig.guarniciones.id || null);
+    } else {
+      if (product.tam?.length === 1) {
+        setSelectedTamaño(product.tam[0].id);
       }
+    }
 
-      if (initialConfig.adicionales) {
-        const initial = new Map<number, number>();
-        initialConfig.adicionales.forEach(adic => {
-          if (adic.cantidad > 0) {
-            initial.set(adic.id, adic.cantidad);
-          }
-        });
-        setSelectedAdicionales(initial);
-      }
+    if (initialConfig?.guarniciones) {
+      setSelectedGuarnicion(initialConfig.guarniciones.id || null);
+    }
+
+    if (initialConfig?.adicionales) {
+      const initial = new Map<number, number>();
+      initialConfig.adicionales.forEach(adic => {
+        if (adic.cantidad > 0) initial.set(adic.id, adic.cantidad);
+      });
+      setSelectedAdicionales(initial);
     }
   };
 
@@ -222,10 +225,10 @@ export default function ProductConfigModal({
             className="w-full"
           >
             {/* Acordeón de Tamaños */}
-            {tamañosDisponibles.length > 0 && (
+            {tamañosDisponibles.length > 1 && (
               <AccordionItem value="tamaños">
                 <AccordionTrigger className="text-base font-semibold">
-                  Tamaño
+                  Tamaños
                 </AccordionTrigger>
                 <AccordionContent>
                   <RadioGroup

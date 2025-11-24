@@ -157,7 +157,7 @@ const CartModal: React.FC<CartModalProps> = ({ open, onOpenChange }) => {
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
-                        
+
                         <Button
                           variant="ghost"
                           size="sm"
@@ -225,7 +225,7 @@ const CartModal: React.FC<CartModalProps> = ({ open, onOpenChange }) => {
           onConfirm={(config) => {
             // Calcular nuevo precio si cambió el tamaño
             let newPrice = editingItem.precio;
-            
+
             if (editingItem.tam?.precio && config.tamaño?.precio) {
               // Ambos tienen precio, reemplazar
               newPrice = newPrice - editingItem.tam.precio + config.tamaño.precio;
@@ -236,14 +236,14 @@ const CartModal: React.FC<CartModalProps> = ({ open, onOpenChange }) => {
               // Solo el anterior tenía precio, quitar
               newPrice = newPrice - editingItem.tam.precio;
             }
-            
+
             updateItemConfig(editingItem.cartId, {
               tamaño: config.tamaño,
               guarniciones: config.guarniciones,
               adicionales: config.adicionales,
               precio: newPrice,
             });
-            
+
             setEditingItem(null);
             toast.success('Configuración actualizada');
           }}

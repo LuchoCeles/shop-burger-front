@@ -11,10 +11,22 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
   const { addToCart } = useCart();
   const [showConfigModal, setShowConfigModal] = useState(false);
 
-  const hasOpciones =
-    (product.tam && product.tam.length > 0) ||
-    (product.guarniciones && product.guarniciones.length > 0) ||
-    (product.adicionales && product.adicionales.length > 0);
+  // 🔥 NUEVO: función que decide si abrir modal
+  const shouldOpenModal = (product: Product) => {
+    const hasTamaños = product.tam && product.tam.length > 0;
+    const hasGuarniciones = product.guarniciones && product.guarniciones.length > 0;
+    const hasAdicionales = product.adicionales && product.adicionales.length > 0;
+
+    // No tiene nada
+    if (!hasTamaños && !hasGuarniciones && !hasAdicionales) return false;
+
+    // Solo 1 tamaño y nada más
+    if (hasTamaños && product.tam.length === 1 && !hasGuarniciones && !hasAdicionales) {
+      return false;
+    }
+
+    return true;
+  };
 
   const handleAddToCart = () => {
     if (product.stock !== undefined && product.stock <= 0) {
@@ -22,23 +34,39 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
       return;
     }
 
-    if (hasOpciones) {
-      setShowConfigModal(true);
-    } else {
+    // 🔥 Evitar modal si no corresponde
+    if (!shouldOpenModal(product)) {
       const cartId = `${product.id}-${Date.now()}`;
+
+      // autoConfig si tiene 1 tamaño
+      const autoConfigTamaño = product.tam?.length === 1 ? product.tam[0] : undefined;
+
+      const precioBase = product.precio * (1 - (product.descuento || 0) / 100);
+      const precioFinal = autoConfigTamaño?.precio
+        ? precioBase + autoConfigTamaño.precio
+        : precioBase;
+
       addToCart({
         id: product.id,
         cartId,
         nombre: product.nombre,
-        precio: product.precio * (1 - (product.descuento || 0) / 100),
+        precio: precioFinal,
         descuento: product.descuento,
         idCategoria: product.idCategoria,
         url_imagen: product.url_imagen,
         stock: product.stock,
+        tam: autoConfigTamaño,
+        guarniciones: undefined,
+        adicionales: [],
         metodoDePago: "",
       });
+
       toast.success("Agregado al carrito");
+      return;
     }
+
+    // 🔥 Si tiene opciones: abrir modal
+    setShowConfigModal(true);
   };
 
   const handleConfigConfirm = (config: {
@@ -48,13 +76,9 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
   }) => {
     const cartId = `${product.id}-${Date.now()}`;
 
-    // Calcular precio base con descuento
     let precioFinal = product.precio * (1 - (product.descuento || 0) / 100);
 
-    // Agregar precio del tam si existe
-    if (config.tam && config.tam.precio) {
-      precioFinal += config.tam.precio;
-    }
+    if (config.tam?.precio) precioFinal += config.tam.precio;
 
     addToCart({
       id: product.id,
@@ -70,6 +94,7 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
       adicionales: config.adicionales,
       metodoDePago: "",
     });
+
     toast.success("Agregado al carrito");
   };
 
@@ -97,12 +122,10 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
         )}
       </div>
 
-      {/* Contenido principal */}
+      {/* Contenido */}
       <CardContent className="flex flex-col justify-between flex-1 p-4">
         <div>
-          <h3 className="mb-2 text-lg font-semibold text-foreground">
-            {product.nombre}
-          </h3>
+          <h3 className="mb-2 text-lg font-semibold text-foreground">{product.nombre}</h3>
 
           {product.descripcion && (
             <p
@@ -124,6 +147,7 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
         </p>
       </CardContent>
 
+      {/* Footer */}
       <CardFooter className="p-4 pt-0 mt-auto flex flex-col items-start gap-1 min-h-[79px]">
         <Button
           className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
@@ -136,13 +160,12 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
 
         {product.stock !== undefined && product.stock <= 5 && (
           <p className="text-xs text-destructive mt-auto">
-            {product.stock === 0
-              ? "Sin stock"
-              : `Últimas ${product.stock} unidades`}
+            {product.stock === 0 ? "Sin stock" : `Últimas ${product.stock} unidades`}
           </p>
         )}
       </CardFooter>
 
+      {/* Modal */}
       <ProductConfigModal
         open={showConfigModal}
         onOpenChange={setShowConfigModal}
