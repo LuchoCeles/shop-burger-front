@@ -321,7 +321,12 @@ const ProductosManager = () => {
                 {product.descripcion}
               </p>
               <p className="mb-2 text-lg font-bold text-primary">
-                {product.tam[0].nombre} ${product.tam[0].precio}
+                {product.tam[0].nombre}           $
+                {new Intl.NumberFormat("es-AR", {
+                  style: "decimal",
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0,
+                }).format(product.tam[0].precioFinal)}
               </p>
               <p className="mb-4 text-xs text-muted-foreground">
                 Stock: {product.stock || "N/A"}
