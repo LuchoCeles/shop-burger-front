@@ -40,20 +40,14 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (item1.id !== item2.id) return false;
 
     // 2. mismo tamaño
-    const t1Id = item1.tamaño?.id || null;
-    const t2Id = item2.tamaño?.id || null;
+    const t1Id = item1.tam?.id || null;
+    const t2Id = item2.tam?.id || null;
     if (t1Id !== t2Id) return false;
 
-    // 3. mismas guarniciones
-    const g1 = item1.guarniciones || [];
-    const g2 = item2.guarniciones || [];
-    if (g1.length !== g2.length) return false;
-    
-    const g1Ids = g1.map(g => g.id).sort();
-    const g2Ids = g2.map(g => g.id).sort();
-    for (let i = 0; i < g1Ids.length; i++) {
-      if (g1Ids[i] !== g2Ids[i]) return false;
-    }
+    // 3. misma guarnición
+    const g1Id = item1.guarnicion?.id || null;
+    const g2Id = item2.guarnicion?.id || null;
+    if (g1Id !== g2Id) return false;
 
     // 4. mismos adicionales
     const a1 = item1.adicionales || [];
@@ -87,28 +81,49 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const addToCart = (product: Omit<CartItem, 'cantidad'>) => {
     setCart((prev) => {
-      // Buscamos item igual por contenido
-      const existing = prev.find((item) => areItemsEqual(item, product));
+      // Normalizar / sanitizar el objeto entrante
+      const normalized: Omit<CartItem, 'cantidad'> = {
+        id: Number(product.id),
+        cartId: product.cartId || `${product.id}-${Date.now()}`,
+        nombre: product.nombre || 'Producto',
+        precio: Number(product.tam.precio || 0),
+        descuento: product.descuento,
+        url_imagen: product.url_imagen,
+        stock: product.stock,
+        adicionales: Array.isArray(product.adicionales) ? product.adicionales.map(a => ({
+          ...a,
+          id: Number(a.id),
+          precio: Number(a.precio || 0),
+          cantidad: Number(a.cantidad || 0),
+          maxCantidad: Number(a.maxCantidad || 0),
+        })) : [],
+        metodoDePago: product.metodoDePago || '',
+        idCategoria: product.idCategoria,
+        tam: product.tam ?? undefined,
+        guarnicion: product.guarnicion ?? undefined,
+      };
+
+      // Buscamos item igual por contenido (usamos areItemsEqual)
+      const existing = prev.find((item) => areItemsEqual(item, normalized));
 
       if (existing) {
         // Validar stock
-        if (product.stock !== undefined && existing.cantidad >= product.stock) {
+        if (normalized.stock !== undefined && existing.cantidad >= normalized.stock) {
           return prev;
         }
 
         // Merge: sumar cantidad
         return prev.map((item) =>
-          areItemsEqual(item, product)
+          areItemsEqual(item, normalized)
             ? { ...item, cantidad: item.cantidad + 1 }
             : item
         );
       }
 
-      // Crear ítem nuevo
-      return [...prev, { ...product, cantidad: 1 }];
+      // Crear ítem nuevo con cantidad = 1
+      return [...prev, { ...normalized, cantidad: 1 }];
     });
   };
-
 
   const removeFromCart = (cartId: string) => {
     setCart((prev) => prev.filter((item) => item.cartId !== cartId));
@@ -136,7 +151,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const clearCart = () => {
     setCart([]);
   };
-  
+
   const updateAdicionales = (cartId: string, adicionales: CartItem['adicionales']) => {
     setCart((prev) =>
       prev.map((item) => (item.cartId === cartId ? { ...item, adicionales } : item))
@@ -144,10 +159,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const updateItemConfig = (
-    cartId: string, 
-    config: { 
-      tamaño?: CartItem['tamaño'];
-      guarniciones?: CartItem['guarniciones'];
+    cartId: string,
+    config: {
+      tam?: CartItem['tam'];
+      guarnicion?: CartItem['guarnicion'];
       adicionales?: CartItem['adicionales'];
       precio?: number;
     }
@@ -157,8 +172,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (item.cartId === cartId) {
           return {
             ...item,
-            ...(config.tamaño !== undefined && { tamaño: config.tamaño }),
-            ...(config.guarniciones !== undefined && { guarniciones: config.guarniciones }),
+            ...(config.tam !== undefined && { tam: config.tam }),
+            ...(config.guarnicion !== undefined && { guarnicion: config.guarnicion }),
             ...(config.adicionales !== undefined && { adicionales: config.adicionales }),
             ...(config.precio !== undefined && { precio: config.precio }),
           };

@@ -31,13 +31,13 @@ export interface ProductConfigModalProps {
   onOpenChange: (open: boolean) => void;
   product: Product;
   onConfirm: (config: {
-    tamaño?: Tamaños;
-    guarniciones: Guarniciones;
+    tam?: Tamaños;
+    guarnicion?: Guarniciones;
     adicionales: CartItemAdicional[];
   }) => void;
   initialConfig?: {
-    tamaño?: Tamaños;
-    guarniciones?: Guarniciones;
+    tam?: Tamaños;
+    guarnicion?: Guarniciones;
     adicionales?: CartItemAdicional[];
   };
 }
@@ -70,6 +70,19 @@ export default function ProductConfigModal({
       initializeSelections();
     }
   }, [open, product.id]);
+
+  useEffect(() => {
+    if (!open) {
+      setSelectedTamaño(null);
+      setSelectedGuarnicion(null);
+      setSelectedAdicionales(new Map());
+      setTamañosDisponibles([]);
+      setGuarnicionesDisponibles([]);
+      setAdicionalesDisponibles([]);
+      setPrecioTotal(null);
+      setOpenAccordion('tamaños');
+    }
+  }, [open]);
 
   useEffect(() => {
     let total = 0;
@@ -110,25 +123,23 @@ export default function ProductConfigModal({
 
   const initializeSelections = () => {
     if (initialConfig) {
-      if (initialConfig.tamaño) {
-        setSelectedTamaño(initialConfig.tamaño.id || null);
+      if (initialConfig.tam) {
+        setSelectedTamaño(initialConfig.tam.id || null);
+      }
+      if (initialConfig.guarnicion) {
+        setSelectedGuarnicion(initialConfig.guarnicion.id || null);
+      }
+      if (initialConfig.adicionales) {
+        const initial = new Map<number, number>();
+        initialConfig.adicionales.forEach(adic => {
+          if (adic.cantidad > 0) initial.set(adic.id, adic.cantidad);
+        });
+        setSelectedAdicionales(initial);
       }
     } else {
       if (product.tam?.length === 1) {
         setSelectedTamaño(product.tam[0].id);
       }
-    }
-
-    if (initialConfig?.guarniciones) {
-      setSelectedGuarnicion(initialConfig.guarniciones.id || null);
-    }
-
-    if (initialConfig?.adicionales) {
-      const initial = new Map<number, number>();
-      initialConfig.adicionales.forEach(adic => {
-        if (adic.cantidad > 0) initial.set(adic.id, adic.cantidad);
-      });
-      setSelectedAdicionales(initial);
     }
   };
 
@@ -160,27 +171,29 @@ export default function ProductConfigModal({
 
   const handleConfirm = () => {
     // Preparar tamaño seleccionado
-    const tamaño = selectedTamaño
+    const tam = selectedTamaño
       ? tamañosDisponibles.find(t => t.id === selectedTamaño)
       : undefined;
 
-    // Preparar guarniciones seleccionadas
-    const guarniciones = selectedGuarnicion
+    // Preparar guarnición seleccionada
+    const guarnicion = selectedGuarnicion
       ? guarnicionesDisponibles.find(g => g.id === selectedGuarnicion)
       : undefined;
 
     // Preparar adicionales seleccionados
-    const adicionales: CartItemAdicional[] = adicionalesDisponibles.map(adicional => ({
-      id: adicional.id!,
-      nombre: adicional.nombre,
-      precio: adicional.precio,
-      cantidad: selectedAdicionales.get(adicional.id!) || 0,
-      maxCantidad: adicional.maxCantidad,
-    }));
+    const adicionales: CartItemAdicional[] = adicionalesDisponibles
+      .map(adicional => ({
+        id: adicional.id!,
+        nombre: adicional.nombre,
+        precio: adicional.precio,
+        cantidad: selectedAdicionales.get(adicional.id!) || 0,
+        maxCantidad: adicional.maxCantidad,
+      }))
+      .filter(a => a.cantidad > 0);
 
     onConfirm({
-      tamaño,
-      guarniciones,
+      tam,
+      guarnicion,
       adicionales,
     });
     onOpenChange(false);
@@ -275,22 +288,19 @@ export default function ProductConfigModal({
                     className="space-y-3"
                   >
                     {guarnicionesDisponibles.map((g) => (
-                      <Label
+                      <label
                         key={g.id}
                         htmlFor={`guarnicion-${g.id}`}
-                        className="flex items-center space-x-3 p-3 border border-border rounded-lg 
-                            bg-card hover:bg-accent/50 transition-colors cursor-pointer"
+                        className="flex items-center space-x-3 p-3 border border-border rounded-lg bg-card hover:bg-accent/50 transition-colors cursor-pointer"
                       >
                         <RadioGroupItem
                           value={g.id!.toString()}
                           id={`guarnicion-${g.id}`}
                         />
-
                         <span className="flex-1">{g.nombre}</span>
-                      </Label>
+                      </label>
                     ))}
                   </RadioGroup>
-
                 </AccordionContent>
               </AccordionItem>
             )}

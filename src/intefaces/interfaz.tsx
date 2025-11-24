@@ -127,7 +127,7 @@ export interface CartItem {
   metodoDePago: string;
   idCategoria?: number;
   tam?: Tamaños;
-  guarniciones?: Guarniciones;
+  guarnicion?: Guarniciones;
 }
 
 export interface CartItemAdicional {
@@ -205,6 +205,15 @@ export interface CartContextType {
   total: number;
   itemCount: number;
   updateAdicionales: (cartId: string, adicionales: CartItem['adicionales']) => void;
+  updateItemConfig: (
+    cartId: string,
+    config: {
+      tam?: CartItem['tam'];
+      guarnicion?: CartItem['guarnicion'];
+      adicionales?: CartItem['adicionales'];
+      precio?: number;
+    }
+  ) => void;
 }
 /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   +                                                                                              +

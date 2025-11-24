@@ -81,43 +81,36 @@ const CartModal: React.FC<CartModalProps> = ({ open, onOpenChange }) => {
                       {/* Información */}
                       <div className="flex-1">
                         <h4 className="font-semibold text-foreground">{item.nombre}</h4>
-                        <p className="text-lg font-bold text-primary">${item.precio}</p>
+                        <p className="text-lg font-bold text-primary">
+                          ${(typeof item.precio === 'number' ? item.precio.toFixed(2) : Number(item.precio || 0).toFixed(2))}
+                        </p>
 
                         {/* Tamaño */}
-                        {item.tam && (
+                        {item.tam && item.tam.nombre ? (
                           <div className="mt-1">
                             <p className="text-xs text-muted-foreground">
                               <span className="font-medium">Tamaño:</span> {item.tam.nombre}
-                              {item.tam.precio && item.tam.precio > 0 && (
-                                <span> (+${item.tam.precio})</span>
-                              )}
+                              {item.tam.precio ? <span> (+${Number(item.tam.precio).toFixed(2)})</span> : null}
                             </p>
                           </div>
-                        )}
+                        ) : null}
 
-                        {/* Guarniciones */}
-                        {item.guarniciones && item.guarniciones.length > 0 && (
+                        {/* Guarnición */}
+                        {item.guarnicion && (
                           <div className="mt-1">
                             <p className="text-xs text-muted-foreground">
-                              <span className="font-medium">Guarniciones:</span>{' '}
-                              {item.guarniciones.map(g => g.nombre).join(', ')}
+                              <span className="font-medium">Guarnición:</span>{' '}
+                              {item.guarnicion.nombre}
                             </p>
                           </div>
                         )}
 
                         {/* Adicionales */}
-                        {item.adicionales && item.adicionales.filter(adic => adic.cantidad > 0).length > 0 && (
-                          <div className="mt-2 space-y-1">
-                            <p className="text-xs text-muted-foreground font-medium">Adicionales:</p>
-                            {item.adicionales
-                              .filter(adic => adic.cantidad > 0)
-                              .map((adic) => (
-                                <p key={adic.id} className="text-xs text-muted-foreground">
-                                  • {adic.nombre} x{adic.cantidad} (+${(adic.precio * adic.cantidad).toFixed(2)})
-                                </p>
-                              ))}
-                          </div>
-                        )}
+                        {item.adicionales?.filter(adic => adic.cantidad > 0).map((adic) => (
+                          <p key={adic.id} className="text-xs text-muted-foreground">
+                            • {adic.nombre} x{adic.cantidad} (+${(Number(adic.precio || 0) * adic.cantidad).toFixed(2)})
+                          </p>
+                        ))}
                       </div>
 
                       {/* Controles */}
@@ -165,7 +158,7 @@ const CartModal: React.FC<CartModalProps> = ({ open, onOpenChange }) => {
                           onClick={() => setEditingItem(item)}
                         >
                           <Edit className="h-3 w-3 mr-1" />
-                          Editar configuración
+                          Editar producto
                         </Button>
 
                         {isMaxStock && (
@@ -211,8 +204,8 @@ const CartModal: React.FC<CartModalProps> = ({ open, onOpenChange }) => {
           onOpenChange={(open) => !open && setEditingItem(null)}
           product={{
             ...editingItem,
-            tamaños: editingItem.tam ? [editingItem.tam] : [],
-            guarniciones: editingItem.guarniciones,
+            tam: editingItem.tam ? [editingItem.tam] : [],
+            guarniciones: editingItem.guarnicion ? [editingItem.guarnicion] : [],
             adicionales: editingItem.adicionales?.map(adic => ({
               id: adic.id,
               nombre: adic.nombre,
@@ -226,30 +219,30 @@ const CartModal: React.FC<CartModalProps> = ({ open, onOpenChange }) => {
             // Calcular nuevo precio si cambió el tamaño
             let newPrice = editingItem.precio;
 
-            if (editingItem.tam?.precio && config.tamaño?.precio) {
+            if (editingItem.tam?.precio && config.tam?.precio) {
               // Ambos tienen precio, reemplazar
-              newPrice = newPrice - editingItem.tam.precio + config.tamaño.precio;
-            } else if (config.tamaño?.precio) {
+              newPrice = newPrice - editingItem.tam.precio + config.tam.precio;
+            } else if (config.tam?.precio) {
               // Solo el nuevo tiene precio, agregar
-              newPrice = newPrice + config.tamaño.precio;
+              newPrice = newPrice + config.tam.precio;
             } else if (editingItem.tam?.precio) {
               // Solo el anterior tenía precio, quitar
               newPrice = newPrice - editingItem.tam.precio;
             }
 
             updateItemConfig(editingItem.cartId, {
-              tamaño: config.tamaño,
-              guarniciones: config.guarniciones,
+              tam: config.tam,
+              guarnicion: config.guarnicion,
               adicionales: config.adicionales,
               precio: newPrice,
             });
 
             setEditingItem(null);
-            toast.success('Configuración actualizada');
+            toast.success('Producto actualizado');
           }}
           initialConfig={{
-            tamaño: editingItem.tam,
-            guarniciones: editingItem.guarniciones,
+            tam: editingItem.tam,
+            guarnicion: editingItem.guarnicion,
             adicionales: editingItem.adicionales,
           }}
         />

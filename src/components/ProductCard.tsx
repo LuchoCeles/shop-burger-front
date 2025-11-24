@@ -56,7 +56,7 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
         url_imagen: product.url_imagen,
         stock: product.stock,
         tam: autoConfigTamaño,
-        guarniciones: undefined,
+        guarnicion: undefined,
         adicionales: [],
         metodoDePago: "",
       });
@@ -71,7 +71,7 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
 
   const handleConfigConfirm = (config: {
     tam?: Tamaños;
-    guarniciones: Guarniciones;
+    guarnicion?: Guarniciones;
     adicionales: CartItemAdicional[];
   }) => {
     const cartId = `${product.id}-${Date.now()}`;
@@ -90,13 +90,19 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
       idCategoria: product.idCategoria,
       url_imagen: product.url_imagen,
       tam: config.tam,
-      guarniciones: config.guarniciones,
+      guarnicion: config.guarnicion,
       adicionales: config.adicionales,
       metodoDePago: "",
     });
 
     toast.success("Agregado al carrito");
   };
+
+  const previewPrice = (() => {
+    const base = Number(product.precio || 0) * (1 - (Number(product.descuento || 0) / 100));
+    const tamPrecio = product.tam && product.tam.length > 0 ? Number(product.tam[0].precio || 0) : 0;
+    return base + tamPrecio;
+  })();
 
   return (
     <Card className="group flex flex-col border-border bg-card transition-all hover:shadow-xl hover:shadow-primary/10 min-h-[460px]">
@@ -139,11 +145,9 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
 
         <p className="text-2xl font-bold text-primary mt-auto">
           $
-          {new Intl.NumberFormat("es-AR", {
-            style: "decimal",
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0,
-          }).format(product.tam[0].precioFinal)}
+
+          {new Intl.NumberFormat('es-AR', { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(previewPrice)}
+
         </p>
       </CardContent>
 
