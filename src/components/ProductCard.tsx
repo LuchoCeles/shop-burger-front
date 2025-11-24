@@ -143,7 +143,7 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
             style: "decimal",
             minimumFractionDigits: 0,
             maximumFractionDigits: 0,
-          }).format(product.precio * (1 - product.descuento / 100))}
+          }).format(product.tam[0].precioFinal)}
         </p>
       </CardContent>
 
