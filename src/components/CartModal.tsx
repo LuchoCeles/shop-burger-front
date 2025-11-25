@@ -12,10 +12,10 @@ import {
   DialogTitle,
   DialogFooter,
 } from './ui/dialog';
-import AdicionalesModal from './AdicionalesModal';
+import ProductConfigModal from './ProductConfigModal';
 
 const CartModal: React.FC<CartModalProps> = ({ open, onOpenChange }) => {
-  const { cart, removeFromCart, updateQuantity, total, updateAdicionales } = useCart();
+  const { cart, removeFromCart, updateQuantity, total, updateItemConfig } = useCart();
   const [editingItem, setEditingItem] = useState<CartItem | null>(null);
   const navigate = useNavigate();
 
@@ -24,7 +24,8 @@ const CartModal: React.FC<CartModalProps> = ({ open, onOpenChange }) => {
     navigate('/checkout');
   };
 
-  const handleIncrement = (cartId: string, currentCantidad: number, stock?: number) => {
+  const handleIncrement = (cartId: string, currentCantidad: number, productoOriginal: any) => {
+    const stock = productoOriginal.stock;
     if (stock !== undefined && currentCantidad >= stock) {
       toast.error(`Solo hay ${stock} unidades disponibles`);
       return;
@@ -57,18 +58,19 @@ const CartModal: React.FC<CartModalProps> = ({ open, onOpenChange }) => {
               </div>
             ) : (
               cart.map((item) => {
-                const isMaxStock =
-                  item.stock !== undefined && item.cantidad >= item.stock;
+                const stock = item.productoOriginal.stock;
+                const isMaxStock = stock !== undefined && item.cantidad >= stock;
+                const precioBase = item.tamSeleccionado?.precioFinal + (item?.adicionalesSeleccionados.map(adic => adic.precio).reduce((a, b) => a + b, 0));
 
                 return (
                   <div key={item.cartId} className="space-y-2">
                     <div className="flex items-center gap-4 rounded-lg border border-border bg-muted/30 p-4">
                       {/* Imagen */}
                       <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-md bg-muted">
-                        {item.url_imagen ? (
+                        {item.productoOriginal.url_imagen ? (
                           <img
-                            src={item.url_imagen}
-                            alt={item.nombre}
+                            src={item.productoOriginal.url_imagen}
+                            alt={item.productoOriginal.nombre}
                             className="h-full w-full object-cover"
                           />
                         ) : (
@@ -80,20 +82,40 @@ const CartModal: React.FC<CartModalProps> = ({ open, onOpenChange }) => {
 
                       {/* Información */}
                       <div className="flex-1">
-                        <h4 className="font-semibold text-foreground">{item.nombre}</h4>
-                        <p className="text-lg font-bold text-primary">${item.precio}</p>
+                        <h4 className="font-semibold text-foreground">{item.productoOriginal.nombre}</h4>
+                        <p className="text-lg font-bold text-primary">
+                          ${precioBase.toFixed(2)}
+                        </p>
 
-                        {item.adicionales && item.adicionales.filter(adic => adic.cantidad > 0).length > 0 && (
-                          <div className="mt-2 space-y-1">
-                            <p className="text-xs text-muted-foreground font-medium">Adicionales:</p>
-                            {item.adicionales
-                              .filter(adic => adic.cantidad > 0)
-                              .map((adic) => (
-                                <p key={adic.id} className="text-xs text-muted-foreground">
-                                  • {adic.nombre} x{adic.cantidad} (+${(adic.precio * adic.cantidad).toFixed(2)})
-                                </p>
-                              ))}
+                        {/* Tamaño */}
+                        {item.tamSeleccionado && (
+                          <div className="mt-1">
+                            <p className="text-xs text-muted-foreground">
+                              <span className="font-medium">Tamaño:</span> {item.tamSeleccionado.nombre}
+                            </p>
                           </div>
+                        )}
+
+                        {/* Guarnición */}
+                        {item.guarnicionSeleccionada && (
+                          <div className="mt-1">
+                            <p className="text-xs text-muted-foreground">
+                              <span className="font-medium">Guarnición:</span>{' '}
+                              {item.guarnicionSeleccionada.nombre}
+                            </p>
+                          </div>
+                        )}
+
+                        {/* Adicionales (solo mostrar los que tienen cantidad > 0) */}
+                        {item.adicionalesSeleccionados.length > 0 && (<div className="mt-1">
+                          <p className="text-xs text-muted-foreground">
+                            <span className="font-medium">Adicionales:</span>{' '}
+                            {item.adicionalesSeleccionados
+                              .filter(adic => adic.cantidad > 0)
+                              .map(adic => `${adic.nombre} x ${adic.cantidad}`)
+                              .join(", ")}
+                          </p>
+                        </div>
                         )}
                       </div>
 
@@ -118,7 +140,7 @@ const CartModal: React.FC<CartModalProps> = ({ open, onOpenChange }) => {
                             size="icon"
                             className="h-8 w-8"
                             onClick={() =>
-                              handleIncrement(item.cartId, item.cantidad, item.stock)
+                              handleIncrement(item.cartId, item.cantidad, item.productoOriginal)
                             }
                             disabled={isMaxStock}
                           >
@@ -134,7 +156,7 @@ const CartModal: React.FC<CartModalProps> = ({ open, onOpenChange }) => {
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
-                        
+
                         <Button
                           variant="ghost"
                           size="sm"
@@ -142,7 +164,7 @@ const CartModal: React.FC<CartModalProps> = ({ open, onOpenChange }) => {
                           onClick={() => setEditingItem(item)}
                         >
                           <Edit className="h-3 w-3 mr-1" />
-                          Editar adicionales
+                          Editar {item.productoOriginal.nombre}
                         </Button>
 
                         {isMaxStock && (
@@ -183,26 +205,25 @@ const CartModal: React.FC<CartModalProps> = ({ open, onOpenChange }) => {
       </Dialog>
 
       {editingItem && (
-        <AdicionalesModal
+        <ProductConfigModal
           open={!!editingItem}
           onOpenChange={(open) => !open && setEditingItem(null)}
-          Product={{
-            ...editingItem,
-            adicionales: editingItem.adicionales?.map(adic => ({
-              id: adic.id,
-              nombre: adic.nombre,
-              precio: Number(adic.precio),
-              stock: 999,
-              maxCantidad: adic.maxCantidad,
-              estado: true,
-            })) || []
-          }}
-          onConfirm={(adicionales) => {
-            updateAdicionales(editingItem.cartId, adicionales);
+          product={editingItem.productoOriginal}
+          onConfirm={(config) => {
+            updateItemConfig(editingItem.cartId, {
+              tamSeleccionado: config.tam,
+              guarnicionSeleccionada: config.guarnicion,
+              adicionalesSeleccionados: config.adicionales || [],
+            });
+
             setEditingItem(null);
-            toast.success('Adicionales actualizados');
+            toast.success('Producto actualizado');
           }}
-          initialAdicionales={editingItem.adicionales || []}
+          initialConfig={{
+            tam: editingItem.tamSeleccionado,
+            guarnicion: editingItem.guarnicionSeleccionada,
+            adicionales: editingItem.adicionalesSeleccionados,
+          }}
         />
       )}
     </>

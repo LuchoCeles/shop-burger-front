@@ -20,7 +20,7 @@ const Home = () => {
   const loadData = async () => {
     try {
       const [productsData, categoriesData] = await Promise.all([
-        ApiService.getProducts(),
+        ApiService.getProducts(true),
         ApiService.getCategories(),
       ]);
       setProducts(Array.isArray(productsData.data) ? productsData.data : []);
@@ -82,14 +82,15 @@ const Home = () => {
           ) : (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 items-start">
               {filteredProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
+                Boolean(product.estado) && Boolean(product.categoria.estado) && (
+                  <ProductCard key={product.id} product={product} />
+                )))}
             </div>
           )}
         </section>
       </main>
 
-          <footer className="border-t border-border bg-card py-8">
+      <footer className="border-t border-border bg-card py-8">
         <div className="container mx-auto px-4">
           <div className="flex flex-col items-center justify-between gap-4 md:flex-row md:items-start">
             <div className="text-sm text-muted-foreground">

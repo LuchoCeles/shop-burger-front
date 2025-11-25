@@ -64,9 +64,37 @@ const ConfiguracionManager = () => {
     }
   };
 
+  const formatCuit = (value: string) => {
+    // Remover todo lo que no sea número
+    const numbers = value.replace(/\D/g, '');
+    
+    // Limitar a 11 dígitos
+    const limited = numbers.slice(0, 11);
+    
+    // Formatear automáticamente: XX-XXXXXXXX-X
+    if (limited.length <= 2) {
+      return limited;
+    } else if (limited.length <= 10) {
+      return `${limited.slice(0, 2)}-${limited.slice(2)}`;
+    } else {
+      return `${limited.slice(0, 2)}-${limited.slice(2, 10)}-${limited.slice(10)}`;
+    }
+  };
+
+  const handleCuitLoginChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatCuit(e.target.value);
+    setCuit(formatted);
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    
+    if (name === 'cuit') {
+      const formatted = formatCuit(value);
+      setFormData(prev => ({ ...prev, [name]: formatted }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleChangeMP = async () => {
@@ -138,8 +166,9 @@ const ConfiguracionManager = () => {
                   type="text"
                   placeholder="XX-XXXXXXXX-X"
                   value={cuit}
-                  onChange={(e) => setCuit(e.target.value)}
+                  onChange={handleCuitLoginChange}
                   required
+                  maxLength={13}
                   className="bg-background"
                 />
               </div>
@@ -225,6 +254,7 @@ const ConfiguracionManager = () => {
                     id="nombre"
                     name="nombre"
                     value={formData.nombre}
+                    maxLength={50}
                     onChange={handleInputChange}
                     placeholder="Nombre del titular"
                   />
@@ -235,6 +265,7 @@ const ConfiguracionManager = () => {
                     id="apellido"
                     name="apellido"
                     value={formData.apellido}
+                    maxLength={50}
                     onChange={handleInputChange}
                     placeholder="Apellido del titular"
                   />
@@ -247,6 +278,7 @@ const ConfiguracionManager = () => {
                   id="cuit"
                   name="cuit"
                   value={formData.cuit}
+                  maxLength={13}
                   onChange={handleInputChange}
                   placeholder="XX-XXXXXXXX-X"
                 />
@@ -258,6 +290,7 @@ const ConfiguracionManager = () => {
                   id="cbu"
                   name="cbu"
                   value={formData.cbu}
+                  maxLength={50}
                   onChange={handleInputChange}
                   placeholder="XXXXXXXXXXXXXXXXXXXXXX"
                 />
@@ -269,6 +302,7 @@ const ConfiguracionManager = () => {
                   id="alias"
                   name="alias"
                   value={formData.alias}
+                  maxLength={50}
                   onChange={handleInputChange}
                   placeholder="alias.banco"
                 />

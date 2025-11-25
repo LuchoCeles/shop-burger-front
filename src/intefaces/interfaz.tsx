@@ -7,17 +7,24 @@ import { Socket } from 'socket.io-client';
   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 export interface Product {
   id: number;
+  idCategoria?: number;
+  idTam?: number;
   nombre: string;
   descripcion?: string;
   precio: number;
   url_imagen?: string;
   imagen?: File | null;
   stock?: number;
-  idCategoria?: number;
+  categoria?: {
+    estado: boolean;
+    nombre: string;
+  };
   descuento?: number;
   isPromocion?: boolean;
   estado?: boolean;
   adicionales?: Adicional[];
+  guarniciones?: Guarniciones[];
+  tam?: Tamaños[];
 }
 
 export interface Category {
@@ -71,6 +78,7 @@ export interface Orders {
   Pago?: {
     id: number;
     estado: string;
+    metodoDePago?: string;
   }
   productos: {
     nombre: string;
@@ -83,6 +91,24 @@ export interface Orders {
     }[];
   }[];
 }
+
+export interface Guarniciones{
+  id?: number;
+  idGxP?: number;
+  nombre: string;
+  stock: number;
+  estado?: boolean;
+}
+
+export interface Tamaños{
+  id?: number;
+  idCategoria?: number;
+  idPxT?: number;
+  nombre: string;
+  precio?: number;
+  precioFinal?: number;
+  estado?: boolean;
+}
 /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   +                                                                                              +
   +                                         MODELOS CARRITO                                      +
@@ -91,15 +117,12 @@ export interface Orders {
 export interface CartItem {
   id: number;
   cartId: string; // ID único para el carrito (producto + adicionales)
-  nombre: string;
-  precio: number;
+  productoOriginal: Product; // Producto completo original
   cantidad: number;
-  descuento?: number;
-  url_imagen?: string;
-  stock?: number;
-  adicionales?: CartItemAdicional[];
+  tamSeleccionado?: Tamaños;
+  guarnicionSeleccionada?: Guarniciones;
+  adicionalesSeleccionados: CartItemAdicional[];
   metodoDePago: string;
-  idCategoria?: number;
 }
 
 export interface CartItemAdicional {
@@ -170,13 +193,27 @@ export interface AuthContextType {
 
 export interface CartContextType {
   cart: CartItem[];
-  addToCart: (product: Omit<CartItem, 'cantidad'>) => void;
+  addToCart: (config: {
+    productoOriginal: Product;
+    tamSeleccionado?: Tamaños;
+    guarnicionSeleccionada?: Guarniciones;
+    adicionalesSeleccionados: CartItemAdicional[];
+    metodoDePago: string;
+  }) => void;
   removeFromCart: (cartId: string) => void;
   updateQuantity: (cartId: string, cantidad: number) => void;
   clearCart: () => void;
   total: number;
   itemCount: number;
-  updateAdicionales: (cartId: string, adicionales: CartItem['adicionales']) => void;
+  updateAdicionales: (cartId: string, adicionales: CartItemAdicional[]) => void;
+  updateItemConfig: (
+    cartId: string,
+    config: {
+      tamSeleccionado?: Tamaños;
+      guarnicionSeleccionada?: Guarniciones;
+      adicionalesSeleccionados?: CartItemAdicional[];
+    }
+  ) => void;
 }
 /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   +                                                                                              +

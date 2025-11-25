@@ -31,7 +31,7 @@ const CategoriasManager = () => {
   const [estado, setEstado] = useState(true);
   const [loading, setLoading] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState<number | null>(null);
-  const MAX_CHARS = 25;
+  const MAX_CHARS = 30;
 
   useEffect(() => {
     loadCategorias();
@@ -160,44 +160,43 @@ const CategoriasManager = () => {
         {categorias.map((cat) => (
           <div
             key={cat.id}
-            className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-lg border border-border bg-card p-4 min-h-[72px]"
+            className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4"
           >
-            <div className="flex-1 min-w-0">
-              <span className="font-medium text-foreground truncate block max-w-xs">
+            <div className="flex-1">
+              <span className="font-medium text-foreground truncate block">
                 {cat.nombre}
               </span>
             </div>
-            <div className="flex-shrink-0 flex items-center justify-start sm:justify-end gap-2 flex-wrap">
+            <div className="flex gap-2 w-full">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => handleToggleEstado(cat)}
                 title={cat.estado ? "Desactivar" : "Activar"}
-                className="flex-1"
+                className="w-12"
               >
                 {cat.estado ? (
-                  <Eye className="h-3 w-3" />
+                  <Eye className="h-4 w-4" />
                 ) : (
-                  <EyeOff className="h-3 w-3" />
+                  <EyeOff className="h-4 w-4" />
                 )}
               </Button>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => handleEdit(cat)}
-                className="flex-1 sm:flex-initial"
+                className="flex-1"
               >
-                <Pencil className="h-3 w-3 sm:mr-0 mr-2" />
-                <span className="sm:hidden">Editar</span>
+                <Pencil className="h-4 w-4" />
+                <span className="truncate">Editar</span>
               </Button>
               <Button
                 variant="destructive"
                 size="sm"
                 onClick={() => setCategoryToDelete(cat.id)}
-                className="flex-1 sm:flex-initial"
+                className="w-12"
               >
-                <Trash2 className="h-3 w-3 sm:mr-0 mr-2" />
-                <span className="sm:hidden">Eliminar</span>
+                <Trash2 className="h-4 w-4" />
               </Button>
             </div>
           </div>
@@ -207,9 +206,14 @@ const CategoriasManager = () => {
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
         <DialogContent className="bg-card">
           <DialogHeader>
-            <DialogTitle className="text-foreground">
-              {editingCategory ? "Editar Categoría" : "Nueva Categoría"}
-            </DialogTitle>
+            <div className="flex items-center justify-between pr-4">
+              <DialogTitle className="text-foreground">
+                {editingCategory ? "Editar Categoría" : "Nueva Categoría"}
+              </DialogTitle>
+              <div className="text-right text-sm text-gray-500">
+                {nombre.length} / {MAX_CHARS}
+              </div>
+            </div>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -217,14 +221,12 @@ const CategoriasManager = () => {
                 type="text"
                 value={nombre}
                 onChange={handleNombreChange}
-                maxLength={MAX_CHARS} // ¡La prevención en el navegador!
+                maxLength={MAX_CHARS}
                 placeholder="Nombre de la categoría"
                 className="tu-clase-de-estilo"
               />
             </div>
-            <div className="text-right text-sm text-gray-500">
-              {nombre.length} / {MAX_CHARS}
-            </div>
+
             <DialogFooter>
               <Button
                 type="button"
