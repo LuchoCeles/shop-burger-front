@@ -36,28 +36,14 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
 
     // 🔥 Evitar modal si no corresponde
     if (!shouldOpenModal(product)) {
-      const cartId = `${product.id}-${Date.now()}`;
-
       // autoConfig si tiene 1 tamaño
       const autoConfigTamaño = product.tam?.length === 1 ? product.tam[0] : undefined;
 
-      const precioBase = product.precio * (1 - (product.descuento || 0) / 100);
-      const precioFinal = autoConfigTamaño?.precio
-        ? precioBase + autoConfigTamaño.precio
-        : precioBase;
-
       addToCart({
-        id: product.id,
-        cartId,
-        nombre: product.nombre,
-        precio: precioFinal,
-        descuento: product.descuento,
-        idCategoria: product.idCategoria,
-        url_imagen: product.url_imagen,
-        stock: product.stock,
-        tam: autoConfigTamaño,
-        guarniciones: undefined,
-        adicionales: [],
+        productoOriginal: product,
+        tamSeleccionado: autoConfigTamaño,
+        guarnicionSeleccionada: undefined,
+        adicionalesSeleccionados: [],
         metodoDePago: "",
       });
 
@@ -71,32 +57,25 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
 
   const handleConfigConfirm = (config: {
     tam?: Tamaños;
-    guarniciones: Guarniciones;
+    guarnicion?: Guarniciones;
     adicionales: CartItemAdicional[];
   }) => {
-    const cartId = `${product.id}-${Date.now()}`;
-
-    let precioFinal = product.precio * (1 - (product.descuento || 0) / 100);
-
-    if (config.tam?.precio) precioFinal += config.tam.precio;
-
     addToCart({
-      id: product.id,
-      cartId,
-      nombre: product.nombre,
-      precio: precioFinal,
-      descuento: product.descuento,
-      stock: product.stock,
-      idCategoria: product.idCategoria,
-      url_imagen: product.url_imagen,
-      tam: config.tam,
-      guarniciones: config.guarniciones,
-      adicionales: config.adicionales,
+      productoOriginal: product,
+      tamSeleccionado: config.tam,
+      guarnicionSeleccionada: config.guarnicion,
+      adicionalesSeleccionados: config.adicionales,
       metodoDePago: "",
     });
 
     toast.success("Agregado al carrito");
   };
+
+  const previewPrice = (() => {
+    const base = Number(product.precio || 0) * (1 - (Number(product.descuento || 0) / 100));
+    const tamPrecio = product.tam && product.tam.length > 0 ? Number(product.tam[0].precio || 0) : 0;
+    return base + tamPrecio;
+  })();
 
   return (
     <Card className="group flex flex-col border-border bg-card transition-all hover:shadow-xl hover:shadow-primary/10 min-h-[460px]">
@@ -139,11 +118,9 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
 
         <p className="text-2xl font-bold text-primary mt-auto">
           $
-          {new Intl.NumberFormat("es-AR", {
-            style: "decimal",
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0,
-          }).format(product.tam[0].precioFinal)}
+
+          {new Intl.NumberFormat('es-AR', { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(previewPrice)}
+
         </p>
       </CardContent>
 

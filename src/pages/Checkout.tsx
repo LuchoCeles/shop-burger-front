@@ -100,10 +100,12 @@ const Checkout = () => {
       productos: cart.map((item) => ({
         id: item.id,
         cantidad: item.cantidad,
-        adicionales: item.adicionales?.map((ad) => ({
-          id: ad.id,
-          cantidad: ad.cantidad,
-        })) || [],
+        adicionales: item.adicionalesSeleccionados
+          .filter(ad => ad.cantidad > 0)
+          .map((ad) => ({
+            id: ad.id,
+            cantidad: ad.cantidad,
+          })),
       })),
     };
     return pedido;
@@ -433,7 +435,7 @@ const Checkout = () => {
 
                 {Object.entries(
                   cart.reduce((acc, item) => {
-                    const categoryId = item.idCategoria || 0;
+                    const categoryId = item.productoOriginal.idCategoria || 0;
                     if (!acc[categoryId]) {
                       acc[categoryId] = [];
                     }
@@ -451,14 +453,17 @@ const Checkout = () => {
                       </h3>
 
                       <div className="space-y-4">
-                        {items.map((item) => (
+                        {items.map((item) => {
+                          const precioBase = item.tamSeleccionado?.precioFinal || item.productoOriginal.precio || 0;
+                          
+                          return (
                           <div key={item.cartId} className="flex justify-between">
                             <div className="flex items-start gap-4">
                               <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-md bg-muted">
-                                {item.url_imagen ? (
+                                {item.productoOriginal.url_imagen ? (
                                   <img
-                                    src={item.url_imagen}
-                                    alt={item.nombre}
+                                    src={item.productoOriginal.url_imagen}
+                                    alt={item.productoOriginal.nombre}
                                     className="h-full w-full object-cover"
                                   />
                                 ) : (
@@ -469,11 +474,11 @@ const Checkout = () => {
                               </div>
 
                               <div className="text-foreground text-xl ">
-                                <p>{item.nombre} x{item.cantidad}</p>
+                                <p>{item.productoOriginal.nombre} x{item.cantidad}</p>
 
-                                {item.adicionales && item.adicionales.filter(ad => ad.cantidad > 0).length > 0 && (
+                                {item.adicionalesSeleccionados.filter(ad => ad.cantidad > 0).length > 0 && (
                                   <ul className="ml-4 list-disc text-sm text-muted-foreground">
-                                    {item.adicionales
+                                    {item.adicionalesSeleccionados
                                       .filter(ad => ad.cantidad > 0)
                                       .map((ad) => (
                                         <li key={ad.id}>{ad.nombre} x{ad.cantidad}</li>
@@ -485,12 +490,12 @@ const Checkout = () => {
 
                             <div className="text-foreground text-xl text-right">
                               <span className="font-semibold text-foreground text-xl">
-                                ${(item.precio * item.cantidad).toFixed(2)}
+                                ${(precioBase * item.cantidad).toFixed(2)}
                               </span>
 
-                              {item.adicionales && item.adicionales.filter(ad => ad.cantidad > 0).length > 0 && (
+                              {item.adicionalesSeleccionados.filter(ad => ad.cantidad > 0).length > 0 && (
                                 <ul className="text-sm text-muted-foreground text-right">
-                                  {item.adicionales.map(
+                                  {item.adicionalesSeleccionados.map(
                                     (ad) =>
                                       ad.cantidad > 0 && (
                                         <li key={ad.id}>${(ad.precio * ad.cantidad).toFixed(2)}</li>
@@ -500,7 +505,8 @@ const Checkout = () => {
                               )}
                             </div>
                           </div>
-                        ))}
+                        )})}
+
                       </div>
                     </div>
                   );

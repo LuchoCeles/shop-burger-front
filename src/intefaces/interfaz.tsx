@@ -117,17 +117,12 @@ export interface Tamaños{
 export interface CartItem {
   id: number;
   cartId: string; // ID único para el carrito (producto + adicionales)
-  nombre: string;
-  precio: number;
+  productoOriginal: Product; // Producto completo original
   cantidad: number;
-  descuento?: number;
-  url_imagen?: string;
-  stock?: number;
-  adicionales?: CartItemAdicional[];
+  tamSeleccionado?: Tamaños;
+  guarnicionSeleccionada?: Guarniciones;
+  adicionalesSeleccionados: CartItemAdicional[];
   metodoDePago: string;
-  idCategoria?: number;
-  tam?: Tamaños;
-  guarniciones?: Guarniciones;
 }
 
 export interface CartItemAdicional {
@@ -198,13 +193,27 @@ export interface AuthContextType {
 
 export interface CartContextType {
   cart: CartItem[];
-  addToCart: (product: Omit<CartItem, 'cantidad'>) => void;
+  addToCart: (config: {
+    productoOriginal: Product;
+    tamSeleccionado?: Tamaños;
+    guarnicionSeleccionada?: Guarniciones;
+    adicionalesSeleccionados: CartItemAdicional[];
+    metodoDePago: string;
+  }) => void;
   removeFromCart: (cartId: string) => void;
   updateQuantity: (cartId: string, cantidad: number) => void;
   clearCart: () => void;
   total: number;
   itemCount: number;
-  updateAdicionales: (cartId: string, adicionales: CartItem['adicionales']) => void;
+  updateAdicionales: (cartId: string, adicionales: CartItemAdicional[]) => void;
+  updateItemConfig: (
+    cartId: string,
+    config: {
+      tamSeleccionado?: Tamaños;
+      guarnicionSeleccionada?: Guarniciones;
+      adicionalesSeleccionados?: CartItemAdicional[];
+    }
+  ) => void;
 }
 /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   +                                                                                              +
