@@ -24,7 +24,8 @@ const CartModal: React.FC<CartModalProps> = ({ open, onOpenChange }) => {
     navigate('/checkout');
   };
 
-  const handleIncrement = (cartId: string, currentCantidad: number, stock?: number) => {
+  const handleIncrement = (cartId: string, currentCantidad: number, productoOriginal: any) => {
+    const stock = productoOriginal.stock;
     if (stock !== undefined && currentCantidad >= stock) {
       toast.error(`Solo hay ${stock} unidades disponibles`);
       return;
@@ -57,18 +58,19 @@ const CartModal: React.FC<CartModalProps> = ({ open, onOpenChange }) => {
               </div>
             ) : (
               cart.map((item) => {
-                const isMaxStock =
-                  item.stock !== undefined && item.cantidad >= item.stock;
+                const stock = item.productoOriginal.stock;
+                const isMaxStock = stock !== undefined && item.cantidad >= stock;
+                const precioBase = item.tamSeleccionado?.precioFinal || item.productoOriginal.precio || 0;
 
                 return (
                   <div key={item.cartId} className="space-y-2">
                     <div className="flex items-center gap-4 rounded-lg border border-border bg-muted/30 p-4">
                       {/* Imagen */}
                       <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-md bg-muted">
-                        {item.url_imagen ? (
+                        {item.productoOriginal.url_imagen ? (
                           <img
-                            src={item.url_imagen}
-                            alt={item.nombre}
+                            src={item.productoOriginal.url_imagen}
+                            alt={item.productoOriginal.nombre}
                             className="h-full w-full object-cover"
                           />
                         ) : (
@@ -80,33 +82,32 @@ const CartModal: React.FC<CartModalProps> = ({ open, onOpenChange }) => {
 
                       {/* Información */}
                       <div className="flex-1">
-                        <h4 className="font-semibold text-foreground">{item.nombre}</h4>
+                        <h4 className="font-semibold text-foreground">{item.productoOriginal.nombre}</h4>
                         <p className="text-lg font-bold text-primary">
-                          ${(typeof item.precio === 'number' ? item.precio.toFixed(2) : Number(item.precio || 0).toFixed(2))}
+                          ${precioBase.toFixed(2)}
                         </p>
 
                         {/* Tamaño */}
-                        {item.tam && item.tam.nombre ? (
+                        {item.tamSeleccionado && (
                           <div className="mt-1">
                             <p className="text-xs text-muted-foreground">
-                              <span className="font-medium">Tamaño:</span> {item.tam.nombre}
-                              {item.tam.precio ? <span> (+${Number(item.tam.precio).toFixed(2)})</span> : null}
-                            </p>
-                          </div>
-                        ) : null}
-
-                        {/* Guarnición */}
-                        {item.guarnicion && (
-                          <div className="mt-1">
-                            <p className="text-xs text-muted-foreground">
-                              <span className="font-medium">Guarnición:</span>{' '}
-                              {item.guarnicion.nombre}
+                              <span className="font-medium">Tamaño:</span> {item.tamSeleccionado.nombre}
                             </p>
                           </div>
                         )}
 
-                        {/* Adicionales */}
-                        {item.adicionales?.filter(adic => adic.cantidad > 0).map((adic) => (
+                        {/* Guarnición */}
+                        {item.guarnicionSeleccionada && (
+                          <div className="mt-1">
+                            <p className="text-xs text-muted-foreground">
+                              <span className="font-medium">Guarnición:</span>{' '}
+                              {item.guarnicionSeleccionada.nombre}
+                            </p>
+                          </div>
+                        )}
+
+                        {/* Adicionales (solo mostrar los que tienen cantidad > 0) */}
+                        {item.adicionalesSeleccionados.filter(adic => adic.cantidad > 0).map((adic) => (
                           <p key={adic.id} className="text-xs text-muted-foreground">
                             • {adic.nombre} x{adic.cantidad} (+${(Number(adic.precio || 0) * adic.cantidad).toFixed(2)})
                           </p>
@@ -134,7 +135,7 @@ const CartModal: React.FC<CartModalProps> = ({ open, onOpenChange }) => {
                             size="icon"
                             className="h-8 w-8"
                             onClick={() =>
-                              handleIncrement(item.cartId, item.cantidad, item.stock)
+                              handleIncrement(item.cartId, item.cantidad, item.productoOriginal)
                             }
                             disabled={isMaxStock}
                           >
@@ -202,48 +203,21 @@ const CartModal: React.FC<CartModalProps> = ({ open, onOpenChange }) => {
         <ProductConfigModal
           open={!!editingItem}
           onOpenChange={(open) => !open && setEditingItem(null)}
-          product={{
-            ...editingItem,
-            tam: editingItem.tam ? [editingItem.tam] : [],
-            guarniciones: editingItem.guarnicion ? [editingItem.guarnicion] : [],
-            adicionales: editingItem.adicionales?.map(adic => ({
-              id: adic.id,
-              nombre: adic.nombre,
-              precio: Number(adic.precio),
-              stock: 999,
-              maxCantidad: adic.maxCantidad,
-              estado: true,
-            })) || []
-          }}
+          product={editingItem.productoOriginal}
           onConfirm={(config) => {
-            // Calcular nuevo precio si cambió el tamaño
-            let newPrice = editingItem.precio;
-
-            if (editingItem.tam?.precio && config.tam?.precio) {
-              // Ambos tienen precio, reemplazar
-              newPrice = newPrice - editingItem.tam.precio + config.tam.precio;
-            } else if (config.tam?.precio) {
-              // Solo el nuevo tiene precio, agregar
-              newPrice = newPrice + config.tam.precio;
-            } else if (editingItem.tam?.precio) {
-              // Solo el anterior tenía precio, quitar
-              newPrice = newPrice - editingItem.tam.precio;
-            }
-
             updateItemConfig(editingItem.cartId, {
-              tam: config.tam,
-              guarnicion: config.guarnicion,
-              adicionales: config.adicionales,
-              precio: newPrice,
+              tamSeleccionado: config.tam,
+              guarnicionSeleccionada: config.guarnicion,
+              adicionalesSeleccionados: config.adicionales || [],
             });
 
             setEditingItem(null);
             toast.success('Producto actualizado');
           }}
           initialConfig={{
-            tam: editingItem.tam,
-            guarnicion: editingItem.guarnicion,
-            adicionales: editingItem.adicionales,
+            tam: editingItem.tamSeleccionado,
+            guarnicion: editingItem.guarnicionSeleccionada,
+            adicionales: editingItem.adicionalesSeleccionados,
           }}
         />
       )}

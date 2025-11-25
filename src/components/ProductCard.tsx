@@ -36,28 +36,14 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
 
     // 🔥 Evitar modal si no corresponde
     if (!shouldOpenModal(product)) {
-      const cartId = `${product.id}-${Date.now()}`;
-
       // autoConfig si tiene 1 tamaño
       const autoConfigTamaño = product.tam?.length === 1 ? product.tam[0] : undefined;
 
-      const precioBase = product.precio * (1 - (product.descuento || 0) / 100);
-      const precioFinal = autoConfigTamaño?.precio
-        ? precioBase + autoConfigTamaño.precio
-        : precioBase;
-
       addToCart({
-        id: product.id,
-        cartId,
-        nombre: product.nombre,
-        precio: precioFinal,
-        descuento: product.descuento,
-        idCategoria: product.idCategoria,
-        url_imagen: product.url_imagen,
-        stock: product.stock,
-        tam: autoConfigTamaño,
-        guarnicion: undefined,
-        adicionales: [],
+        productoOriginal: product,
+        tamSeleccionado: autoConfigTamaño,
+        guarnicionSeleccionada: undefined,
+        adicionalesSeleccionados: [],
         metodoDePago: "",
       });
 
@@ -74,24 +60,11 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
     guarnicion?: Guarniciones;
     adicionales: CartItemAdicional[];
   }) => {
-    const cartId = `${product.id}-${Date.now()}`;
-
-    let precioFinal = product.precio * (1 - (product.descuento || 0) / 100);
-
-    if (config.tam?.precio) precioFinal += config.tam.precio;
-
     addToCart({
-      id: product.id,
-      cartId,
-      nombre: product.nombre,
-      precio: precioFinal,
-      descuento: product.descuento,
-      stock: product.stock,
-      idCategoria: product.idCategoria,
-      url_imagen: product.url_imagen,
-      tam: config.tam,
-      guarnicion: config.guarnicion,
-      adicionales: config.adicionales,
+      productoOriginal: product,
+      tamSeleccionado: config.tam,
+      guarnicionSeleccionada: config.guarnicion,
+      adicionalesSeleccionados: config.adicionales,
       metodoDePago: "",
     });
 
