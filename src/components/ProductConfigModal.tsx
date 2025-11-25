@@ -219,7 +219,7 @@ export default function ProductConfigModal({
       <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            Configurar producto{product?.nombre ? ` - "${product.nombre}"` : ''}
+            Editar {product?.nombre ? ` - "${product.nombre}"` : ''}
           </DialogTitle>
         </DialogHeader>
 
@@ -385,7 +385,7 @@ export default function ProductConfigModal({
           >
             Cancelar
           </Button>
-          <Button onClick={handleConfirm} disabled={loading}>
+          <Button onClick={handleConfirm} disabled={loading || !selectedTamaño}>
             Confirmar
           </Button>
         </DialogFooter>
