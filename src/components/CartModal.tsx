@@ -60,7 +60,7 @@ const CartModal: React.FC<CartModalProps> = ({ open, onOpenChange }) => {
               cart.map((item) => {
                 const stock = item.productoOriginal.stock;
                 const isMaxStock = stock !== undefined && item.cantidad >= stock;
-                const precioBase = item.tamSeleccionado?.precioFinal || item.productoOriginal.precio || 0;
+                const precioBase = item.tamSeleccionado?.precioFinal + (item?.adicionalesSeleccionados.map(adic => adic.precio).reduce((a, b) => a + b, 0));
 
                 return (
                   <div key={item.cartId} className="space-y-2">
@@ -107,11 +107,16 @@ const CartModal: React.FC<CartModalProps> = ({ open, onOpenChange }) => {
                         )}
 
                         {/* Adicionales (solo mostrar los que tienen cantidad > 0) */}
-                        {item.adicionalesSeleccionados.filter(adic => adic.cantidad > 0).map((adic) => (
-                          <p key={adic.id} className="text-xs text-muted-foreground">
-                            • {adic.nombre} x{adic.cantidad} (+${(Number(adic.precio || 0) * adic.cantidad).toFixed(2)})
+                        {item.adicionalesSeleccionados.length > 0 && (<div className="mt-1">
+                          <p className="text-xs text-muted-foreground">
+                            <span className="font-medium">Adicionales:</span>{' '}
+                            {item.adicionalesSeleccionados
+                              .filter(adic => adic.cantidad > 0)
+                              .map(adic => `${adic.nombre} x ${adic.cantidad}`)
+                              .join(", ")}
                           </p>
-                        ))}
+                        </div>
+                        )}
                       </div>
 
                       {/* Controles */}
@@ -159,7 +164,7 @@ const CartModal: React.FC<CartModalProps> = ({ open, onOpenChange }) => {
                           onClick={() => setEditingItem(item)}
                         >
                           <Edit className="h-3 w-3 mr-1" />
-                          Editar producto
+                          Editar {item.productoOriginal.nombre}
                         </Button>
 
                         {isMaxStock && (
