@@ -13,7 +13,6 @@ import { useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-
 const Numero_Whatsapp = import.meta.env.VITE_NUM_WHATSAPP;
 
 const Checkout = () => {
@@ -28,7 +27,7 @@ const Checkout = () => {
     direccion: '',
   });
   const [descripcion, setDescripcion] = useState('');
-  const [tipoEntrega, setTipoEntrega] = useState<'retiro' | 'domicilio'>('retiro');
+  const [tipoEntrega, setTipoEntrega] = useState<'Retiro' | 'Domicilio'>('Retiro');
   const [metodoDePago, setMetodoDePago] = useState<'Efectivo' | 'Transferencia' | 'Mercado Pago'>('Efectivo');
   const [mpLink, setMpLink] = useState<string | null>(null);
   const [orderId, setOrderId] = useState<number | null>(null);
@@ -106,6 +105,7 @@ const Checkout = () => {
             id: ad.id,
             cantidad: ad.cantidad,
           })),
+        idGuarnicion: item.guarnicionSeleccionada.id,
       })),
     };
     return pedido;
@@ -114,7 +114,7 @@ const Checkout = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (tipoEntrega === 'domicilio' && (!cliente.telefono || !cliente.direccion)) {
+    if (tipoEntrega === 'Domicilio' && (!cliente.telefono || !cliente.direccion)) {
       toast.error('Completa teléfono y dirección');
       return;
     }
@@ -263,9 +263,9 @@ const Checkout = () => {
                 <Tabs
                   value={tipoEntrega}
                   onValueChange={(v) => {
-                    setTipoEntrega(v as "retiro" | "domicilio");
+                    setTipoEntrega(v as "Retiro" | "Domicilio");
 
-                    if (v === "retiro") {
+                    if (v === "Retiro") {
                       setCliente({ telefono: "N/A", direccion: "Retira en local" });
                     } else {
                       setCliente({ telefono: "", direccion: "" });
@@ -274,14 +274,14 @@ const Checkout = () => {
                 >
                   <TabsList className="w-full bg-[#1b1b1b] rounded-xl p-1 flex">
                     <TabsTrigger
-                      value="retiro"
+                      value="Retiro"
                       className="flex-1 data-[state=active]:bg-black data-[state=active]:text-white text-gray-400"
                     >
                       Para retirar
                     </TabsTrigger>
 
                     <TabsTrigger
-                      value="domicilio"
+                      value="Domicilio"
                       className="flex-1 data-[state=active]:bg-black data-[state=active]:text-white text-gray-400"
                     >
                       Entrega a domicilio
@@ -290,7 +290,7 @@ const Checkout = () => {
                 </Tabs>
 
                 <AnimatePresence mode="wait">
-                  {tipoEntrega === 'domicilio' && (
+                  {tipoEntrega === 'Domicilio' && (
                     <motion.div
                       key="domicilio-fields"
                       initial={{ opacity: 0, height: 0 }}
@@ -312,7 +312,7 @@ const Checkout = () => {
                           onChange={(e) =>
                             setCliente({ ...cliente, telefono: e.target.value })
                           }
-                          required={tipoEntrega === 'domicilio'}
+                          required={tipoEntrega === 'Domicilio'}
                           className="bg-background"
                         />
                       </div>
@@ -329,7 +329,7 @@ const Checkout = () => {
                           onChange={(e) =>
                             setCliente({ ...cliente, direccion: e.target.value })
                           }
-                          required={tipoEntrega === 'domicilio'}
+                          required={tipoEntrega === 'Domicilio'}
                           className="bg-background"
                         />
                       </div>
@@ -452,61 +452,71 @@ const Checkout = () => {
                         {categoryName}
                       </h3>
 
-                      <div className="space-y-4">
+                      <div className="space-y-6">
                         {items.map((item) => {
-                          const precioBase = item.tamSeleccionado?.precioFinal || item.productoOriginal.precio || 0;
-                          
+                          const adicionalesFiltrados = item.adicionalesSeleccionados?.filter(a => a.cantidad > 0) || [];
+
                           return (
-                          <div key={item.cartId} className="flex justify-between">
-                            <div className="flex items-start gap-4">
-                              <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-md bg-muted">
-                                {item.productoOriginal.url_imagen ? (
-                                  <img
-                                    src={item.productoOriginal.url_imagen}
-                                    alt={item.productoOriginal.nombre}
-                                    className="h-full w-full object-cover"
-                                  />
-                                ) : (
-                                  <div className="flex h-full w-full items-center justify-center text-2xl">
-                                    🍽️
-                                  </div>
-                                )}
-                              </div>
-
-                              <div className="text-foreground text-xl ">
-                                <p>{item.productoOriginal.nombre} x{item.cantidad}</p>
-
-                                {item.adicionalesSeleccionados.filter(ad => ad.cantidad > 0).length > 0 && (
-                                  <ul className="ml-4 list-disc text-sm text-muted-foreground">
-                                    {item.adicionalesSeleccionados
-                                      .filter(ad => ad.cantidad > 0)
-                                      .map((ad) => (
-                                        <li key={ad.id}>{ad.nombre} x{ad.cantidad}</li>
-                                      ))}
-                                  </ul>
-                                )}
-                              </div>
-                            </div>
-
-                            <div className="text-foreground text-xl text-right">
-                              <span className="font-semibold text-foreground text-xl">
-                                ${(precioBase * item.cantidad).toFixed(2)}
-                              </span>
-
-                              {item.adicionalesSeleccionados.filter(ad => ad.cantidad > 0).length > 0 && (
-                                <ul className="text-sm text-muted-foreground text-right">
-                                  {item.adicionalesSeleccionados.map(
-                                    (ad) =>
-                                      ad.cantidad > 0 && (
-                                        <li key={ad.id}>${(ad.precio * ad.cantidad).toFixed(2)}</li>
-                                      )
+                            <div key={item.cartId} className="grid grid-cols-[56px_1fr_auto] gap-x-4 gap-y-1 items-start">
+                              {/* IMG */}
+                              <div className="row-span-4">
+                                <div className="h-14 w-14 overflow-hidden rounded-md bg-muted">
+                                  {item.productoOriginal.url_imagen ? (
+                                    <img
+                                      src={item.productoOriginal.url_imagen}
+                                      alt={item.productoOriginal.nombre}
+                                      className="h-full w-full object-cover"
+                                    />
+                                  ) : (
+                                    <div className="flex h-full w-full items-center justify-center text-2xl">🍽️</div>
                                   )}
-                                </ul>
+                                </div>
+                              </div>
+
+                              {/* NOMBRE */}
+                              <p className="text-xl font-medium text-foreground">
+                                {item.productoOriginal.nombre}
+                              </p>
+                              <div></div>
+
+                              {/* GUARNICIÓN (si hay) */}
+                              {item.guarnicionSeleccionada && (
+                                <>
+                                  <p className="text-sm text-muted-foreground">
+                                    <span className="font-medium">Guarnición:</span>{" "}
+                                    {item.guarnicionSeleccionada.nombre}
+                                  </p>
+                                  <div></div>
+                                </>
+                              )}
+
+                              {/* TAMAÑO */}
+                              <p className="text-base text-muted-foreground">
+                                {item.tamSeleccionado?.nombre ?? "Sin tamaño"} x{item.cantidad}
+                              </p>
+                              <p className="text-right text-base text-muted-foreground">
+                                ${item.tamSeleccionado?.precioFinal?.toFixed(2) ?? "0.00"}
+                              </p>
+
+                              {/* ADICIONALES (si hay) */}
+                              {adicionalesFiltrados.length > 0 && (
+                                <>
+                                  <ul className="ml-4 list-disc text-sm text-muted-foreground space-y-0.5">
+                                    {adicionalesFiltrados.map((ad) => (
+                                      <li key={ad.id}>{ad.nombre} x{ad.cantidad}</li>
+                                    ))}
+                                  </ul>
+
+                                  <ul className="text-right text-sm text-muted-foreground space-y-0.5">
+                                    {adicionalesFiltrados.map((ad) => (
+                                      <li key={ad.id}>${(ad.precio * ad.cantidad).toFixed(2)}</li>
+                                    ))}
+                                  </ul>
+                                </>
                               )}
                             </div>
-                          </div>
-                        )})}
-
+                          );
+                        })}
                       </div>
                     </div>
                   );

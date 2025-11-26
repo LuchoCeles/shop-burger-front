@@ -7,6 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
+  DialogDescription
 } from './ui/dialog';
 import { Adicional, CartItemAdicional, AdicionalesModalProps } from '@/intefaces/interfaz';
 import ApiService from '@/services/api';
@@ -99,7 +100,7 @@ export default function AdicionalesModal({
       cantidad: selectedAdicionales.get(adicional.id!) || 0,
       maxCantidad: adicional.maxCantidad,
     }));
-    
+
     onConfirm(result);
     onOpenChange(false);
   };
