@@ -224,6 +224,7 @@ export default function AdicionalesManager() {
                 id="nombre"
                 value={formData.nombre}
                 maxLength={maxLength}
+                autoComplete='off'
                 onChange={(e) =>
                   setFormData({ ...formData, nombre: e.target.value })
                 }
