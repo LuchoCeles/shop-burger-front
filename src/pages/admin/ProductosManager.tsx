@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, Pencil, Eye, EyeOff, ListPlus } from "lucide-react";
+import { Plus, Pencil, Eye, EyeOff, ListPlus, UtensilsCrossed } from "lucide-react";
 import ApiService from "../../services/api";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
@@ -282,6 +282,10 @@ const ProductosManager = () => {
     ));
   };
 
+  const tamañosFiltrados = tamaños.filter(
+    (t) => t.idCategoria === Number(formData.idCategoria)
+  );
+
   return (
     <div className="space-y-4 md:space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -300,11 +304,11 @@ const ProductosManager = () => {
         </Button>
       </div>
 
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {productos.map((product) => (
           <div
             key={product.id}
-            className="overflow-hidden rounded-lg border border-border bg-card"
+            className="overflow-hidden rounded-lg border border-border bg-card flex flex-col"
           >
             {product.url_imagen && (
               <img
@@ -313,35 +317,34 @@ const ProductosManager = () => {
                 className="h-48 w-full object-contain bg-muted"
               />
             )}
-            <div className="p-4">
-              <h3 className="mb-2 font-semibold text-foreground">
-                {product.nombre}
-              </h3>
+
+            <div className="p-4 flex flex-col flex-1">
+              <h3 className="mb-2 font-semibold text-foreground">{product.nombre}</h3>
+
               <p className="mb-2 text-sm text-muted-foreground line-clamp-2">
                 {product.descripcion}
               </p>
+
               <p className="mb-2 text-lg font-bold text-primary">
-                {product.tam[0].nombre}           $
+                {product.tam[0].nombre} $
                 {new Intl.NumberFormat("es-AR", {
                   style: "decimal",
                   minimumFractionDigits: 0,
                   maximumFractionDigits: 0,
                 }).format(product.tam[0].precioFinal)}
               </p>
+
               <p className="mb-4 text-xs text-muted-foreground">
                 Stock: {product.stock || "N/A"}
               </p>
 
-              <div className="flex flex-col gap-2">
+              <div className="mt-auto">
                 <div className="flex flex-wrap gap-2">
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() =>
-                      handleToggleEstado(product.id, product.estado)
-                    }
-                    title={product.estado ? "Desactivar" : "Activar"}
                     className="flex-shrink-0"
+                    onClick={() => handleToggleEstado(product.id, product.estado)}
                   >
                     {product.estado ? (
                       <Eye className="h-3 w-3" />
@@ -349,6 +352,31 @@ const ProductosManager = () => {
                       <EyeOff className="h-3 w-3" />
                     )}
                   </Button>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-shrink-0"
+                    onClick={() => {
+                      setSelectedProductForAdicionales(product);
+                      setAdicionalesDialogOpen(true);
+                    }}
+                  >
+                    <ListPlus className="h-3 w-3" />
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-shrink-0"
+                    onClick={() => {
+                      setSelectedProductForGuarniciones(product);
+                      setGuarnicionesDialogOpen(true);
+                    }}
+                  >
+                    <UtensilsCrossed className="h-3 w-3" />
+                  </Button>
+
                   <Button
                     variant="outline"
                     size="sm"
@@ -357,30 +385,6 @@ const ProductosManager = () => {
                   >
                     <Pencil className="mr-1 h-3 w-3" />
                     <span className="truncate">Editar</span>
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex-1 min-w-0"
-                    onClick={() => {
-                      setSelectedProductForAdicionales(product);
-                      setAdicionalesDialogOpen(true);
-                    }}
-                  >
-                    <ListPlus className="mr-1 h-3 w-3" />
-                    <span className="truncate">Adicionales</span>
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex-1 min-w-0"
-                    onClick={() => {
-                      setSelectedProductForGuarniciones(product);
-                      setGuarnicionesDialogOpen(true);
-                    }}
-                  >
-                    <ListPlus className="mr-1 h-3 w-3" />
-                    <span className="truncate">Guarniciones</span>
                   </Button>
                 </div>
               </div>
@@ -491,58 +495,68 @@ const ProductosManager = () => {
                   <label className="mb-2 block text-sm font-medium text-foreground">
                     Tamaños
                   </label>
-                  <div className="flex flex-wrap gap-4">
-                    {tamaños.map((tam) => {
-                      const checked = preciosPorTam.some(p => p.idTam === tam.id);
 
-                      return (
-                        <label
-                          key={tam.id}
-                          className="flex items-center gap-3 cursor-pointer group"
-                        >
-                          <Checkbox
-                            checked={checked}
-                            onCheckedChange={() => handleTamañoToggle(tam.id!)}
-                          />
-                          <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
-                            {tam.nombre}
-                          </span>
-                        </label>
-                      );
-                    })}
-                  </div>
+                  {tamañosFiltrados.length === 0 ? (
+                    <p className="text-xs text-muted-foreground">
+                      Esta categoría no tiene tamaños asignados.
+                    </p>
+                  ) : (
+                    <div className="flex flex-wrap gap-4">
+                      {tamañosFiltrados.map((tam) => {
+                        const checked = preciosPorTam.some((p) => p.idTam === tam.id);
+
+                        return (
+                          <label
+                            key={tam.id}
+                            className="flex items-center gap-3 cursor-pointer group"
+                          >
+                            <Checkbox
+                              checked={checked}
+                              onCheckedChange={() => handleTamañoToggle(tam.id!)}
+                            />
+                            <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
+                              {tam.nombre}
+                            </span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
+
 
                 {preciosPorTam.length > 0 && (
                   <div className="space-y-4">
                     <label className="block text-sm font-medium text-foreground">
                       Precios por Tamaño
                     </label>
-                    {preciosPorTam.map((precio, index) => {
-                      const tamaño = tamaños.find(t => t.id === precio.idTam);
-                      return (
-                        <div key={precio.idTam}>
-                          {index > 0 && (
-                            <div className="border-t border-border/50 mb-4" />
-                          )}
-                          <div className="flex items-center gap-3">
-                            <span className="text-sm font-medium text-foreground min-w-[100px]">
-                              {tamaño?.nombre}:
-                            </span>
-                            <Input
-                              type="number"
-                              placeholder="Precio"
-                              value={precio.precio}
-                              onChange={(e) => handlePrecioChange(precio.idTam, e.target.value)}
-                              min="0"
-                              step="0.01"
-                              required
-                              className="bg-background"
-                            />
+                    {preciosPorTam.filter((p) => tamañosFiltrados.some((t) => t.id === p.idTam))
+                      .map((precio, index) => {
+                        const tamaño = tamaños.find(t => t.id === precio.idTam);
+                        return (
+                          <div key={precio.idTam}>
+                            {index > 0 && (
+                              <div className="border-t border-border/50 mb-4" />
+                            )}
+                            <div className="flex items-center gap-3">
+                              <span className="text-sm font-medium text-foreground min-w-[100px]">
+                                {tamaño?.nombre}:
+                              </span>
+                              <Input
+                                type="number"
+                                placeholder="Precio"
+                                value={precio.precio}
+                                onChange={(e) => handlePrecioChange(precio.idTam, e.target.value)}
+                                min="0"
+                                step="0.01"
+                                required
+                                className="bg-background"
+                              />
+                            </div>
                           </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })
+                    }
                   </div>
                 )}
               </>

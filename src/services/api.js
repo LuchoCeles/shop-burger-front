@@ -120,13 +120,13 @@ class ApiService {
     return rsp.json();
   }
 
-  async createTamaño(nombre) {
-    const rsp = await this.POST('api/tam/', { nombre: nombre });
+  async createTamaño(data) {
+    const rsp = await this.POST('api/tam/', { data });
     return rsp.json();
   }
 
   async updateTamaño(id, data) {
-    const rsp = await this.PATCH(`api/tam/${id}`,data);
+    const rsp = await this.PATCH(`api/tam/${id}`, { data });
     return rsp.json();
   }
 
