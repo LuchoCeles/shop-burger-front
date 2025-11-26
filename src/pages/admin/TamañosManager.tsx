@@ -139,7 +139,7 @@ export default function TamañosManager() {
         </Button>
       </div>
 
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {tamaño.map((tamaño) => (
           <div
             key={tamaño.id}
@@ -156,12 +156,14 @@ export default function TamañosManager() {
               </p>
             </div>
 
-            <div className="flex gap-2 w-full">
+            <div className="flex items-center gap-2 w-full mt-2">
+
+              {/* Activar/Desactivar */}
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => handleToggleEstado(tamaño)}
-                className="w-12"
+                className="h-9 w-9 p-0 flex justify-center items-center"
                 title={tamaño.estado ? "Desactivar" : "Activar"}
               >
                 {tamaño.estado ? (
@@ -170,15 +172,19 @@ export default function TamañosManager() {
                   <EyeOff className="h-4 w-4" />
                 )}
               </Button>
+
+              {/* Editar */}
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => handleEdit(tamaño)}
-                className="flex-1"
+                className="flex-1 h-9 flex justify-center items-center gap-1 px-3"
               >
                 <Pencil className="h-4 w-4" />
                 <span className="truncate">Editar</span>
               </Button>
+
+              {/* Eliminar */}
               <Button
                 variant="destructive"
                 size="sm"
@@ -186,10 +192,11 @@ export default function TamañosManager() {
                   setSelectedTamaño(tamaño);
                   setIsDeleteDialogOpen(true);
                 }}
-                className="w-12"
+                className="h-9 w-9 p-0 flex justify-center items-center"
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
+
             </div>
           </div>
         ))}
