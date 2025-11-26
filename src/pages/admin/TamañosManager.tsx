@@ -65,11 +65,14 @@ export default function TamañosManager() {
 
     try {
       if (selectedTamaño) {
-        await ApiService.updateTamaño(selectedTamaño.id, formData.nombre);
-        toast.success("El tamaño se actualizó correctamente");
+        const rsp = await ApiService.updateTamaño(selectedTamaño.id, { nombre: formData.nombre, idCategoria: formData.idCategoria });
+        if (rsp.success) toast.success("El tamaño se actualizó correctamente");
+        else toast.error(rsp.message || "Error al actualizar el tamaño");
+
       } else {
-        await ApiService.createTamaño(formData.nombre);
-        toast.success("El tamaño se creó correctamente");
+        const rsp = await ApiService.createTamaño({ nombre: formData.nombre, idCategoria: formData.idCategoria });
+        if (!rsp.success) toast.error(rsp.message || "Error al crear el tamaño");
+        else toast.success("El tamaño se creó correctamente");
       }
       loadTamaños();
       resetForm();
