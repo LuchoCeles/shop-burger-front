@@ -18,91 +18,96 @@ const Home = () => {
   }, []);
 
   const loadData = async () => {
+    setLoading(true);
     try {
       const [productsData, categoriesData] = await Promise.all([
         ApiService.getProducts(true),
         ApiService.getCategories(),
       ]);
-      setProducts(Array.isArray(productsData.data) ? productsData.data : []);
-      setCategories(Array.isArray(categoriesData.data) ? categoriesData.data : []);
+      const prods = Array.isArray(productsData.data) ? productsData.data : [];
+      const cats = Array.isArray(categoriesData.data) ? categoriesData.data : [];
+
+      setProducts(prods);
+      setCategories(cats);
     } catch (error) {
       toast.error('Error al cargar los datos');
-      console.error(error);
+      console.error('loadData error', error);
     } finally {
       setLoading(false);
     }
   };
 
-  // Mapa de categorías por id para lookup rápido
-  const categoriesById = useMemo(() => {
-    const map = new Map<number, Category>();
-    categories.forEach((c) => {
-      if (c?.id != null) map.set(Number(c.id), c);
-    });
-    return map;
-  }, [categories]);
+  // Normaliza números (id string -> number) y evita undefined
+  const normalizeNumber = (v: any) => {
+    if (v === null || v === undefined) return null;
+    const n = Number(v);
+    return Number.isNaN(n) ? null : n;
+  };
 
-  // Normaliza la condición "activo": undefined => true, false => false
-  const isActive = (flag?: boolean) => (flag === undefined ? true : Boolean(flag));
-
-  // Agrupar productos por categoría (incluye "Sin categoría" si corresponde)
+  // Agrupar productos por categoría con reglas simples y robustas
   const productosPorCategoria = useMemo(() => {
-    // Filtramos primero los productos activos
-    const activeProducts = products.filter((p) => isActive(p.estado));
-
-    // Construyo un map idCategoria -> productos
+    // Map idCategoria -> productos
     const map = new Map<number | 'none', Product[]>();
 
-    for (const p of activeProducts) {
-      const catId = p.idCategoria != null ? Number(p.idCategoria) : 'none';
-      // Ignoro productos cuyo objeto categoria indique que está desactivada (si existe)
-      if (p.categoria && !isActive(p.categoria.estado)) continue;
+    for (const rawP of products) {
+      // normalizar idCategoria (puede venir string o number)
+      const idCat = normalizeNumber((rawP as any).idCategoria);
+      const key = idCat === null ? 'none' : idCat;
+      // solo productos con estado true (si backend no filtra, lo controlamos)
+      if (rawP.estado === false) continue;
 
-      if (!map.has(catId)) map.set(catId, []);
-      map.get(catId)!.push(p);
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(rawP);
     }
 
-    // Convertir a array con orden: las categorías existentes primero (según categories),
-    // luego la sección "Sin categoría" si existe.
-    const result: Array<{ id: number | 'none'; nombre: string; productos: Product[] }> = [];
+    // Resultado: para cada categoría oficial (orden de categories), sacamos sus productos
+    const result: Array<{ id: number | 'none'; nombre: string; estado: boolean; productos: Product[] }> = [];
 
-    // Añadir cada categoría (solo si corresponde) manteniendo orden de categories
+    // recorrer categorías en el orden que vino el backend
     for (const cat of categories) {
-      const catProducts = map.get(Number(cat.id)) || [];
+      const catId = normalizeNumber(cat.id) ?? undefined;
+      // si category.id no es number, lo saltamos (pero raro)
+      const productosParaEsta = catId != null ? map.get(catId) || [] : [];
       result.push({
-        id: Number(cat.id),
-        nombre: cat.nombre,
-        productos: catProducts,
+        id: catId as number,
+        nombre: cat.nombre ?? 'Sin nombre',
+        estado: cat.estado !== false, // undefined -> true, false -> false
+        productos: productosParaEsta,
       });
-      // quitar del map para no duplicar
-      map.delete(Number(cat.id));
+      // quitamos del mapa la key para no duplicar
+      if (catId != null) map.delete(catId);
     }
 
-    // Si quedaron productos con categoría inexistente / null -> los agrupamos en 'Sin categoría'
     if (map.has('none')) {
       result.push({
         id: 'none',
         nombre: 'Sin categoría',
+        estado: true,
         productos: map.get('none') || [],
       });
       map.delete('none');
     }
 
-    // Si quedaron productos con category ids que no estaban en categories (map keys numéricas),
-    // agruparlos por su id (nombre fallback)
-    for (const [key, prods] of map.entries()) {
-      if (typeof key === 'number') {
-        const cat = categoriesById.get(key);
+    // luego cualquier key numérica que quedó (categoría no listada en categories)
+    for (const [k, prods] of map.entries()) {
+      if (typeof k === 'number') {
         result.push({
-          id: key,
-          nombre: cat ? cat.nombre : `Categoría ${key}`,
+          id: k,
+          nombre: `Categoría ${k}`,
+          estado: true,
           productos: prods,
         });
       }
     }
 
     return result;
-  }, [products, categories, categoriesById]);
+  }, [products, categories]);
+
+  // Helper: obtener total de productos renderables (solo categorías activas)
+  const totalRenderable = productosPorCategoria.reduce((sum, c) => {
+    if (!c.estado) return sum;
+    return sum + (Array.isArray(c.productos) ? c.productos.length : 0);
+  }, 0);
 
   return (
     <div className="min-h-screen bg-background">
@@ -125,7 +130,11 @@ const Home = () => {
           <CategoryCarousel
             categories={categories}
             selectedCategory={selectedCategory}
-            onSelectCategory={setSelectedCategory}
+            onSelectCategory={(val) => {
+              // si se hace toggle: volver a null
+              if (val === selectedCategory) setSelectedCategory(null);
+              else setSelectedCategory(val);
+            }}
           />
         </section>
 
@@ -138,22 +147,18 @@ const Home = () => {
             </div>
           ) : (
             <>
-              {/* Si hay una categoría seleccionada, mostramos solo esa sección */}
+              {/* Si hay categoría seleccionada → mostrar solo esa */}
               {selectedCategory ? (
                 productosPorCategoria
-                  .filter((cat) => cat.id === selectedCategory)
+                  .filter((cat) => cat.id === selectedCategory && cat.estado === true)
                   .map((cat) => (
                     <div key={String(cat.id)} className="mb-12">
-                      <h2 className="mb-4 text-2xl font-bold text-foreground">
-                        {cat.nombre}
-                      </h2>
+                      <h2 className="mb-4 text-2xl font-bold text-foreground">{cat.nombre}</h2>
 
                       {cat.productos.length === 0 ? (
-                        <p className="text-muted-foreground">
-                          No hay productos disponibles en esta categoría.
-                        </p>
+                        <p className="text-muted-foreground text-sm italic">Sin productos disponibles.</p>
                       ) : (
-                        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 items-start">
                           {cat.productos.map((product) => (
                             <ProductCard key={product.id} product={product} />
                           ))}
@@ -162,26 +167,24 @@ const Home = () => {
                     </div>
                   ))
               ) : (
-                // Si NO hay categoría seleccionada → mostramos todas las secciones
-                productosPorCategoria.map((cat) => (
-                  <div key={String(cat.id)} className="mb-12">
-                    <h2 className="mb-4 text-2xl font-bold text-foreground">
-                      {cat.nombre}
-                    </h2>
+                // Si NO hay categoría seleccionada → mostramos todas las categorías activas
+                productosPorCategoria
+                  .filter((cat) => cat.estado === true)
+                  .map((cat) => (
+                    <div key={String(cat.id)} className="mb-12">
+                      <h2 className="mb-4 text-2xl font-bold text-foreground">{cat.nombre}</h2>
 
-                    {cat.productos.length === 0 ? (
-                      <p className="text-muted-foreground text-sm italic">
-                        Sin productos disponibles.
-                      </p>
-                    ) : (
-                      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 items-start">
-                        {cat.productos.map((product) => (
-                          <ProductCard key={product.id} product={product} />
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))
+                      {cat.productos.length === 0 ? (
+                        <p className="text-muted-foreground text-sm italic">Sin productos disponibles.</p>
+                      ) : (
+                        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 items-start">
+                          {cat.productos.map((product) => (
+                            <ProductCard key={product.id} product={product} />
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))
               )}
             </>
           )}
