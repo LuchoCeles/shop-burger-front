@@ -61,6 +61,7 @@ const ProductosManager = () => {
   const [guarnicionesDialogOpen, setGuarnicionesDialogOpen] = useState(false);
   const [selectedProductForAdicionales, setSelectedProductForAdicionales] = useState<Product | null>(null);
   const [selectedProductForGuarniciones, setSelectedProductForGuarniciones] = useState<Product | null>(null);
+  const [categoriaFiltro, setCategoriaFiltro] = useState("todos");
 
 
 
@@ -292,105 +293,132 @@ const ProductosManager = () => {
         <h1 className="text-2xl font-bold text-foreground md:text-3xl">
           Productos
         </h1>
-        <Button
-          onClick={() => {
-            resetForm();
-            setShowDialog(true);
-          }}
-          className="bg-primary text-primary-foreground hover:bg-primary/90 w-full sm:w-auto"
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Nuevo Producto
-        </Button>
+
+        <div className="flex gap-2 w-full sm:w-auto">
+          {/* FILTRO DE CATEGORÍAS */}
+          <Select
+            value={categoriaFiltro}
+            onValueChange={setCategoriaFiltro}
+          >
+            <SelectTrigger className="bg-background w-full sm:w-40">
+              <SelectValue placeholder="Categoría" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todos">Todos</SelectItem>
+              {categorias.map((cat) => (
+                <SelectItem key={cat.id} value={cat.id.toString()}>
+                  {cat.nombre}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Button
+            onClick={() => {
+              resetForm();
+              setShowDialog(true);
+            }}
+            className="bg-primary text-primary-foreground hover:bg-primary/90 w-auto"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Nuevo Producto
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-        {productos.map((product) => (
-          <div
-            key={product.id}
-            className="overflow-hidden rounded-lg border border-border bg-card flex flex-col"
-          >
-            {product.url_imagen && (
-              <img
-                src={product.url_imagen}
-                alt={product.nombre}
-                className="h-48 w-full object-contain bg-muted"
-              />
-            )}
+        {productos
+          .filter((p) =>
+            categoriaFiltro === "todos"
+              ? true
+              : p.idCategoria?.toString() === categoriaFiltro
+          )
+          .map((product) => (
+            <div
+              key={product.id}
+              className="overflow-hidden rounded-lg border border-border bg-card flex flex-col"
+            >
+              {product.url_imagen && (
+                <img
+                  src={product.url_imagen}
+                  alt={product.nombre}
+                  className="h-48 w-full object-contain bg-muted"
+                />
+              )}
 
-            <div className="p-4 flex flex-col flex-1">
-              <h3 className="mb-2 font-semibold text-foreground">{product.nombre}</h3>
+              <div className="p-4 flex flex-col flex-1">
+                <h3 className="mb-2 font-semibold text-foreground">{product.nombre}</h3>
 
-              <p className="mb-2 text-sm text-muted-foreground line-clamp-2">
-                {product.descripcion}
-              </p>
+                <p className="mb-2 text-sm text-muted-foreground line-clamp-2">
+                  {product.descripcion}
+                </p>
 
-              <p className="mb-2 text-lg font-bold text-primary">
-                {product.tam[0].nombre} $
-                {new Intl.NumberFormat("es-AR", {
-                  style: "decimal",
-                  minimumFractionDigits: 0,
-                  maximumFractionDigits: 0,
-                }).format(product.tam[0].precioFinal)}
-              </p>
+                <p className="mb-2 text-lg font-bold text-primary">
+                  {product.tam[0].nombre} $
+                  {new Intl.NumberFormat("es-AR", {
+                    style: "decimal",
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0,
+                  }).format(product.tam[0].precioFinal)}
+                </p>
 
-              <p className="mb-4 text-xs text-muted-foreground">
-                Stock: {product.stock || "N/A"}
-              </p>
+                <p className="mb-4 text-xs text-muted-foreground">
+                  Stock: {product.stock || "N/A"}
+                </p>
 
-              <div className="mt-auto">
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex-shrink-0"
-                    onClick={() => handleToggleEstado(product.id, product.estado)}
-                  >
-                    {product.estado ? (
-                      <Eye className="h-3 w-3" />
-                    ) : (
-                      <EyeOff className="h-3 w-3" />
-                    )}
-                  </Button>
+                <div className="mt-auto">
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-shrink-0"
+                      onClick={() => handleToggleEstado(product.id, product.estado)}
+                    >
+                      {product.estado ? (
+                        <Eye className="h-3 w-3" />
+                      ) : (
+                        <EyeOff className="h-3 w-3" />
+                      )}
+                    </Button>
 
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex-shrink-0"
-                    onClick={() => {
-                      setSelectedProductForAdicionales(product);
-                      setAdicionalesDialogOpen(true);
-                    }}
-                  >
-                    <ListPlus className="h-3 w-3" />
-                  </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-shrink-0"
+                      onClick={() => {
+                        setSelectedProductForAdicionales(product);
+                        setAdicionalesDialogOpen(true);
+                      }}
+                    >
+                      <ListPlus className="h-3 w-3" />
+                    </Button>
 
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex-shrink-0"
-                    onClick={() => {
-                      setSelectedProductForGuarniciones(product);
-                      setGuarnicionesDialogOpen(true);
-                    }}
-                  >
-                    <UtensilsCrossed className="h-3 w-3" />
-                  </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-shrink-0"
+                      onClick={() => {
+                        setSelectedProductForGuarniciones(product);
+                        setGuarnicionesDialogOpen(true);
+                      }}
+                    >
+                      <UtensilsCrossed className="h-3 w-3" />
+                    </Button>
 
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex-1 min-w-0"
-                    onClick={() => handleEdit(product)}
-                  >
-                    <Pencil className="mr-1 h-3 w-3" />
-                    <span className="truncate">Editar</span>
-                  </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1 min-w-0"
+                      onClick={() => handleEdit(product)}
+                    >
+                      <Pencil className="mr-1 h-3 w-3" />
+                      <span className="truncate">Editar</span>
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
       </div>
 
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
