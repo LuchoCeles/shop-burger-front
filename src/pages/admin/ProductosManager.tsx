@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, Pencil, Eye, EyeOff, ListPlus } from "lucide-react";
+import { Plus, Pencil, Eye, EyeOff, ListPlus, UtensilsCrossed } from "lucide-react";
 import ApiService from "../../services/api";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
@@ -300,11 +300,11 @@ const ProductosManager = () => {
         </Button>
       </div>
 
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {productos.map((product) => (
           <div
             key={product.id}
-            className="overflow-hidden rounded-lg border border-border bg-card"
+            className="overflow-hidden rounded-lg border border-border bg-card flex flex-col"
           >
             {product.url_imagen && (
               <img
@@ -313,35 +313,35 @@ const ProductosManager = () => {
                 className="h-48 w-full object-contain bg-muted"
               />
             )}
-            <div className="p-4">
-              <h3 className="mb-2 font-semibold text-foreground">
-                {product.nombre}
-              </h3>
+
+            <div className="p-4 flex flex-col flex-1">
+              <h3 className="mb-2 font-semibold text-foreground">{product.nombre}</h3>
+
+              {/* 💡 Esto permite que la descripción ocupe lo que necesite SIN empujar los botones */}
               <p className="mb-2 text-sm text-muted-foreground line-clamp-2">
                 {product.descripcion}
               </p>
+
               <p className="mb-2 text-lg font-bold text-primary">
-                {product.tam[0].nombre}           $
+                {product.tam[0].nombre} $
                 {new Intl.NumberFormat("es-AR", {
                   style: "decimal",
                   minimumFractionDigits: 0,
                   maximumFractionDigits: 0,
                 }).format(product.tam[0].precioFinal)}
               </p>
+
               <p className="mb-4 text-xs text-muted-foreground">
                 Stock: {product.stock || "N/A"}
               </p>
 
-              <div className="flex flex-col gap-2">
+              <div className="mt-auto">
                 <div className="flex flex-wrap gap-2">
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() =>
-                      handleToggleEstado(product.id, product.estado)
-                    }
-                    title={product.estado ? "Desactivar" : "Activar"}
                     className="flex-shrink-0"
+                    onClick={() => handleToggleEstado(product.id, product.estado)}
                   >
                     {product.estado ? (
                       <Eye className="h-3 w-3" />
@@ -349,6 +349,31 @@ const ProductosManager = () => {
                       <EyeOff className="h-3 w-3" />
                     )}
                   </Button>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-shrink-0"
+                    onClick={() => {
+                      setSelectedProductForAdicionales(product);
+                      setAdicionalesDialogOpen(true);
+                    }}
+                  >
+                    <ListPlus className="h-3 w-3" />
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-shrink-0"
+                    onClick={() => {
+                      setSelectedProductForGuarniciones(product);
+                      setGuarnicionesDialogOpen(true);
+                    }}
+                  >
+                    <UtensilsCrossed className="h-3 w-3" />
+                  </Button>
+
                   <Button
                     variant="outline"
                     size="sm"
@@ -357,30 +382,6 @@ const ProductosManager = () => {
                   >
                     <Pencil className="mr-1 h-3 w-3" />
                     <span className="truncate">Editar</span>
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex-1 min-w-0"
-                    onClick={() => {
-                      setSelectedProductForAdicionales(product);
-                      setAdicionalesDialogOpen(true);
-                    }}
-                  >
-                    <ListPlus className="mr-1 h-3 w-3" />
-                    <span className="truncate">Adicionales</span>
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex-1 min-w-0"
-                    onClick={() => {
-                      setSelectedProductForGuarniciones(product);
-                      setGuarnicionesDialogOpen(true);
-                    }}
-                  >
-                    <ListPlus className="mr-1 h-3 w-3" />
-                    <span className="truncate">Guarniciones</span>
                   </Button>
                 </div>
               </div>
