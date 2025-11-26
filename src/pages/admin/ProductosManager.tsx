@@ -282,6 +282,10 @@ const ProductosManager = () => {
     ));
   };
 
+  const tamañosFiltrados = tamaños.filter(
+    (t) => t.idCategoria === Number(formData.idCategoria)
+  );
+
   return (
     <div className="space-y-4 md:space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -317,7 +321,6 @@ const ProductosManager = () => {
             <div className="p-4 flex flex-col flex-1">
               <h3 className="mb-2 font-semibold text-foreground">{product.nombre}</h3>
 
-              {/* 💡 Esto permite que la descripción ocupe lo que necesite SIN empujar los botones */}
               <p className="mb-2 text-sm text-muted-foreground line-clamp-2">
                 {product.descripcion}
               </p>
@@ -492,58 +495,68 @@ const ProductosManager = () => {
                   <label className="mb-2 block text-sm font-medium text-foreground">
                     Tamaños
                   </label>
-                  <div className="flex flex-wrap gap-4">
-                    {tamaños.map((tam) => {
-                      const checked = preciosPorTam.some(p => p.idTam === tam.id);
 
-                      return (
-                        <label
-                          key={tam.id}
-                          className="flex items-center gap-3 cursor-pointer group"
-                        >
-                          <Checkbox
-                            checked={checked}
-                            onCheckedChange={() => handleTamañoToggle(tam.id!)}
-                          />
-                          <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
-                            {tam.nombre}
-                          </span>
-                        </label>
-                      );
-                    })}
-                  </div>
+                  {tamañosFiltrados.length === 0 ? (
+                    <p className="text-xs text-muted-foreground">
+                      Esta categoría no tiene tamaños asignados.
+                    </p>
+                  ) : (
+                    <div className="flex flex-wrap gap-4">
+                      {tamañosFiltrados.map((tam) => {
+                        const checked = preciosPorTam.some((p) => p.idTam === tam.id);
+
+                        return (
+                          <label
+                            key={tam.id}
+                            className="flex items-center gap-3 cursor-pointer group"
+                          >
+                            <Checkbox
+                              checked={checked}
+                              onCheckedChange={() => handleTamañoToggle(tam.id!)}
+                            />
+                            <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
+                              {tam.nombre}
+                            </span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
+
 
                 {preciosPorTam.length > 0 && (
                   <div className="space-y-4">
                     <label className="block text-sm font-medium text-foreground">
                       Precios por Tamaño
                     </label>
-                    {preciosPorTam.map((precio, index) => {
-                      const tamaño = tamaños.find(t => t.id === precio.idTam);
-                      return (
-                        <div key={precio.idTam}>
-                          {index > 0 && (
-                            <div className="border-t border-border/50 mb-4" />
-                          )}
-                          <div className="flex items-center gap-3">
-                            <span className="text-sm font-medium text-foreground min-w-[100px]">
-                              {tamaño?.nombre}:
-                            </span>
-                            <Input
-                              type="number"
-                              placeholder="Precio"
-                              value={precio.precio}
-                              onChange={(e) => handlePrecioChange(precio.idTam, e.target.value)}
-                              min="0"
-                              step="0.01"
-                              required
-                              className="bg-background"
-                            />
+                    {preciosPorTam.filter((p) => tamañosFiltrados.some((t) => t.id === p.idTam))
+                      .map((precio, index) => {
+                        const tamaño = tamaños.find(t => t.id === precio.idTam);
+                        return (
+                          <div key={precio.idTam}>
+                            {index > 0 && (
+                              <div className="border-t border-border/50 mb-4" />
+                            )}
+                            <div className="flex items-center gap-3">
+                              <span className="text-sm font-medium text-foreground min-w-[100px]">
+                                {tamaño?.nombre}:
+                              </span>
+                              <Input
+                                type="number"
+                                placeholder="Precio"
+                                value={precio.precio}
+                                onChange={(e) => handlePrecioChange(precio.idTam, e.target.value)}
+                                min="0"
+                                step="0.01"
+                                required
+                                className="bg-background"
+                              />
+                            </div>
                           </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })
+                    }
                   </div>
                 )}
               </>
