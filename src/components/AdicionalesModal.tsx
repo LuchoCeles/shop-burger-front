@@ -6,12 +6,11 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
-  DialogDescription
+  DialogFooter
 } from './ui/dialog';
 import { Adicional, CartItemAdicional, AdicionalesModalProps } from '@/intefaces/interfaz';
 import ApiService from '@/services/api';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 export default function AdicionalesModal({
   open,
@@ -47,11 +46,7 @@ export default function AdicionalesModal({
 
       setAdicionales(filtered);
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'No se pudieron cargar los adicionales',
-        variant: 'destructive',
-      });
+      toast.error(error.message || 'Error al cargar los adicionales');
     } finally {
       setLoading(false);
     }
@@ -64,17 +59,9 @@ export default function AdicionalesModal({
       newMap.set(adicional.id, current + 1);
       setSelectedAdicionales(newMap);
     } else if (current >= adicional.maxCantidad) {
-      toast({
-        title: 'Límite alcanzado',
-        description: `Máximo ${adicional.maxCantidad} unidades de ${adicional.nombre}`,
-        variant: 'destructive',
-      });
+      toast.warning(`Máximo de ${adicional.maxCantidad} seleccionados`);
     } else {
-      toast({
-        title: 'Sin stock',
-        description: `Solo hay ${adicional.stock} unidades disponibles`,
-        variant: 'destructive',
-      });
+      toast.error(`No hay más stock de ${adicional.nombre}`);
     }
   };
 

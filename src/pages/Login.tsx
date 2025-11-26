@@ -28,10 +28,12 @@ const Login = () => {
     try {
       const response = await ApiService.login(formData.nombre, formData.password);
 
-      if (response.data) {
+      if (response.success) {
         authLogin(response.data.token, formData.nombre);
         toast.success('Bienvenido');
         navigate('/admin');
+      }else{
+        toast.error('Credenciales incorrectas');
       }
     } catch (error) {
       toast.error(error.message || 'Credenciales incorrectas');

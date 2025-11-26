@@ -137,7 +137,7 @@ export default function AdicionalesManager() {
         </Button>
       </div>
 
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {adicionales.map((adicional) => (
           <div
             key={adicional.id}
@@ -154,7 +154,6 @@ export default function AdicionalesManager() {
             </div>
 
             <div className="text-sm text-muted-foreground space-y-1">
-              <p>Estado: {adicional.estado ? 'Activo' : 'Inactivo'}</p>
               <p>Cantidad Disponible: {adicional.stock}</p>
               <p>Cantidad Máxima por Producto: {adicional.maxCantidad}</p>
             </div>

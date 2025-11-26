@@ -156,7 +156,7 @@ const CategoriasManager = () => {
         </Button>
       </div>
 
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
         {categorias.map((cat) => (
           <div
             key={cat.id}
@@ -167,13 +167,13 @@ const CategoriasManager = () => {
                 {cat.nombre}
               </span>
             </div>
-            <div className="flex gap-2 w-full">
+            <div className="flex items-center gap-2 w-full mt-2">
               <Button
                 variant="outline"
                 size="sm"
+                className="h-9 w-9 p-0 flex justify-center items-center"
                 onClick={() => handleToggleEstado(cat)}
                 title={cat.estado ? "Desactivar" : "Activar"}
-                className="w-12"
               >
                 {cat.estado ? (
                   <Eye className="h-4 w-4" />
@@ -184,8 +184,8 @@ const CategoriasManager = () => {
               <Button
                 variant="outline"
                 size="sm"
+                className="flex-1 h-9 flex justify-center items-center gap-1 px-3"
                 onClick={() => handleEdit(cat)}
-                className="flex-1"
               >
                 <Pencil className="h-4 w-4" />
                 <span className="truncate">Editar</span>
@@ -193,8 +193,8 @@ const CategoriasManager = () => {
               <Button
                 variant="destructive"
                 size="sm"
+                className="h-9 w-9 p-0 flex justify-center items-center"
                 onClick={() => setCategoryToDelete(cat.id)}
-                className="w-12"
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
