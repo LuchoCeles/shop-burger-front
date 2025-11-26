@@ -106,6 +106,7 @@ const Checkout = () => {
             cantidad: ad.cantidad,
           })),
         idGuarnicion: item.guarnicionSeleccionada.id,
+        idTam: item.tamSeleccionado.id
       })),
     };
     return pedido;
@@ -132,14 +133,16 @@ const Checkout = () => {
       const response = await ApiService.createOrder(pedido);
 
       sessionStorage.setItem("mp_status", "pending");
+      if (response.success) {
+        toast.success('Pedido creado exitosamente');
 
-      toast.success('Pedido creado exitosamente');
-
-      setSubmitting(false);
-      setMpReady(true);
-      setOrderId(response.data.id);
-      cargarPedidoMP(response.data, pedido);
-
+        setSubmitting(false);
+        setMpReady(true);
+        setOrderId(response.data.id);
+        cargarPedidoMP(response.data, pedido);
+      } else {
+        toast.error(response.message);
+      }
     } catch (error: any) {
       toast.error(error.message || 'Error al crear el pedido');
     } finally {

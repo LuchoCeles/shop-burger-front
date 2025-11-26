@@ -385,7 +385,7 @@ export default function ProductConfigModal({
           >
             Cancelar
           </Button>
-          <Button onClick={handleConfirm} disabled={loading || !selectedTamaño}>
+          <Button onClick={handleConfirm} disabled={loading || !selectedTamaño || (!selectedGuarnicion && product.guarniciones.length > 0)}>
             Confirmar
           </Button>
         </DialogFooter>
