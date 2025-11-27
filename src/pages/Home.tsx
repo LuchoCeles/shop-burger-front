@@ -88,7 +88,6 @@ const Home = () => {
       map.delete('none');
     }
 
-    // luego cualquier key numérica que quedó (categoría no listada en categories)
     for (const [k, prods] of map.entries()) {
       if (typeof k === 'number') {
         result.push({
@@ -102,12 +101,6 @@ const Home = () => {
 
     return result;
   }, [products, categories]);
-
-  // Helper: obtener total de productos renderables (solo categorías activas)
-  const totalRenderable = productosPorCategoria.reduce((sum, c) => {
-    if (!c.estado) return sum;
-    return sum + (Array.isArray(c.productos) ? c.productos.length : 0);
-  }, 0);
 
   return (
     <div className="min-h-screen bg-background">
@@ -147,7 +140,6 @@ const Home = () => {
             </div>
           ) : (
             <>
-              {/* Si hay categoría seleccionada → mostrar solo esa */}
               {selectedCategory ? (
                 productosPorCategoria
                   .filter((cat) => cat.id === selectedCategory && cat.estado === true)
@@ -167,10 +159,10 @@ const Home = () => {
                     </div>
                   ))
               ) : (
-                // Si NO hay categoría seleccionada → mostramos todas las categorías activas
                 productosPorCategoria
-                  .filter((cat) => cat.estado === true)
+                  .filter((cat) => cat.estado === true && cat.productos.length > 0)
                   .map((cat) => (
+
                     <div key={String(cat.id)} className="mb-12">
                       <h2 className="mb-4 text-2xl font-bold text-foreground">{cat.nombre}</h2>
 
