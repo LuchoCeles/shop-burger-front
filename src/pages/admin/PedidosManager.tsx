@@ -25,7 +25,7 @@ import { toast } from 'sonner';
 const PedidosManager = () => {
   const [pedidos, setPedidos] = useState<Orders[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filtroEstado, setFiltroEstado] = useState<'todos' | 'pendiente' | 'entregado' | 'cancelado'>('todos');
+  const [filtroEstado, setFiltroEstado] = useState<'Todos' | 'Pendiente' | 'Entregado' | 'Cancelado'>('Todos');
   const [confirmDialog, setConfirmDialog] = useState<{ open: boolean; pedidoId: number; nuevoEstado: string }>({
     open: false,
     pedidoId: 0,
@@ -228,15 +228,15 @@ const PedidosManager = () => {
                   <Select
                     value={pedido.estado}
                     onValueChange={(value) => handleEstadoChange(pedido.id, value)}
-                    disabled={pedido.estado === "entregado" || pedido.estado === "cancelado"}
+                    disabled={pedido.estado === "Entregado" || pedido.estado === "Cancelado"}
                   >
                     <SelectTrigger className="w-full sm:w-40 bg-background">
                       <SelectValue placeholder="Seleccionar estado" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="pendiente">Pendiente</SelectItem>
-                      <SelectItem value="entregado">Entregado</SelectItem>
-                      <SelectItem value="cancelado">Cancelado</SelectItem>
+                      <SelectItem value="Pendiente">Pendiente</SelectItem>
+                      <SelectItem value="Entregado">Entregado</SelectItem>
+                      <SelectItem value="Cancelado">Cancelado</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -246,7 +246,7 @@ const PedidosManager = () => {
 
             <div className="mb-4 grid gap-2 text-sm">
               <p className="text-foreground">
-                <span className="font-medium">Cliente:</span> {pedido.cliente.id || 'N/A'}
+                <span className="font-medium">Metodo De Pago:</span> {pedido.Pago?.metodoDePago || 'N/A'}
               </p>
               <p className="text-foreground">
                 <span className="font-medium">Teléfono:</span> {pedido.cliente.telefono || 'N/A'}
@@ -254,11 +254,9 @@ const PedidosManager = () => {
               <p className="text-foreground">
                 <span className="font-medium">Dirección:</span> {pedido.cliente.direccion.toUpperCase() || 'N/A'}
               </p>
-              {pedido.descripcion && (
-                <p className="text-foreground font-bold">
-                  <span className="font-medium">Notas:</span> {pedido.descripcion.toUpperCase() || 'N/A'}
-                </p>
-              )}
+              <p className="text-foreground font-bold">
+                <span className="font-medium">Notas:</span> {pedido?.descripcion.toUpperCase() || 'N/A'}
+              </p>
             </div>
 
             <div className="border-t border-border pt-4">
@@ -357,23 +355,23 @@ const PedidosManager = () => {
 
       <Tabs value={filtroEstado} onValueChange={(value) => setFiltroEstado(value as any)} className="w-full">
         <TabsList className="mb-6 grid w-full max-w-md grid-cols-4">
-          <TabsTrigger value="todos">Todos</TabsTrigger>
-          <TabsTrigger value="pendiente">Pendiente</TabsTrigger>
-          <TabsTrigger value="entregado">Entregado</TabsTrigger>
-          <TabsTrigger value="cancelado">Cancelado</TabsTrigger>
+          <TabsTrigger value="Todos">Todos</TabsTrigger>
+          <TabsTrigger value="Pendiente">Pendiente</TabsTrigger>
+          <TabsTrigger value="Entregado">Entregado</TabsTrigger>
+          <TabsTrigger value="Cancelado">Cancelado</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="todos">
+        <TabsContent value="Todos">
           {renderPedidos(pedidos)}
         </TabsContent>
-        <TabsContent value="pendiente">
-          {renderPedidos(pedidos.filter(p => p.estado === 'pendiente').sort((a, b) => a.id - b.id))}
+        <TabsContent value="Pendiente">
+          {renderPedidos(pedidos.filter(p => p.estado === 'Pendiente').sort((a, b) => a.id - b.id))}
         </TabsContent>
-        <TabsContent value="entregado">
-          {renderPedidos(pedidos.filter(p => p.estado === 'entregado'))}
+        <TabsContent value="Entregado">
+          {renderPedidos(pedidos.filter(p => p.estado === 'Entregado'))}
         </TabsContent>
-        <TabsContent value="cancelado">
-          {renderPedidos(pedidos.filter(p => p.estado === 'cancelado'))}
+        <TabsContent value="Cancelado">
+          {renderPedidos(pedidos.filter(p => p.estado === 'Cancelado'))}
         </TabsContent>
       </Tabs>
     </div>
