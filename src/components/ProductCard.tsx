@@ -10,6 +10,7 @@ import ProductConfigModal from "./ProductConfigModal";
 const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
   const { addToCart } = useCart();
   const [showConfigModal, setShowConfigModal] = useState(false);
+  const [expanded, setExpanded] = useState(false);
 
   // 🔥 NUEVO: función que decide si abrir modal
   const shouldOpenModal = (product: Product) => {
