@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Navbar from '../components/Navbar';
 import CategoryCarousel from '../components/CategoryCarousel';
 import ProductCard from '../components/ProductCard';
@@ -18,25 +18,89 @@ const Home = () => {
   }, []);
 
   const loadData = async () => {
+    setLoading(true);
     try {
       const [productsData, categoriesData] = await Promise.all([
         ApiService.getProducts(true),
         ApiService.getCategories(),
       ]);
-      setProducts(Array.isArray(productsData.data) ? productsData.data : []);
-      setCategories(Array.isArray(categoriesData.data) ? categoriesData.data : []);
+      const prods = Array.isArray(productsData.data) ? productsData.data : [];
+      const cats = Array.isArray(categoriesData.data) ? categoriesData.data : [];
+
+      setProducts(prods);
+      setCategories(cats);
     } catch (error) {
       toast.error('Error al cargar los datos');
-      console.error(error);
+      console.error('loadData error', error);
     } finally {
       setLoading(false);
     }
   };
 
+  // Normaliza números (id string -> number) y evita undefined
+  const normalizeNumber = (v: any) => {
+    if (v === null || v === undefined) return null;
+    const n = Number(v);
+    return Number.isNaN(n) ? null : n;
+  };
 
-  const filteredProducts = selectedCategory
-    ? (products || []).filter((p) => p.idCategoria === selectedCategory)
-    : products || [];
+  // Agrupar productos por categoría con reglas simples y robustas
+  const productosPorCategoria = useMemo(() => {
+    // Map idCategoria -> productos
+    const map = new Map<number | 'none', Product[]>();
+
+    for (const rawP of products) {
+      // normalizar idCategoria (puede venir string o number)
+      const idCat = normalizeNumber((rawP as any).idCategoria);
+      const key = idCat === null ? 'none' : idCat;
+      // solo productos con estado true (si backend no filtra, lo controlamos)
+      if (rawP.estado === false) continue;
+
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(rawP);
+    }
+
+    // Resultado: para cada categoría oficial (orden de categories), sacamos sus productos
+    const result: Array<{ id: number | 'none'; nombre: string; estado: boolean; productos: Product[] }> = [];
+
+    // recorrer categorías en el orden que vino el backend
+    for (const cat of categories) {
+      const catId = normalizeNumber(cat.id) ?? undefined;
+      // si category.id no es number, lo saltamos (pero raro)
+      const productosParaEsta = catId != null ? map.get(catId) || [] : [];
+      result.push({
+        id: catId as number,
+        nombre: cat.nombre ?? 'Sin nombre',
+        estado: cat.estado !== false, // undefined -> true, false -> false
+        productos: productosParaEsta,
+      });
+      // quitamos del mapa la key para no duplicar
+      if (catId != null) map.delete(catId);
+    }
+
+    if (map.has('none')) {
+      result.push({
+        id: 'none',
+        nombre: 'Sin categoría',
+        estado: true,
+        productos: map.get('none') || [],
+      });
+      map.delete('none');
+    }
+
+    for (const [k, prods] of map.entries()) {
+      if (typeof k === 'number') {
+        result.push({
+          id: k,
+          nombre: `Categoría ${k}`,
+          estado: true,
+          productos: prods,
+        });
+      }
+    }
+
+    return result;
+  }, [products, categories]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -59,7 +123,11 @@ const Home = () => {
           <CategoryCarousel
             categories={categories}
             selectedCategory={selectedCategory}
-            onSelectCategory={setSelectedCategory}
+            onSelectCategory={(val) => {
+              // si se hace toggle: volver a null
+              if (val === selectedCategory) setSelectedCategory(null);
+              else setSelectedCategory(val);
+            }}
           />
         </section>
 
@@ -67,25 +135,50 @@ const Home = () => {
           {loading ? (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {[...Array(8)].map((_, i) => (
-                <div
-                  key={i}
-                  className="h-96 animate-pulse rounded-lg bg-card"
-                />
+                <div key={i} className="h-96 animate-pulse rounded-lg bg-card" />
               ))}
             </div>
-          ) : filteredProducts.length === 0 ? (
-            <div className="py-20 text-center">
-              <p className="text-xl text-muted-foreground">
-                No hay productos disponibles en esta categoría
-              </p>
-            </div>
           ) : (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 items-start">
-              {filteredProducts.map((product) => (
-                Boolean(product.estado) && Boolean(product.categoria.estado) && (
-                  <ProductCard key={product.id} product={product} />
-                )))}
-            </div>
+            <>
+              {selectedCategory ? (
+                productosPorCategoria
+                  .filter((cat) => cat.id === selectedCategory && cat.estado === true)
+                  .map((cat) => (
+                    <div key={String(cat.id)} className="mb-12">
+                      <h2 className="mb-4 text-2xl font-bold text-foreground">{cat.nombre}</h2>
+
+                      {cat.productos.length === 0 ? (
+                        <p className="text-muted-foreground text-sm italic">Sin productos disponibles.</p>
+                      ) : (
+                        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 items-start">
+                          {cat.productos.map((product) => (
+                            <ProductCard key={product.id} product={product} />
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))
+              ) : (
+                productosPorCategoria
+                  .filter((cat) => cat.estado === true && cat.productos.length > 0)
+                  .map((cat) => (
+
+                    <div key={String(cat.id)} className="mb-12">
+                      <h2 className="mb-4 text-2xl font-bold text-foreground">{cat.nombre}</h2>
+
+                      {cat.productos.length === 0 ? (
+                        <p className="text-muted-foreground text-sm italic">Sin productos disponibles.</p>
+                      ) : (
+                        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 items-start">
+                          {cat.productos.map((product) => (
+                            <ProductCard key={product.id} product={product} />
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))
+              )}
+            </>
           )}
         </section>
       </main>
