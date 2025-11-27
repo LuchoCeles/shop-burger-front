@@ -64,7 +64,8 @@ const CartModal: React.FC<CartModalProps> = ({ open, onOpenChange }) => {
 
                 return (
                   <div key={item.cartId} className="space-y-2">
-                    <div className="flex items-center gap-4 rounded-lg border border-border bg-muted/30 p-4">
+                    {/* Desktop layout */}
+                    <div className="hidden sm:flex items-center gap-4 rounded-lg border border-border bg-muted/30 p-4">
                       {/* Imagen */}
                       <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-md bg-muted">
                         {item.productoOriginal.url_imagen ? (
@@ -106,20 +107,27 @@ const CartModal: React.FC<CartModalProps> = ({ open, onOpenChange }) => {
                           </div>
                         )}
 
-                        {/* Adicionales (solo mostrar los que tienen cantidad > 0) */}
-                        {item.adicionalesSeleccionados.length > 0 && (<div className="mt-1">
-                          <p className="text-xs text-muted-foreground">
-                            <span className="font-medium">Adicionales:</span>{' '}
-                            {item.adicionalesSeleccionados
-                              .filter(adic => adic.cantidad > 0)
-                              .map(adic => `${adic.nombre} x ${adic.cantidad}`)
-                              .join(", ")}
-                          </p>
-                        </div>
+                        {/* Adicionales desktop */}
+                        {item.adicionalesSeleccionados.filter(adic => adic.cantidad > 0).length > 0 && (
+                          <div>
+                            <p className="text-xs font-medium text-muted-foreground mb-1">Adicionales:</p>
+                            <div className="flex flex-wrap gap-1">
+                              {item.adicionalesSeleccionados
+                                .filter(adic => adic.cantidad > 0)
+                                .map((adic, idx) => (
+                                  <span
+                                    key={idx}
+                                    className="inline-flex items-center px-2 py-0.5 rounded-md bg-primary/10 text-xs text-foreground"
+                                  >
+                                    {adic.nombre} × {adic.cantidad}
+                                  </span>
+                                ))}
+                            </div>
+                          </div>
                         )}
                       </div>
 
-                      {/* Controles */}
+                      {/* Controles desktop */}
                       <div className="flex flex-col items-end gap-2">
                         <div className="flex items-center gap-2">
                           <Button
@@ -164,17 +172,138 @@ const CartModal: React.FC<CartModalProps> = ({ open, onOpenChange }) => {
                           onClick={() => setEditingItem(item)}
                         >
                           <Edit className="h-3 w-3 mr-1" />
-                          Editar {item.productoOriginal.nombre}
+                          Editar
                         </Button>
 
                         {isMaxStock && (
-                          <div className="text-center -mt-2">
-                            <span className="text-xs text-destructive font-medium">
-                              Stock máximo alcanzado
-                            </span>
-                          </div>
+                          <span className="text-xs text-destructive font-medium">
+                            Stock máximo
+                          </span>
                         )}
                       </div>
+                    </div>
+
+                    {/* Mobile layout */}
+                    <div className="flex sm:hidden flex-col gap-3 rounded-lg border border-border bg-muted/30 p-3">
+                      <div className="flex items-start gap-3">
+                        {/* Imagen */}
+                        <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-md bg-muted">
+                          {item.productoOriginal.url_imagen ? (
+                            <img
+                              src={item.productoOriginal.url_imagen}
+                              alt={item.productoOriginal.nombre}
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            <div className="flex h-full w-full items-center justify-center text-xl">
+                              🍽️
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Información */}
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-semibold text-foreground text-sm">{item.productoOriginal.nombre}</h4>
+                          <p className="text-base font-bold text-primary">
+                            ${precioBase.toFixed(2)}
+                          </p>
+
+                          {/* Tamaño */}
+                          {item.tamSeleccionado && (
+                            <div className="mt-1">
+                              <p className="text-xs text-muted-foreground">
+                                <span className="font-medium">Tamaño:</span> {item.tamSeleccionado.nombre}
+                              </p>
+                            </div>
+                          )}
+
+                          {/* Guarnición */}
+                          {item.guarnicionSeleccionada && (
+                            <div className="mt-1">
+                              <p className="text-xs text-muted-foreground">
+                                <span className="font-medium">Guarnición:</span>{' '}
+                                {item.guarnicionSeleccionada.nombre}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Adicionales mobile - badges */}
+                      {item.adicionalesSeleccionados.filter(adic => adic.cantidad > 0).length > 0 && (
+                        <div className="border-t pt-2">
+                          <p className="text-xs font-medium text-muted-foreground mb-1">Adicionales:</p>
+                          <div className="flex flex-wrap gap-1">
+                            {item.adicionalesSeleccionados
+                              .filter(adic => adic.cantidad > 0)
+                              .map((adic, idx) => (
+                                <span
+                                  key={idx}
+                                  className="inline-flex items-center px-2 py-0.5 rounded-md bg-primary/10 text-xs text-foreground"
+                                >
+                                  {adic.nombre} × {adic.cantidad}
+                                </span>
+                              ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Controles mobile */}
+                      <div className="flex items-center justify-between gap-2 border-t pt-2">
+                        <div className="flex items-center gap-1.5">
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => handleDecrement(item.cartId, item.cantidad)}
+                          >
+                            <Minus className="h-3 w-3" />
+                          </Button>
+
+                          <span className="w-7 text-center text-sm font-semibold">
+                            {item.cantidad}
+                          </span>
+
+                          <Button
+                            variant={isMaxStock ? 'secondary' : 'outline'}
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() =>
+                              handleIncrement(item.cartId, item.cantidad, item.productoOriginal)
+                            }
+                            disabled={isMaxStock}
+                          >
+                            <Plus className="h-3 w-3" />
+                          </Button>
+                        </div>
+
+                        <div className="flex items-center gap-1.5">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 text-xs px-2"
+                            onClick={() => setEditingItem(item)}
+                          >
+                            <Edit className="h-3 w-3 mr-1" />
+                            Editar
+                          </Button>
+
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                            onClick={() => removeFromCart(item.cartId)}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+
+                      {isMaxStock && (
+                        <span className="text-xs text-destructive font-medium text-center">
+                          Stock máximo
+                        </span>
+                      )}
                     </div>
                   </div>
                 );
