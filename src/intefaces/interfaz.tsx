@@ -67,7 +67,7 @@ export interface Adicional {
 
 export interface Orders {
   id: number;
-  estado: 'pendiente' | 'entregado' | 'cancelado';
+  estado: 'Pendiente' | 'Entregado' | 'Cancelado';
   precioTotal: number;
   descripcion?: string;
   cliente: {
