@@ -186,8 +186,8 @@ const ProductosManager = () => {
     // Cargar precios por tamaño
     if (product.tam && product.tam.length > 0) {
       const precios = product.tam.map(t => ({
-        idTam: t.id!,
-        precio: t.precio?.toString() || ""
+        idTam: t.id,
+        precio: t.precioFinal?.toString() || t.precio?.toString() || ""
       }));
       setPreciosPorTam(precios);
     }
@@ -220,8 +220,6 @@ const ProductosManager = () => {
       e.target.value = "";
     }
   };
-
-
 
   const handleImageSave = (croppedImage: File) => {
     setImagen(croppedImage);

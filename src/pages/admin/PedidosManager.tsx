@@ -20,6 +20,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '../../components/ui/alert-dialog';
+import { Button } from '../../components/ui/button';
+import { Plus } from 'lucide-react';
+import ManualOrderModal from '../../components/ManualOrderModal';
 import { toast } from 'sonner';
 
 const PedidosManager = () => {
@@ -33,6 +36,7 @@ const PedidosManager = () => {
   });
   const { socket } = useSocket();
   const [estadoManual, setEstadoManual] = useState<Record<number, string>>({});
+  const [showManualOrderModal, setShowManualOrderModal] = useState(false);
 
 
   useEffect(() => {
@@ -322,7 +326,19 @@ const PedidosManager = () => {
   );
   return (
     <div>
-      <h1 className="mb-6 text-3xl font-bold text-foreground">Pedidos</h1>
+      <div className="mb-6 flex items-center justify-between">
+        <h1 className="text-3xl font-bold text-foreground">Pedidos</h1>
+        <Button onClick={() => setShowManualOrderModal(true)} className="gap-2">
+          <Plus className="h-4 w-4" />
+          Nuevo Pedido
+        </Button>
+      </div>
+
+      <ManualOrderModal
+        open={showManualOrderModal}
+        onOpenChange={setShowManualOrderModal}
+        onOrderCreated={loadPedidos}
+      />
 
       <AlertDialog open={confirmDialog.open} onOpenChange={(open) => setConfirmDialog({ ...confirmDialog, open })}>
         <AlertDialogContent>
