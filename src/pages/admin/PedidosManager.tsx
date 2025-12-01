@@ -275,33 +275,22 @@ const PedidosManager = () => {
                         </p>
                         <div className="mt-2 space-y-1.5">
                           <p className="text-xs font-medium text-muted-foreground">Adicionales:</p>
-                          {Array.isArray(prod.adicionales) && (
-                            (() => {
-                              const adicionalesValidos = prod.adicionales.filter(a => a.cantidad > 0);
+                          {prod.adicionales.map((ad, adIdx) => (
+                            <div
+                              key={adIdx}
+                              className="flex items-center gap-2 rounded-sm bg-background/50 px-2 py-1"
+                            >
+                              <span className="text-sm text-foreground">+ {ad.nombre}</span>
 
-                              if (adicionalesValidos.length === 0) return null;
-                              return (
-                                <>
-                                  {adicionalesValidos.map((adicional, adIdx) => (
-                                    <div
-                                      key={adIdx}
-                                      className="flex items-center gap-2 rounded-sm bg-background/50 px-2 py-1"
-                                    >
-                                      <span className="text-xs text-foreground">+ {adicional.nombre}</span>
+                              <span className="text-sm text-foreground">
+                                x{ad.cantidad}
+                              </span>
 
-                                      <span className="text-xs font-medium text-muted-foreground">
-                                        x{adicional.cantidad}
-                                      </span>
-
-                                      <span className="ml-auto text-xs font-semibold text-primary">
-                                        ${adicional.precio * adicional.cantidad}
-                                      </span>
-                                    </div>
-                                  ))}
-                                </>
-                              );
-                            })()
-                          )}
+                              <span className="ml-auto text-sm font-semibold text-primary">
+                                ${ad.precio * ad.cantidad}
+                              </span>
+                            </div>
+                          ))}
                         </div>
                       </div>
                       <div className="ml-4 text-right">
