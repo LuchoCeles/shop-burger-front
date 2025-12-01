@@ -9,7 +9,7 @@ import { Badge } from './ui/badge';
 import { Search, ShoppingCart, X } from 'lucide-react';
 import { toast } from 'sonner';
 import ApiService from '@/services/api';
-import { Product, Category, CartItem, Cliente } from '@/intefaces/interfaz';
+import { Product, Category, Cliente } from '@/intefaces/interfaz';
 import ProductCard from './ProductCard';
 import { useCart } from '@/context/CartContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -233,9 +233,9 @@ const ManualOrderModal = ({ open, onOpenChange, onOrderCreated }: ManualOrderMod
         <DialogHeader className="px-6 pt-6 pb-4 border-b">
           <div className="flex items-center justify-between">
             <DialogTitle className="text-2xl">
-              {step === 'products' ? 'Nuevo Pedido Manual' : 'Finalizar Pedido'}
+              {step === 'products' ? 'Nuevo Pedido' : 'Finalizar Pedido'}
             </DialogTitle>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 mr-7">
               {step === 'products' && cart.length > 0 && (
                 <Button
                   variant="default"
@@ -256,8 +256,9 @@ const ManualOrderModal = ({ open, onOpenChange, onOrderCreated }: ManualOrderMod
               {/* Filtros */}
               <div className="space-y-4">
                 {/* Búsqueda */}
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <div className="relative overflow-visible ml-1 mr-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
+
                   <Input
                     placeholder="Buscar productos..."
                     value={searchQuery}

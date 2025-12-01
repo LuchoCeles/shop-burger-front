@@ -313,6 +313,8 @@ const PedidosManager = () => {
       )}
     </div>
   );
+
+  
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
