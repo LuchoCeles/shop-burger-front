@@ -70,6 +70,7 @@ export interface Orders {
   estado: 'Pendiente' | 'Entregado' | 'Cancelado';
   precioTotal: number;
   descripcion?: string;
+  envio?: number;
   cliente: {
     id: number;
     telefono: string;
@@ -89,10 +90,18 @@ export interface Orders {
       precio: number;
       cantidad: number;
     }[];
+    guarnicion?: {
+      id: number;
+      nombre: string;
+    },
+    tam?: {
+      id: number;
+      nombre: string;
+    };
   }[];
 }
 
-export interface Guarniciones{
+export interface Guarniciones {
   id?: number;
   idGxP?: number;
   nombre: string;
@@ -100,7 +109,7 @@ export interface Guarniciones{
   estado?: boolean;
 }
 
-export interface Tamaños{
+export interface Tamaños {
   id?: number;
   idCategoria?: number;
   idPxT?: number;

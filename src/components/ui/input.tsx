@@ -23,6 +23,10 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
           disabled:border-muted
 
           md:text-sm
+
+          [appearance:textfield]
+          [&::-webkit-outer-spin-button]:appearance-none
+          [&::-webkit-inner-spin-button]:appearance-none
           `,
           className
         )}

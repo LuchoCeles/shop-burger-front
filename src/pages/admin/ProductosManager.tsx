@@ -52,6 +52,7 @@ const ProductosManager = () => {
     isPromocion: false,
   });
   const [preciosPorTam, setPreciosPorTam] = useState<{ idTam: number; precio: string }[]>([]);
+  const [preciosGuardados, setPreciosGuardados] = useState<Record<number, string>>({});
   const [imagen, setImagen] = useState<File | null>(null);
   const [imagenOriginal, setImagenOriginal] = useState<File | null>(null);
   const [imagenParaEditar, setImagenParaEditar] = useState<File | null>(null);
@@ -63,11 +64,14 @@ const ProductosManager = () => {
   const [selectedProductForGuarniciones, setSelectedProductForGuarniciones] = useState<Product | null>(null);
   const [categoriaFiltro, setCategoriaFiltro] = useState("todos");
 
-
-
   useEffect(() => {
     loadData();
   }, []);
+
+  useEffect(() => {
+    setPreciosPorTam([]);
+    setPreciosGuardados({});
+  }, [formData.idCategoria]);
 
   const loadData = async () => {
     try {
@@ -186,10 +190,19 @@ const ProductosManager = () => {
     // Cargar precios por tamaño
     if (product.tam && product.tam.length > 0) {
       const precios = product.tam.map(t => ({
-        idTam: t.id!,
-        precio: t.precio?.toString() || ""
+        idTam: t.id,
+        precio: t.precioFinal?.toString() || t.precio?.toString() || ""
       }));
       setPreciosPorTam(precios);
+
+      // Inicializar precios guardados con los precios actuales
+      const guardados: Record<number, string> = {};
+      product.tam.forEach(t => {
+        guardados[t.id] = t.precioFinal?.toString() || t.precio?.toString() || "";
+      });
+      setPreciosGuardados(guardados);
+    } else {
+      setPreciosGuardados({});
     }
 
     setShowDialog(true);
@@ -206,6 +219,7 @@ const ProductosManager = () => {
       isPromocion: false,
     });
     setPreciosPorTam([]);
+    setPreciosGuardados({});
     setImagen(null);
     setImagenParaEditar(null);
   };
@@ -220,8 +234,6 @@ const ProductosManager = () => {
       e.target.value = "";
     }
   };
-
-
 
   const handleImageSave = (croppedImage: File) => {
     setImagen(croppedImage);
@@ -269,12 +281,36 @@ const ProductosManager = () => {
     const existe = preciosPorTam.find(p => p.idTam === tamId);
 
     if (existe) {
+      // Guardar el precio antes de remover
+      if (existe.precio) {
+        setPreciosGuardados(prev => ({ ...prev, [tamId]: existe.precio }));
+      }
       // Remover tamaño
       setPreciosPorTam(preciosPorTam.filter(p => p.idTam !== tamId));
     } else {
-      // Agregar tamaño
-      setPreciosPorTam([...preciosPorTam, { idTam: tamId, precio: "" }]);
+      // Agregar tamaño - recuperar precio guardado si existe
+      const precioGuardado = preciosGuardados[tamId] || "";
+      const nuevosPreciosPorTam = [...preciosPorTam, { idTam: tamId, precio: precioGuardado }];
+
+      // Ordenar según el orden original de tamañosFiltrados
+      const ordenTamaños = tamañosFiltrados.map(t => t.id);
+      nuevosPreciosPorTam.sort((a, b) => {
+        const indexA = ordenTamaños.indexOf(a.idTam);
+        const indexB = ordenTamaños.indexOf(b.idTam);
+        return indexA - indexB;
+      });
+
+      setPreciosPorTam(nuevosPreciosPorTam);
     }
+  };
+
+  // Calcular precio con descuento
+  const calcularPrecioConDescuento = (precio: string) => {
+    const precioNum = parseFloat(precio);
+    const descuentoNum = parseFloat(formData.descuento) || 0;
+    if (isNaN(precioNum) || precioNum <= 0) return "";
+    const precioFinal = precioNum - (precioNum * descuentoNum / 100);
+    return precioFinal.toFixed(2);
   };
 
   const handlePrecioChange = (tamId: number, precio: string) => {
@@ -561,6 +597,9 @@ const ProductosManager = () => {
                     {preciosPorTam.filter((p) => tamañosFiltrados.some((t) => t.id === p.idTam))
                       .map((precio, index) => {
                         const tamaño = tamaños.find(t => t.id === precio.idTam);
+                        const precioConDescuento = calcularPrecioConDescuento(precio.precio);
+                        const tieneDescuento = editingProduct && parseFloat(formData.descuento) > 0;
+
                         return (
                           <div key={precio.idTam}>
                             {index > 0 && (
@@ -570,16 +609,29 @@ const ProductosManager = () => {
                               <span className="text-sm font-medium text-foreground min-w-[100px]">
                                 {tamaño?.nombre}:
                               </span>
-                              <Input
-                                type="number"
-                                placeholder="Precio"
-                                value={precio.precio}
-                                onChange={(e) => handlePrecioChange(precio.idTam, e.target.value)}
-                                min="0"
-                                step="0.01"
-                                required
-                                className="bg-background"
-                              />
+                              <div className="flex-1">
+                                <Input
+                                  type="number"
+                                  placeholder="Precio"
+                                  value={precio.precio}
+                                  onChange={(e) => handlePrecioChange(precio.idTam, e.target.value)}
+                                  min="0"
+                                  step="0.01"
+                                  required
+                                  className="bg-background"
+                                />
+                              </div>
+                              {tieneDescuento && precioConDescuento && (
+                                <div className="flex-1">
+                                  <Input
+                                    type="text"
+                                    value={`$${precioConDescuento}`}
+                                    readOnly
+                                    className="bg-muted text-muted-foreground cursor-not-allowed"
+                                    title="Precio final con descuento"
+                                  />
+                                </div>
+                              )}
                             </div>
                           </div>
                         );

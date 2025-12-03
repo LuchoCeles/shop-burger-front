@@ -20,6 +20,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '../../components/ui/alert-dialog';
+import { Button } from '../../components/ui/button';
+import { Plus } from 'lucide-react';
+import ManualOrderModal from '../../components/ManualOrderModal';
 import { toast } from 'sonner';
 
 const PedidosManager = () => {
@@ -33,6 +36,7 @@ const PedidosManager = () => {
   });
   const { socket } = useSocket();
   const [estadoManual, setEstadoManual] = useState<Record<number, string>>({});
+  const [showManualOrderModal, setShowManualOrderModal] = useState(false);
 
 
   useEffect(() => {
@@ -271,33 +275,22 @@ const PedidosManager = () => {
                         </p>
                         <div className="mt-2 space-y-1.5">
                           <p className="text-xs font-medium text-muted-foreground">Adicionales:</p>
-                          {Array.isArray(prod.adicionales) && (
-                            (() => {
-                              const adicionalesValidos = prod.adicionales.filter(a => a.cantidad > 0);
+                          {prod.adicionales.map((ad, adIdx) => (
+                            <div
+                              key={adIdx}
+                              className="flex items-center gap-2 rounded-sm bg-background/50 px-2 py-1"
+                            >
+                              <span className="text-sm text-foreground">+ {ad.nombre}</span>
 
-                              if (adicionalesValidos.length === 0) return null;
-                              return (
-                                <>
-                                  {adicionalesValidos.map((adicional, adIdx) => (
-                                    <div
-                                      key={adIdx}
-                                      className="flex items-center gap-2 rounded-sm bg-background/50 px-2 py-1"
-                                    >
-                                      <span className="text-xs text-foreground">+ {adicional.nombre}</span>
+                              <span className="text-sm text-foreground">
+                                x{ad.cantidad}
+                              </span>
 
-                                      <span className="text-xs font-medium text-muted-foreground">
-                                        x{adicional.cantidad}
-                                      </span>
-
-                                      <span className="ml-auto text-xs font-semibold text-primary">
-                                        ${adicional.precio * adicional.cantidad}
-                                      </span>
-                                    </div>
-                                  ))}
-                                </>
-                              );
-                            })()
-                          )}
+                              <span className="ml-auto text-sm font-semibold text-primary">
+                                ${ad.precio * ad.cantidad}
+                              </span>
+                            </div>
+                          ))}
                         </div>
                       </div>
                       <div className="ml-4 text-right">
@@ -320,9 +313,23 @@ const PedidosManager = () => {
       )}
     </div>
   );
+
+  
   return (
     <div>
-      <h1 className="mb-6 text-3xl font-bold text-foreground">Pedidos</h1>
+      <div className="mb-6 flex items-center justify-between">
+        <h1 className="text-3xl font-bold text-foreground">Pedidos</h1>
+        <Button onClick={() => setShowManualOrderModal(true)} className="gap-2">
+          <Plus className="h-4 w-4" />
+          Nuevo Pedido
+        </Button>
+      </div>
+
+      <ManualOrderModal
+        open={showManualOrderModal}
+        onOpenChange={setShowManualOrderModal}
+        onOrderCreated={loadPedidos}
+      />
 
       <AlertDialog open={confirmDialog.open} onOpenChange={(open) => setConfirmDialog({ ...confirmDialog, open })}>
         <AlertDialogContent>
