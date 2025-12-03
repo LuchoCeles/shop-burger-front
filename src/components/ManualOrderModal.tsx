@@ -93,7 +93,7 @@ const ManualOrderModal = ({ open, onOpenChange, onOrderCreated }: ManualOrderMod
   const filteredProducts = useMemo(() => {
     // Convertir estado numérico/string a boolean
     let filtered = products.filter((p) => {
-      const est = p.estado;
+      const est = p.estado as unknown;
       const enabled = est === true || est === 1 || est === "1";
       return enabled;
     });
