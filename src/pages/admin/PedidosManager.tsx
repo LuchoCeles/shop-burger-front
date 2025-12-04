@@ -104,31 +104,33 @@ const PedidosManager = () => {
   };
 
   const handleEstadoChange = (id: number, estado: string) => {
-    if (estado === 'entregado' || estado === 'cancelado') {
+    if (estado === 'Entregado' || estado === 'Cancelado' || estado === 'Enviado') {
       setConfirmDialog({ open: true, pedidoId: id, nuevoEstado: estado });
     } else {
       confirmarCambioEstado(id, estado);
     }
   };
 
-  const handleEstadoPagoChange = async (idPedido: number, nuevoEstado: string) => {
+  const handleEstadoPagoChange = async (idPago: number, nuevoEstado: string) => {
     try {
-      await ApiService.updateEstadoPago(idPedido, nuevoEstado);
-      toast.success("Estado de pago actualizado");
-      loadPedidos();
+      const rsp = await ApiService.updateEstadoPago({ id: idPago, estado: nuevoEstado });
+      if (rsp.success) {
+        toast.success(rsp.message || "Estado de pago actualizado");
+        loadPedidos();
+      } else {
+        toast.error(rsp.error || "Error al actualizar el estado de pago");
+      }
     } catch (error) {
-      toast.error("Error al actualizar el estado del pago");
+      toast.error(error.message || "Error al conectar con el servidor");
     }
   };
 
   const confirmarCambioEstado = async (id: number, estado: string) => {
     try {
       const r = await ApiService.updateOrder({ id: id, estado: estado });
-      if (r.suscess) {
+      if (r.success) {
         toast.success('Estado actualizado');
         loadPedidos();
-      } else {
-        toast.error(r.error || 'Error al actualizar');
       }
     } catch (error) {
       toast.error(error.message || 'Error al actualizar');
@@ -139,6 +141,7 @@ const PedidosManager = () => {
     const colors: Record<string, string> = {
       pendiente: 'text-yellow-500',
       entregado: 'text-green-500',
+      enviado: 'text-blue-500',
       cancelado: 'text-red-500',
       pagado: 'text-green-500',
       rechazado: 'text-red-500',
@@ -173,7 +176,7 @@ const PedidosManager = () => {
                 {pedido.Pago?.metodoDePago === "Mercado Pago" && (
                   <div className="flex items-center justify-between sm:justify-start gap-2 w-full">
                     <span className={`font-medium ${getEstadoColor(pedido.Pago.estado.toLowerCase())}`}>
-                      Estado MP:
+                      Estado:
                     </span>
 
                     <Select value={pedido.Pago.estado} disabled>
@@ -193,14 +196,14 @@ const PedidosManager = () => {
                 {/* SELECT 2 - Estado manual editable */}
                 <div className="flex items-center justify-between sm:justify-start gap-2 w-full">
                   <span className={`font-medium ${getEstadoColor(estadoManual[pedido.id]?.toLowerCase?.())}`}>
-                    Estado Manual:
+                    Estado:
                   </span>
 
                   <Select
                     value={estadoManual[pedido.id]}
                     onValueChange={(value) => {
                       setEstadoManual(prev => ({ ...prev, [pedido.id]: value }));
-                      handleEstadoPagoChange(pedido.id, value);
+                      handleEstadoPagoChange(pedido.Pago.id, value);
                     }}
                     disabled={
                       ["Pagado", "Cancelado"].includes(estadoManual[pedido.id]) ||
@@ -239,6 +242,7 @@ const PedidosManager = () => {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="Pendiente">Pendiente</SelectItem>
+                      <SelectItem value="Enviado">Enviado</SelectItem>
                       <SelectItem value="Entregado">Entregado</SelectItem>
                       <SelectItem value="Cancelado">Cancelado</SelectItem>
                     </SelectContent>
@@ -314,7 +318,7 @@ const PedidosManager = () => {
     </div>
   );
 
-  
+
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
