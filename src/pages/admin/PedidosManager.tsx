@@ -131,8 +131,6 @@ const PedidosManager = () => {
       if (r.success) {
         toast.success('Estado actualizado');
         loadPedidos();
-      } else {
-        toast.error(r.error || 'Error al actualizar');
       }
     } catch (error) {
       toast.error(error.message || 'Error al actualizar');
@@ -143,6 +141,7 @@ const PedidosManager = () => {
     const colors: Record<string, string> = {
       pendiente: 'text-yellow-500',
       entregado: 'text-green-500',
+      enviado: 'text-blue-500',
       cancelado: 'text-red-500',
       pagado: 'text-green-500',
       rechazado: 'text-red-500',
@@ -177,7 +176,7 @@ const PedidosManager = () => {
                 {pedido.Pago?.metodoDePago === "Mercado Pago" && (
                   <div className="flex items-center justify-between sm:justify-start gap-2 w-full">
                     <span className={`font-medium ${getEstadoColor(pedido.Pago.estado.toLowerCase())}`}>
-                      Estado MP:
+                      Estado:
                     </span>
 
                     <Select value={pedido.Pago.estado} disabled>
@@ -197,7 +196,7 @@ const PedidosManager = () => {
                 {/* SELECT 2 - Estado manual editable */}
                 <div className="flex items-center justify-between sm:justify-start gap-2 w-full">
                   <span className={`font-medium ${getEstadoColor(estadoManual[pedido.id]?.toLowerCase?.())}`}>
-                    Estado Manual:
+                    Estado:
                   </span>
 
                   <Select
