@@ -104,27 +104,31 @@ const PedidosManager = () => {
   };
 
   const handleEstadoChange = (id: number, estado: string) => {
-    if (estado === 'entregado' || estado === 'cancelado') {
+    if (estado === 'Entregado' || estado === 'Cancelado' || estado === 'Enviado') {
       setConfirmDialog({ open: true, pedidoId: id, nuevoEstado: estado });
     } else {
       confirmarCambioEstado(id, estado);
     }
   };
 
-  const handleEstadoPagoChange = async (idPedido: number, nuevoEstado: string) => {
+  const handleEstadoPagoChange = async (idPago: number, nuevoEstado: string) => {
     try {
-      await ApiService.updateEstadoPago(idPedido, nuevoEstado);
-      toast.success("Estado de pago actualizado");
-      loadPedidos();
+      const rsp = await ApiService.updateEstadoPago({ id: idPago, estado: nuevoEstado });
+      if (rsp.success) {
+        toast.success(rsp.message || "Estado de pago actualizado");
+        loadPedidos();
+      } else {
+        toast.error(rsp.error || "Error al actualizar el estado de pago");
+      }
     } catch (error) {
-      toast.error("Error al actualizar el estado del pago");
+      toast.error(error.message || "Error al conectar con el servidor");
     }
   };
 
   const confirmarCambioEstado = async (id: number, estado: string) => {
     try {
       const r = await ApiService.updateOrder({ id: id, estado: estado });
-      if (r.suscess) {
+      if (r.success) {
         toast.success('Estado actualizado');
         loadPedidos();
       } else {
@@ -200,7 +204,7 @@ const PedidosManager = () => {
                     value={estadoManual[pedido.id]}
                     onValueChange={(value) => {
                       setEstadoManual(prev => ({ ...prev, [pedido.id]: value }));
-                      handleEstadoPagoChange(pedido.id, value);
+                      handleEstadoPagoChange(pedido.Pago.id, value);
                     }}
                     disabled={
                       ["Pagado", "Cancelado"].includes(estadoManual[pedido.id]) ||
@@ -239,6 +243,7 @@ const PedidosManager = () => {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="Pendiente">Pendiente</SelectItem>
+                      <SelectItem value="Enviado">Enviado</SelectItem>
                       <SelectItem value="Entregado">Entregado</SelectItem>
                       <SelectItem value="Cancelado">Cancelado</SelectItem>
                     </SelectContent>
@@ -314,7 +319,7 @@ const PedidosManager = () => {
     </div>
   );
 
-  
+
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
