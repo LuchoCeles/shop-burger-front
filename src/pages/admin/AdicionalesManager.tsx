@@ -23,6 +23,7 @@ import { Label } from '@/components/ui/label';
 import ApiService from '@/services/api';
 import { Adicional } from '@/intefaces/interfaz';
 import { toast } from 'sonner';
+import { AdicionalesManagerSkeleton } from '@/components/skeletons';
 
 export default function AdicionalesManager() {
   const [adicionales, setAdicionales] = useState<Adicional[]>([]);
@@ -35,6 +36,7 @@ export default function AdicionalesManager() {
     stock: '',
     maxCantidad: '',
   });
+  const [initialLoading, setInitialLoading] = useState(true);
   const maxLength = 25;
 
   useEffect(() => {
@@ -45,10 +47,15 @@ export default function AdicionalesManager() {
     try {
       const data = await ApiService.getAdicionales();
       setAdicionales(data.data);
+      setInitialLoading(false);
     } catch (error) {
       toast.error('Error al cargar los adicionales');
     }
   };
+
+  if (initialLoading) {
+    return <AdicionalesManagerSkeleton />;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -12,6 +12,7 @@ import { Cliente, BankData, Category } from '@/intefaces/interfaz';
 import { useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CheckoutSkeleton } from '../components/skeletons';
 
 const Numero_Whatsapp = import.meta.env.VITE_NUM_WHATSAPP;
 
@@ -32,6 +33,7 @@ const Checkout = () => {
   const [mpLink, setMpLink] = useState<string | null>(null);
   const [orderId, setOrderId] = useState<number | null>(null);
   const [mpReady, setMpReady] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const location = useLocation();
 
   // ---------------------------
@@ -78,6 +80,7 @@ const Checkout = () => {
       ]);
       setBankData(bankDataRes.data);
       setCategories(Array.isArray(categoriesRes.data) ? categoriesRes.data : []);
+      setInitialLoading(false);
     } catch (error) {
       toast.error('Error al obtener datos bancarios');
     } finally {
@@ -237,10 +240,16 @@ const Checkout = () => {
   // ---------------------------
   // Loading screen
   // ---------------------------
-  if (loadingData) {
+  if (initialLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background text-foreground">
-        <p>Cargando datos...</p>
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="container mx-auto max-w-4xl px-4 py-8">
+          <div className="mb-8">
+            <div className="h-9 w-48 bg-muted animate-pulse rounded" />
+          </div>
+          <CheckoutSkeleton />
+        </div>
       </div>
     );
   }

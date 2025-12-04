@@ -23,6 +23,7 @@ import { Label } from '@/components/ui/label';
 import ApiService from '@/services/api';
 import { Guarniciones } from '@/intefaces/interfaz';
 import { toast } from 'sonner';
+import { GuarnicionesManagerSkeleton } from '@/components/skeletons';
 
 export default function GuarnicionesManager() {
   const [guarniciones, setGuarniciones] = useState<Guarniciones[]>([]);
@@ -33,6 +34,7 @@ export default function GuarnicionesManager() {
     nombre: '',
     stock: ''
   });
+  const [initialLoading, setInitialLoading] = useState(true);
   const maxLength = 25;
 
   useEffect(() => {
@@ -43,10 +45,15 @@ export default function GuarnicionesManager() {
     try {
       const data = await ApiService.getGuarniciones();
       setGuarniciones(data.data);
+      setInitialLoading(false);
     } catch (error) {
       toast.error('Error al cargar los guarniciones');
     }
   };
+
+  if (initialLoading) {
+    return <GuarnicionesManagerSkeleton />;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
