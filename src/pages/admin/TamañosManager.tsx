@@ -30,6 +30,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../components/ui/select";
+import { TamañosManagerSkeleton } from '@/components/skeletons';
 
 export default function TamañosManager() {
   const [tamaño, setTamaño] = useState<Tamaños[]>([]);
@@ -41,6 +42,7 @@ export default function TamañosManager() {
     idCategoria: '',
     nombre: '',
   });
+  const [initialLoading, setInitialLoading] = useState(true);
   const maxLength = 25;
 
   useEffect(() => {
@@ -55,10 +57,15 @@ export default function TamañosManager() {
       ]);
       setCategorias(dataCategories.data);
       setTamaño(dataTam.data);
+      setInitialLoading(false);
     } catch (error) {
       toast.error('Error al cargar los tamaños');
     }
   };
+
+  if (initialLoading) {
+    return <TamañosManagerSkeleton />;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Package, FolderKanban, ShoppingBag } from 'lucide-react';
 import ApiService from '../../services/api';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
+import { DashboardHomeSkeleton } from '../../components/skeletons';
 
 const DashboardHome = () => {
   const [stats, setStats] = useState({
@@ -9,6 +10,7 @@ const DashboardHome = () => {
     categorias: 0,
     pedidos: 0,
   });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadStats();
@@ -26,10 +28,16 @@ const DashboardHome = () => {
         categorias: categorias.data.length,
         pedidos: pedidos.data.length,
       });
+      setLoading(false);
     } catch (error) {
       console.error('Error loading stats:', error);
+      // No ocultamos el skeleton en caso de error
     }
   };
+
+  if (loading) {
+    return <DashboardHomeSkeleton />;
+  }
 
   return (
     <div>

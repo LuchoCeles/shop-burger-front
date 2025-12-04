@@ -36,6 +36,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "../../components/ui/alert-dialog";
+import { ProductosManagerSkeleton } from "../../components/skeletons";
 
 const ProductosManager = () => {
   const [productos, setProductos] = useState<Product[]>([]);
@@ -63,6 +64,7 @@ const ProductosManager = () => {
   const [selectedProductForAdicionales, setSelectedProductForAdicionales] = useState<Product | null>(null);
   const [selectedProductForGuarniciones, setSelectedProductForGuarniciones] = useState<Product | null>(null);
   const [categoriaFiltro, setCategoriaFiltro] = useState("todos");
+  const [initialLoading, setInitialLoading] = useState(true);
 
   useEffect(() => {
     loadData();
@@ -83,10 +85,15 @@ const ProductosManager = () => {
       setProductos(prodData.data);
       setCategorias(catData.data);
       setTamaños(tamData.data);
+      setInitialLoading(false);
     } catch (error) {
       toast.error(error.message || "Error al cargar datos");
     }
   };
+
+  if (initialLoading) {
+    return <ProductosManagerSkeleton />;
+  }
 
   const handleReopenEditor = () => {
     if (imagenOriginal) {

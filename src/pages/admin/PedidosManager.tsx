@@ -24,6 +24,7 @@ import { Button } from '../../components/ui/button';
 import { Plus } from 'lucide-react';
 import ManualOrderModal from '../../components/ManualOrderModal';
 import { toast } from 'sonner';
+import { PedidosManagerSkeleton } from '../../components/skeletons';
 
 const PedidosManager = () => {
   const [pedidos, setPedidos] = useState<Orders[]>([]);
@@ -96,10 +97,9 @@ const PedidosManager = () => {
     try {
       const pedido = await ApiService.getOrders();
       setPedidos((pedido.data) || []);
+      setLoading(false);
     } catch (error) {
       toast.error('Error al cargar pedidos');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -151,7 +151,7 @@ const PedidosManager = () => {
   };
 
   if (loading) {
-    return <div className="text-foreground">Cargando pedidos...</div>;
+    return <PedidosManagerSkeleton />;
   }
 
   const renderPedidos = (pedidosLista: Orders[]) => (

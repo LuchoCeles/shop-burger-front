@@ -22,6 +22,7 @@ import {
   AlertDialogTitle,
 } from "../../components/ui/alert-dialog";
 import { toast } from "sonner";
+import { CategoriasManagerSkeleton } from "../../components/skeletons";
 
 const CategoriasManager = () => {
   const [categorias, setCategorias] = useState<Category[]>([]);
@@ -30,6 +31,7 @@ const CategoriasManager = () => {
   const [nombre, setNombre] = useState("");
   const [estado, setEstado] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [categoryToDelete, setCategoryToDelete] = useState<number | null>(null);
   const MAX_CHARS = 30;
 
@@ -45,10 +47,15 @@ const CategoriasManager = () => {
         toast.error(data.message || "Error al cargar categorías");
         return;
       }
+      setInitialLoading(false);
     } catch (error) {
       toast.error("Error al cargar categorías");
     }
   };
+
+  if (initialLoading) {
+    return <CategoriasManagerSkeleton />;
+  }
 
   const handleNombreChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.value.length <= MAX_CHARS) {

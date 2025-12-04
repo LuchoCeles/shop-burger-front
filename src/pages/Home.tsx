@@ -6,11 +6,14 @@ import ApiService from '../services/api';
 import { toast } from 'sonner';
 import { Product, Category } from '../intefaces/interfaz';
 import { MessageCircle, Instagram, Facebook } from 'lucide-react';
+import { CategoryCarouselSkeleton, ProductGridSkeleton } from '../components/skeletons';
+import { Skeleton } from '../components/ui/skeleton';
 
 const Home = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -29,6 +32,7 @@ const Home = () => {
 
       setProducts(prods);
       setCategories(cats);
+      setInitialLoading(false);
     } catch (error) {
       toast.error('Error al cargar los datos');
       console.error('loadData error', error);
@@ -132,12 +136,14 @@ const Home = () => {
         </section>
 
         <section>
-          {loading ? (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {[...Array(8)].map((_, i) => (
-                <div key={i} className="h-96 animate-pulse rounded-lg bg-card" />
-              ))}
-            </div>
+          {initialLoading ? (
+            <>
+              <div className="mb-8">
+                <CategoryCarouselSkeleton />
+              </div>
+              <Skeleton className="h-8 w-40 mb-4" />
+              <ProductGridSkeleton count={8} />
+            </>
           ) : (
             <>
               {selectedCategory ? (
