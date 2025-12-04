@@ -21,6 +21,7 @@ import {
   AlertDialogTitle,
 } from "../../components/ui/alert-dialog";
 import { toast } from "sonner";
+import { HorariosManagerSkeleton } from "../../components/skeletons";
 
 const HorariosManager = () => {
   const [horarios, setHorarios] = useState([]);
@@ -32,6 +33,7 @@ const HorariosManager = () => {
   const [estado, setEstado] = useState(true);
 
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [horarioToDelete, setHorarioToDelete] = useState(null);
 
   useEffect(() => {
@@ -42,10 +44,15 @@ const HorariosManager = () => {
     try {
       //const res = await ApiService.get("/horarios");
       //setHorarios(res.data);
+      setInitialLoading(false); // Temporal hasta que se implemente el endpoint
     } catch (err) {
       toast.error("No se pudieron cargar los horarios");
     }
   };
+
+  if (initialLoading) {
+    return <HorariosManagerSkeleton />;
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
