@@ -20,12 +20,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '../../components/ui/alert-dialog';
+import { Button } from '../../components/ui/button';
+import { Plus } from 'lucide-react';
+import ManualOrderModal from '../../components/ManualOrderModal';
 import { toast } from 'sonner';
 
 const PedidosManager = () => {
   const [pedidos, setPedidos] = useState<Orders[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filtroEstado, setFiltroEstado] = useState<'todos' | 'pendiente' | 'entregado' | 'cancelado'>('todos');
+  const [filtroEstado, setFiltroEstado] = useState<'Todos' | 'Pendiente' | 'Entregado' | 'Cancelado'>('Todos');
   const [confirmDialog, setConfirmDialog] = useState<{ open: boolean; pedidoId: number; nuevoEstado: string }>({
     open: false,
     pedidoId: 0,
@@ -33,6 +36,7 @@ const PedidosManager = () => {
   });
   const { socket } = useSocket();
   const [estadoManual, setEstadoManual] = useState<Record<number, string>>({});
+  const [showManualOrderModal, setShowManualOrderModal] = useState(false);
 
 
   useEffect(() => {
@@ -100,31 +104,33 @@ const PedidosManager = () => {
   };
 
   const handleEstadoChange = (id: number, estado: string) => {
-    if (estado === 'entregado' || estado === 'cancelado') {
+    if (estado === 'Entregado' || estado === 'Cancelado' || estado === 'Enviado') {
       setConfirmDialog({ open: true, pedidoId: id, nuevoEstado: estado });
     } else {
       confirmarCambioEstado(id, estado);
     }
   };
 
-  const handleEstadoPagoChange = async (idPedido: number, nuevoEstado: string) => {
+  const handleEstadoPagoChange = async (idPago: number, nuevoEstado: string) => {
     try {
-      await ApiService.updateEstadoPago(idPedido, nuevoEstado);
-      toast.success("Estado de pago actualizado");
-      loadPedidos();
+      const rsp = await ApiService.updateEstadoPago({ id: idPago, estado: nuevoEstado });
+      if (rsp.success) {
+        toast.success(rsp.message || "Estado de pago actualizado");
+        loadPedidos();
+      } else {
+        toast.error(rsp.error || "Error al actualizar el estado de pago");
+      }
     } catch (error) {
-      toast.error("Error al actualizar el estado del pago");
+      toast.error(error.message || "Error al conectar con el servidor");
     }
   };
 
   const confirmarCambioEstado = async (id: number, estado: string) => {
     try {
       const r = await ApiService.updateOrder({ id: id, estado: estado });
-      if (r.suscess) {
+      if (r.success) {
         toast.success('Estado actualizado');
         loadPedidos();
-      } else {
-        toast.error(r.error || 'Error al actualizar');
       }
     } catch (error) {
       toast.error(error.message || 'Error al actualizar');
@@ -135,6 +141,7 @@ const PedidosManager = () => {
     const colors: Record<string, string> = {
       pendiente: 'text-yellow-500',
       entregado: 'text-green-500',
+      enviado: 'text-blue-500',
       cancelado: 'text-red-500',
       pagado: 'text-green-500',
       rechazado: 'text-red-500',
@@ -169,7 +176,7 @@ const PedidosManager = () => {
                 {pedido.Pago?.metodoDePago === "Mercado Pago" && (
                   <div className="flex items-center justify-between sm:justify-start gap-2 w-full">
                     <span className={`font-medium ${getEstadoColor(pedido.Pago.estado.toLowerCase())}`}>
-                      Estado MP:
+                      Estado:
                     </span>
 
                     <Select value={pedido.Pago.estado} disabled>
@@ -189,14 +196,14 @@ const PedidosManager = () => {
                 {/* SELECT 2 - Estado manual editable */}
                 <div className="flex items-center justify-between sm:justify-start gap-2 w-full">
                   <span className={`font-medium ${getEstadoColor(estadoManual[pedido.id]?.toLowerCase?.())}`}>
-                    Estado Manual:
+                    Estado:
                   </span>
 
                   <Select
                     value={estadoManual[pedido.id]}
                     onValueChange={(value) => {
                       setEstadoManual(prev => ({ ...prev, [pedido.id]: value }));
-                      handleEstadoPagoChange(pedido.id, value);
+                      handleEstadoPagoChange(pedido.Pago.id, value);
                     }}
                     disabled={
                       ["Pagado", "Cancelado"].includes(estadoManual[pedido.id]) ||
@@ -228,15 +235,16 @@ const PedidosManager = () => {
                   <Select
                     value={pedido.estado}
                     onValueChange={(value) => handleEstadoChange(pedido.id, value)}
-                    disabled={pedido.estado === "entregado" || pedido.estado === "cancelado"}
+                    disabled={pedido.estado === "Entregado" || pedido.estado === "Cancelado"}
                   >
                     <SelectTrigger className="w-full sm:w-40 bg-background">
                       <SelectValue placeholder="Seleccionar estado" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="pendiente">Pendiente</SelectItem>
-                      <SelectItem value="entregado">Entregado</SelectItem>
-                      <SelectItem value="cancelado">Cancelado</SelectItem>
+                      <SelectItem value="Pendiente">Pendiente</SelectItem>
+                      <SelectItem value="Enviado">Enviado</SelectItem>
+                      <SelectItem value="Entregado">Entregado</SelectItem>
+                      <SelectItem value="Cancelado">Cancelado</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -246,7 +254,7 @@ const PedidosManager = () => {
 
             <div className="mb-4 grid gap-2 text-sm">
               <p className="text-foreground">
-                <span className="font-medium">Cliente:</span> {pedido.cliente.id || 'N/A'}
+                <span className="font-medium">Metodo De Pago:</span> {pedido.Pago?.metodoDePago || 'N/A'}
               </p>
               <p className="text-foreground">
                 <span className="font-medium">Teléfono:</span> {pedido.cliente.telefono || 'N/A'}
@@ -254,11 +262,9 @@ const PedidosManager = () => {
               <p className="text-foreground">
                 <span className="font-medium">Dirección:</span> {pedido.cliente.direccion.toUpperCase() || 'N/A'}
               </p>
-              {pedido.descripcion && (
-                <p className="text-foreground font-bold">
-                  <span className="font-medium">Notas:</span> {pedido.descripcion.toUpperCase() || 'N/A'}
-                </p>
-              )}
+              <p className="text-foreground font-bold">
+                <span className="font-medium">Notas:</span> {pedido?.descripcion.toUpperCase() || 'N/A'}
+              </p>
             </div>
 
             <div className="border-t border-border pt-4">
@@ -273,33 +279,22 @@ const PedidosManager = () => {
                         </p>
                         <div className="mt-2 space-y-1.5">
                           <p className="text-xs font-medium text-muted-foreground">Adicionales:</p>
-                          {Array.isArray(prod.adicionales) && (
-                            (() => {
-                              const adicionalesValidos = prod.adicionales.filter(a => a.cantidad > 0);
+                          {prod.adicionales.map((ad, adIdx) => (
+                            <div
+                              key={adIdx}
+                              className="flex items-center gap-2 rounded-sm bg-background/50 px-2 py-1"
+                            >
+                              <span className="text-sm text-foreground">+ {ad.nombre}</span>
 
-                              if (adicionalesValidos.length === 0) return null;
-                              return (
-                                <>
-                                  {adicionalesValidos.map((adicional, adIdx) => (
-                                    <div
-                                      key={adIdx}
-                                      className="flex items-center gap-2 rounded-sm bg-background/50 px-2 py-1"
-                                    >
-                                      <span className="text-xs text-foreground">+ {adicional.nombre}</span>
+                              <span className="text-sm text-foreground">
+                                x{ad.cantidad}
+                              </span>
 
-                                      <span className="text-xs font-medium text-muted-foreground">
-                                        x{adicional.cantidad}
-                                      </span>
-
-                                      <span className="ml-auto text-xs font-semibold text-primary">
-                                        ${adicional.precio * adicional.cantidad}
-                                      </span>
-                                    </div>
-                                  ))}
-                                </>
-                              );
-                            })()
-                          )}
+                              <span className="ml-auto text-sm font-semibold text-primary">
+                                ${ad.precio * ad.cantidad}
+                              </span>
+                            </div>
+                          ))}
                         </div>
                       </div>
                       <div className="ml-4 text-right">
@@ -322,9 +317,23 @@ const PedidosManager = () => {
       )}
     </div>
   );
+
+
   return (
     <div>
-      <h1 className="mb-6 text-3xl font-bold text-foreground">Pedidos</h1>
+      <div className="mb-6 flex items-center justify-between">
+        <h1 className="text-3xl font-bold text-foreground">Pedidos</h1>
+        <Button onClick={() => setShowManualOrderModal(true)} className="gap-2">
+          <Plus className="h-4 w-4" />
+          Nuevo Pedido
+        </Button>
+      </div>
+
+      <ManualOrderModal
+        open={showManualOrderModal}
+        onOpenChange={setShowManualOrderModal}
+        onOrderCreated={loadPedidos}
+      />
 
       <AlertDialog open={confirmDialog.open} onOpenChange={(open) => setConfirmDialog({ ...confirmDialog, open })}>
         <AlertDialogContent>
@@ -357,23 +366,23 @@ const PedidosManager = () => {
 
       <Tabs value={filtroEstado} onValueChange={(value) => setFiltroEstado(value as any)} className="w-full">
         <TabsList className="mb-6 grid w-full max-w-md grid-cols-4">
-          <TabsTrigger value="todos">Todos</TabsTrigger>
-          <TabsTrigger value="pendiente">Pendiente</TabsTrigger>
-          <TabsTrigger value="entregado">Entregado</TabsTrigger>
-          <TabsTrigger value="cancelado">Cancelado</TabsTrigger>
+          <TabsTrigger value="Todos">Todos</TabsTrigger>
+          <TabsTrigger value="Pendiente">Pendiente</TabsTrigger>
+          <TabsTrigger value="Entregado">Entregado</TabsTrigger>
+          <TabsTrigger value="Cancelado">Cancelado</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="todos">
+        <TabsContent value="Todos">
           {renderPedidos(pedidos)}
         </TabsContent>
-        <TabsContent value="pendiente">
-          {renderPedidos(pedidos.filter(p => p.estado === 'pendiente').sort((a, b) => a.id - b.id))}
+        <TabsContent value="Pendiente">
+          {renderPedidos(pedidos.filter(p => p.estado === 'Pendiente').sort((a, b) => a.id - b.id))}
         </TabsContent>
-        <TabsContent value="entregado">
-          {renderPedidos(pedidos.filter(p => p.estado === 'entregado'))}
+        <TabsContent value="Entregado">
+          {renderPedidos(pedidos.filter(p => p.estado === 'Entregado'))}
         </TabsContent>
-        <TabsContent value="cancelado">
-          {renderPedidos(pedidos.filter(p => p.estado === 'cancelado'))}
+        <TabsContent value="Cancelado">
+          {renderPedidos(pedidos.filter(p => p.estado === 'Cancelado'))}
         </TabsContent>
       </Tabs>
     </div>

@@ -42,6 +42,7 @@ export default function GenericAssignDialog({
 }) {
   const [items, setItems] = useState<any[]>([]);
   const [assignedIds, setAssignedIds] = useState<number[]>([]);
+  const [relationMap, setRelationMap] = useState<Record<number, number>>({}); // itemId -> relationId
   const [loading, setLoading] = useState<boolean>(false);
 
 
@@ -60,6 +61,20 @@ export default function GenericAssignDialog({
       const ids = productItems?.map((i) => i.id).filter(Boolean) || [];
       setAssignedIds(ids);
 
+      // Construir mapa de relaciones existentes
+      if (getIdRelacion) {
+        const relations = getIdRelacion(Product);
+        if (Array.isArray(relations)) {
+          const map: Record<number, number> = {};
+          relations.forEach((r) => {
+            if (r.id && r.idRelacion) {
+              map[r.id] = r.idRelacion;
+            }
+          });
+          setRelationMap(map);
+        }
+      }
+
     } catch (err) {
       toast.error(err.message || "No se pudieron cargar los items");
     } finally {
@@ -73,25 +88,45 @@ export default function GenericAssignDialog({
 
     try {
       if (isAssigned) {
-        let relationId = getIdRelacion ? getIdRelacion(Product) : null;
-
-        if (Array.isArray(relationId)) {
-          relationId = relationId.find((r) => r.id === id);
-          if(relationId){
-            await onRemove(relationId.idRelacion);
+        // Buscar el ID de relación en el mapa local primero
+        const storedRelationId = relationMap[id];
+        
+        if (storedRelationId) {
+          await onRemove(storedRelationId);
+          setRelationMap((prev) => {
+            const newMap = { ...prev };
+            delete newMap[id];
+            return newMap;
+          });
+        } else {
+          // Fallback al método anterior
+          let relationId = getIdRelacion ? getIdRelacion(Product) : null;
+          if (Array.isArray(relationId)) {
+            const found = relationId.find((r) => r.id === id);
+            if (found) {
+              await onRemove(found.idRelacion);
+            } else {
+              throw new Error("No se encontró el ID de relación para este item");
+            }
+          } else {
+            throw new Error("No se encontró el ID de relación para este item");
           }
         }
 
-        if (!relationId) {
-          throw new Error("No se encontró el ID de relación para este item");
-        }
-
         setAssignedIds((prev) => prev.filter((x) => x !== id));
-
         toast.success(`${title} removido`);
       } else {
-        await onAdd(Product.id, id);
+        const response = await onAdd(Product.id, id);
         setAssignedIds((prev) => [...prev, id]);
+
+        // Guardar el ID de relación devuelto por la API
+        if (response?.data?.id) {
+          setRelationMap((prev) => ({ ...prev, [id]: response.data.id }));
+        } else if (response?.data?.idAxp) {
+          setRelationMap((prev) => ({ ...prev, [id]: response.data.idAxp }));
+        } else if (response?.data?.idGxP) {
+          setRelationMap((prev) => ({ ...prev, [id]: response.data.idGxP }));
+        }
 
         toast.success(`${title} agregado`);
       }

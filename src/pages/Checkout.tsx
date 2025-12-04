@@ -100,13 +100,13 @@ const Checkout = () => {
         id: item.id,
         cantidad: item.cantidad,
         adicionales: item.adicionalesSeleccionados
-          .filter(ad => ad.cantidad > 0)
+          .filter(ad => ad.cantidad > 0 && ad.id !== null && ad.id !== undefined)
           .map((ad) => ({
-            id: ad.id,
+            id: ad.id!,
             cantidad: ad.cantidad,
           })),
-        idGuarnicion: item.guarnicionSeleccionada.id,
-        idTam: item.tamSeleccionado.id
+        idGuarnicion: item?.guarnicionSeleccionada?.id,
+        idTam: item.tamSeleccionado?.id
       })),
     };
     return pedido;

@@ -208,6 +208,11 @@ class ApiService {
     return rsp.json();
   }
 
+  async updateEstadoPago(data) {
+    const rsp = await this.PATCH(`admin/pago/estado`, data);
+    return rsp.json();
+  }
+
   // Adicionales endpoints
   async getAdicionales() {
     const rsp = await this.GET('api/adicional/');
