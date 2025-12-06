@@ -278,6 +278,16 @@ const PedidosManager = () => {
                           {prod.nombre}
                         </p>
                         <div className="mt-2 space-y-1.5">
+                          <p className="text-xs font-medium text-muted-foreground">
+                            Guarnición seleccionada:
+                          </p>
+                          {prod.guarnicion && (
+                            <div className="flex items-center gap-2 rounded-sm bg-background/50 px-2 py-1">
+                              <p className="text-sm text-foreground">
+                                {prod.guarnicion.nombre}
+                              </p>
+                            </div>
+                          )}
                           <p className="text-xs font-medium text-muted-foreground">Adicionales:</p>
                           {prod.adicionales.map((ad, adIdx) => (
                             <div
