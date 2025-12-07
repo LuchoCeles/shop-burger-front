@@ -29,9 +29,21 @@ const ConfiguracionManager = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      fetchBankData(bankData);
+      loadBankDataFromAPI();
     }
   }, [isAuthenticated]);
+
+  const loadBankDataFromAPI = async () => {
+    try {
+      const rsp = await ApiService.getBancos();
+      if (rsp.success) {
+        setBankData(rsp.data);
+        fetchBankData(rsp.data);
+      }
+    } catch (err) {
+      console.error("Error cargando datos bancarios", err);
+    }
+  };
 
   const fetchBankData = (data: BankData) => {
     setFormData({
@@ -360,30 +372,40 @@ const ConfiguracionManager = () => {
                   htmlFor="mp-token"
                   className="w-40 text-sm font-medium whitespace-nowrap"
                 >
-                  Token de Mercado Pago
+                  Token Mercado Pago
                 </Label>
 
                 <div className="relative flex-1">
                   <Input
                     id="mp-token"
                     name="mpAccessToken"
-                    value={formData.mpAccessToken}
-                    maxLength={70}
                     type={showPassword ? "text" : "password"}
-                    onChange={handleInputChange}
-                    placeholder="Ingrese su Token"
-                    required
+                    value={formData.mpAccessToken ?? ""}
+                    onChange={(e) =>
+                      setFormData(prev => ({
+                        ...prev,
+                        mpAccessToken: e.target.value,
+                      }))
+                    }
+                    placeholder="Ingrese su token"
+                    maxLength={70}
                     className="pr-10"
+                    required
+                    autoComplete="off"
                   />
 
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7 p-0"
                     onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7 p-0"
                   >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
                   </Button>
                 </div>
               </div>
