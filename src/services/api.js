@@ -277,8 +277,8 @@ class ApiService {
     return rsp.json();
   }
 
-  async updateBancoMP(id, mpEstado) {
-    const rsp = await this.PATCH(`admin/banco/${id}/stateMP`, { mpEstado: mpEstado }, false, localStorage.getItem('bancoToken'));
+  async updateBancoMP(id, data) {
+    const rsp = await this.PATCH(`admin/banco/${id}/stateMP`, { mpEstado: data.mpEstado, mpAccessToken: data.mpAccessToken }, false, localStorage.getItem('bancoToken'));
     return rsp.json();
   }
 

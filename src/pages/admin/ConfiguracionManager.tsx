@@ -24,23 +24,24 @@ const ConfiguracionManager = () => {
     apellido: '',
     nombre: '',
     mpEstado: false,
+    mpAccessToken: '',
   });
 
   useEffect(() => {
     if (isAuthenticated) {
       fetchBankData(bankData);
     }
-  }, [isAuthenticated, bankData]);
+  }, [isAuthenticated]);
 
   const fetchBankData = (data: BankData) => {
-    setBankData(data);
     setFormData({
       cuit: data.cuit || '',
       alias: data.alias || '',
       cbu: data.cbu || '',
       apellido: data.apellido || '',
       nombre: data.nombre || '',
-      mpEstado: data.mpEstado,
+      mpEstado: Boolean(data.mpEstado),
+      mpAccessToken: data.mpAccessToken || '',
     });
   };
 
@@ -51,7 +52,6 @@ const ConfiguracionManager = () => {
       const response = await ApiService.loginBanco(cuit.trim(), password);
       if (response.success) {
         loginBanco(response.token, response.data);
-        console.log(response.data);
         fetchBankData(response.data);
         toast.success(response.message || 'Autenticación exitosa');
       } else {
@@ -67,10 +67,10 @@ const ConfiguracionManager = () => {
   const formatCuit = (value: string) => {
     // Remover todo lo que no sea número
     const numbers = value.replace(/\D/g, '');
-    
+
     // Limitar a 11 dígitos
     const limited = numbers.slice(0, 11);
-    
+
     // Formatear automáticamente: XX-XXXXXXXX-X
     if (limited.length <= 2) {
       return limited;
@@ -88,7 +88,7 @@ const ConfiguracionManager = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    
+
     if (name === 'cuit') {
       const formatted = formatCuit(value);
       setFormData(prev => ({ ...prev, [name]: formatted }));
@@ -100,10 +100,10 @@ const ConfiguracionManager = () => {
   const handleChangeMP = async () => {
     try {
       setLoading(true);
-      const rsp = await ApiService.updateBancoMP(bankData.id, formData.mpEstado);
+      const rsp = await ApiService.updateBancoMP(bankData.id, { mpEstado: formData.mpEstado, mpAccessToken: formData.mpAccessToken });
       if (rsp.success) {
         toast.success(rsp.message || 'Estado de Mercado Pago actualizado');
-        fetchBankData(rsp.data);
+        setBankData(rsp.data);
       } else {
         toast.error(rsp.message || 'Error al actualizar estado de Mercado Pago');
       }
@@ -123,6 +123,7 @@ const ConfiguracionManager = () => {
         formData.cbu !== bankData?.cbu ||
         formData.apellido !== bankData?.apellido ||
         formData.nombre !== bankData?.nombre ||
+        formData.mpAccessToken !== bankData?.mpAccessToken ||
         formData.mpEstado !== !!bankData?.mpEstado;
       if (!isDiferent) {
         toast.info('No hay cambios para guardar');
@@ -133,7 +134,6 @@ const ConfiguracionManager = () => {
 
       if (response.success) {
         toast.success(response.message || 'Datos actualizados correctamente');
-        fetchBankData(response.data);
         setBankData(response.data);
       } else {
         toast.error(response.message || 'Error al actualizar datos');
@@ -339,14 +339,53 @@ const ConfiguracionManager = () => {
                 <div className="space-y-0.5">
                   <Label htmlFor="mp-estado">Estado de Mercado Pago</Label>
                   <p className="text-sm text-muted-foreground">
-                    {formData.mpEstado ? 'Mercado Pago está activado' : 'Mercado Pago está desactivado'}
+                    {formData.mpEstado
+                      ? "Mercado Pago está activado"
+                      : "Mercado Pago está desactivado"}
                   </p>
                 </div>
+
                 <Switch
                   id="mp-estado"
-                  checked={formData.mpEstado}
-                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, mpEstado: checked }))}
+                  checked={Boolean(formData.mpEstado)}
+                  onCheckedChange={(checked) =>
+                    setFormData((prev) => ({ ...prev, mpEstado: checked }))
+                  }
                 />
+              </div>
+
+              {/* TOKEN */}
+              <div className="flex items-center gap-3">
+                <Label
+                  htmlFor="mp-token"
+                  className="w-40 text-sm font-medium whitespace-nowrap"
+                >
+                  Token de Mercado Pago
+                </Label>
+
+                <div className="relative flex-1">
+                  <Input
+                    id="mp-token"
+                    name="mpAccessToken"
+                    value={formData.mpAccessToken}
+                    maxLength={70}
+                    type={showPassword ? "text" : "password"}
+                    onChange={handleInputChange}
+                    placeholder="Ingrese su Token"
+                    required
+                    className="pr-10"
+                  />
+
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7 p-0"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                </div>
               </div>
               <div className="flex justify-end pt-4">
                 <Button onClick={handleChangeMP} disabled={loading}>

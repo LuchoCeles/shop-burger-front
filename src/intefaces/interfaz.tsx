@@ -41,6 +41,7 @@ export interface BankData {
   apellido: string;
   nombre: string;
   mpEstado?: boolean;
+  mpAccessToken?: string;
 }
 
 export interface Cliente {
