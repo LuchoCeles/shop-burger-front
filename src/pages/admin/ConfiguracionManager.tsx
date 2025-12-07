@@ -16,46 +16,75 @@ const ConfiguracionManager = () => {
   const { loginBanco, isBankAuthenticated: isAuthenticated, logoutBanco, bankData, setBankData } = useAuth();
   const [cuit, setCuit] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [showTokenPassword, setShowTokenPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    cuit: '',
-    alias: '',
-    cbu: '',
-    apellido: '',
-    nombre: '',
-    mpEstado: false,
-    mpAccessToken: '',
+  const [initialLoading, setInitialLoading] = useState(true);
+  // Inicializar formData directamente desde bankData si existe
+  const [formData, setFormData] = useState(() => {
+    if (bankData) {
+      return {
+        cuit: bankData.cuit || '',
+        alias: bankData.alias || '',
+        cbu: bankData.cbu || '',
+        apellido: bankData.apellido || '',
+        nombre: bankData.nombre || '',
+        mpEstado: Boolean(bankData.mpEstado),
+        mpAccessToken: bankData.mpAccessToken || '',
+      };
+    }
+    return {
+      cuit: '',
+      alias: '',
+      cbu: '',
+      apellido: '',
+      nombre: '',
+      mpEstado: false,
+      mpAccessToken: '',
+    };
   });
 
+
+
+  // Cargar datos al montar el componente
   useEffect(() => {
-    if (isAuthenticated) {
-      loadBankDataFromAPI();
-    }
+    const loadInitialData = async () => {
+      if (isAuthenticated && bankData) {
+        // Si ya tenemos bankData en el contexto, usarlo
+        setInitialLoading(false);
+      } else if (isAuthenticated) {
+        // Si estamos autenticados pero no tenemos bankData, intentar obtenerlo del servidor
+        try {
+          const response = await ApiService.getBancoData(); // Asume que tienes este endpoint
+          if (response.success && response.data) {
+            setBankData(response.data);
+          }
+        } catch (error) {
+          console.error('Error al cargar datos bancarios:', error);
+        } finally {
+          setInitialLoading(false);
+        }
+      } else {
+        setInitialLoading(false);
+      }
+    };
+
+    loadInitialData();
   }, [isAuthenticated]);
 
-  const loadBankDataFromAPI = async () => {
-    try {
-      const rsp = await ApiService.getBancos();
-      if (rsp.success) {
-        setBankData(rsp.data);
-        fetchBankData(rsp.data);
-      }
-    } catch (err) {
-      console.error("Error cargando datos bancarios", err);
+  // Actualizar formulario cuando cambien los datos bancarios
+  useEffect(() => {
+    if (bankData) {
+      setFormData({
+        cuit: bankData.cuit || '',
+        alias: bankData.alias || '',
+        cbu: bankData.cbu || '',
+        apellido: bankData.apellido || '',
+        nombre: bankData.nombre || '',
+        mpEstado: Boolean(bankData.mpEstado),
+        mpAccessToken: bankData.mpAccessToken || '',
+      });
     }
-  };
-
-  const fetchBankData = (data: BankData) => {
-    setFormData({
-      cuit: data.cuit || '',
-      alias: data.alias || '',
-      cbu: data.cbu || '',
-      apellido: data.apellido || '',
-      nombre: data.nombre || '',
-      mpEstado: Boolean(data.mpEstado),
-      mpAccessToken: data.mpAccessToken || '',
-    });
-  };
+  }, [bankData]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,7 +93,6 @@ const ConfiguracionManager = () => {
       const response = await ApiService.loginBanco(cuit.trim(), password);
       if (response.success) {
         loginBanco(response.token, response.data);
-        fetchBankData(response.data);
         toast.success(response.message || 'Autenticación exitosa');
       } else {
         toast.error(response.message || 'Contraseña incorrecta');
@@ -77,13 +105,9 @@ const ConfiguracionManager = () => {
   };
 
   const formatCuit = (value: string) => {
-    // Remover todo lo que no sea número
     const numbers = value.replace(/\D/g, '');
-
-    // Limitar a 11 dígitos
     const limited = numbers.slice(0, 11);
 
-    // Formatear automáticamente: XX-XXXXXXXX-X
     if (limited.length <= 2) {
       return limited;
     } else if (limited.length <= 10) {
@@ -112,7 +136,19 @@ const ConfiguracionManager = () => {
   const handleChangeMP = async () => {
     try {
       setLoading(true);
-      const rsp = await ApiService.updateBancoMP(bankData.id, { mpEstado: formData.mpEstado, mpAccessToken: formData.mpAccessToken });
+      
+      console.log('Enviando datos MP:', {
+        mpEstado: formData.mpEstado,
+        mpAccessToken: formData.mpAccessToken
+      });
+      
+      const rsp = await ApiService.updateBancoMP(bankData.id, { 
+        mpEstado: formData.mpEstado, 
+        mpAccessToken: formData.mpAccessToken 
+      });
+      
+      console.log('Respuesta del servidor:', rsp);
+      
       if (rsp.success) {
         toast.success(rsp.message || 'Estado de Mercado Pago actualizado');
         setBankData(rsp.data);
@@ -120,6 +156,7 @@ const ConfiguracionManager = () => {
         toast.error(rsp.message || 'Error al actualizar estado de Mercado Pago');
       }
     } catch (error) {
+      console.error('Error completo:', error);
       toast.error(error.message || 'Error al guardar cambios');
     } finally {
       setLoading(false);
@@ -137,12 +174,17 @@ const ConfiguracionManager = () => {
         formData.nombre !== bankData?.nombre ||
         formData.mpAccessToken !== bankData?.mpAccessToken ||
         formData.mpEstado !== !!bankData?.mpEstado;
+      
       if (!isDiferent) {
         toast.info('No hay cambios para guardar');
         return;
       }
-
+      
+      console.log('Enviando datos bancarios:', formData);
+      
       const response = await ApiService.updateBanco(bankData.id, formData);
+      
+      console.log('Respuesta del servidor:', response);
 
       if (response.success) {
         toast.success(response.message || 'Datos actualizados correctamente');
@@ -151,11 +193,42 @@ const ConfiguracionManager = () => {
         toast.error(response.message || 'Error al actualizar datos');
       }
     } catch (error) {
+      console.error('Error completo:', error);
       toast.error('Error al guardar cambios');
     } finally {
       setLoading(false);
     }
   };
+
+  if (initialLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Card className="w-full max-w-md">
+          <CardContent className="pt-6">
+            <div className="flex flex-col items-center gap-4">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              <p className="text-sm text-muted-foreground">Cargando...</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (initialLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Card className="w-full max-w-md">
+          <CardContent className="pt-6">
+            <div className="flex flex-col items-center gap-4">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              <p className="text-sm text-muted-foreground">Cargando...</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
     return (
@@ -366,42 +439,31 @@ const ConfiguracionManager = () => {
                 />
               </div>
 
-              {/* TOKEN */}
-              <div className="flex items-center gap-3">
-                <Label
-                  htmlFor="mp-token"
-                  className="w-40 text-sm font-medium whitespace-nowrap"
-                >
-                  Token Mercado Pago
-                </Label>
-
-                <div className="relative flex-1">
+              <div className="space-y-4">
+                <Label htmlFor="mp-token">Token Mercado Pago</Label>
+                <div className="relative">
                   <Input
                     id="mp-token"
                     name="mpAccessToken"
-                    type={showPassword ? "text" : "password"}
-                    value={formData.mpAccessToken ?? ""}
-                    onChange={(e) =>
-                      setFormData(prev => ({
-                        ...prev,
-                        mpAccessToken: e.target.value,
-                      }))
-                    }
-                    placeholder="Ingrese su token"
+                    type={showTokenPassword ? "text" : "password"}
+                    value={formData.mpAccessToken}
+                    onChange={(e) => setFormData(prev => ({
+                      ...prev,
+                      mpAccessToken: e.target.value
+                    }))}
+                    placeholder="Ingrese su token de acceso"
                     maxLength={70}
                     className="pr-10"
-                    required
                     autoComplete="off"
                   />
-
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
-                    onClick={() => setShowPassword(!showPassword)}
+                    onClick={() => setShowTokenPassword(!showTokenPassword)}
                     className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7 p-0"
                   >
-                    {showPassword ? (
+                    {showTokenPassword ? (
                       <EyeOff className="h-4 w-4" />
                     ) : (
                       <Eye className="h-4 w-4" />
