@@ -117,19 +117,27 @@ const HorariosManager = () => {
     setTempRangos(newRangos);
   };
 
+  const formatHora = (hora) => {
+    if(!hora) return null;
+    return hora.length === 5 ? `${hora}:00` : hora;
+  }
+
   const handleSubmit = async () => {
     if (editingDia === null) return;
 
     setLoading(true);
 
     try {
+      const esUpdate = !!editingDia?.id;
+
       const payload = {
         idDia: editingDia.id,
         rangos: tempRangos.map(r => ({
-          horarioApertura: r.inicio,
-          horarioCierre: r.fin,
+          ...(esUpdate && r.id ? { idHorario: r.id } : {}),
+          horarioApertura: formatHora(r.inicio),
+          horarioCierre: formatHora(r.fin),
           estado: r.estado
-        }))
+        })),
       };
 
       if (editingDia?.id) {
