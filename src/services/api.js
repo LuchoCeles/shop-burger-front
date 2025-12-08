@@ -294,7 +294,7 @@ class ApiService {
   }
 
   async updateHorario(id, horarioData) {
-    const rsp = await this.PATCH(`api/horario/${id}`, horarioData);
+    const rsp = await this.PATCH(`api/horario/${id}`, { rangos: horarioData });
     return rsp.json();
   }
 
