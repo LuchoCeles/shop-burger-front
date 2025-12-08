@@ -1,4 +1,3 @@
-import { set } from 'node_modules/date-fns/set';
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { AuthContextType, BankData } from 'src/intefaces/interfaz';
 
@@ -24,7 +23,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isBankAuthenticated, setIsBankAuthenticated] = useState(false);
   const [user, setUser] = useState<{ nombre: string } | null>(null);
-  const [bankData, setBankData] = useState<BankData | null>(null);
+  const [bankData, setBankDataState] = useState<BankData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -33,15 +32,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const bancoToken = localStorage.getItem('bancoToken');
     const bancoData = localStorage.getItem('bancoData');
 
-
     if (bancoToken) {
       if (isTokenExpired(bancoToken)) {
         localStorage.removeItem('bancoToken');
+        localStorage.removeItem('bancoData');
         setIsBankAuthenticated(false);
       } else {
         setIsBankAuthenticated(true);
-        if(bancoData){
-          setBankData(JSON.parse(bancoData));
+        if (bancoData) {
+          setBankDataState(JSON.parse(bancoData));
         }
       }
     }
@@ -71,14 +70,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const loginBanco = (token: string, data: BankData) => {
     localStorage.setItem('bancoToken', token);
     localStorage.setItem('bancoData', JSON.stringify(data));
-    setBankData(data);
+    setBankDataState(data);
     setIsBankAuthenticated(true);
+  };
+
+  // Función actualizada para sincronizar con localStorage
+  const setBankData = (data: BankData | null) => {
+    if (data) {
+      localStorage.setItem('bancoData', JSON.stringify(data));
+      setBankDataState(data);
+    } else {
+      localStorage.removeItem('bancoData');
+      setBankDataState(null);
+    }
   };
 
   const logoutBanco = () => {
     localStorage.removeItem('bancoToken');
     localStorage.removeItem('bancoData');
-    setBankData(null);
+    setBankDataState(null);
     setIsBankAuthenticated(false);
   };
 
@@ -90,11 +100,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsAuthenticated(false);
     setIsBankAuthenticated(false);
     setUser(null);
-    setBankData(null);
+    setBankDataState(null);
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, loading, login, logout, loginBanco, isBankAuthenticated, logoutBanco, bankData, setBankData }}>
+    <AuthContext.Provider value={{ 
+      isAuthenticated, 
+      user, 
+      loading, 
+      login, 
+      logout, 
+      loginBanco, 
+      isBankAuthenticated, 
+      logoutBanco, 
+      bankData, 
+      setBankData 
+    }}>
       {children}
     </AuthContext.Provider>
   );
