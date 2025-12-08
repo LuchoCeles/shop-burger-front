@@ -41,7 +41,7 @@ export interface BankData {
   apellido: string;
   nombre: string;
   mpEstado?: boolean;
-  mpAccessToken?: string;
+  mercadoPagoAccessToken?: string;
 }
 
 export interface Cliente {

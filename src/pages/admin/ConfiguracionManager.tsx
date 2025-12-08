@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
@@ -6,103 +6,20 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Lock, Eye, EyeOff, CreditCard, Landmark } from 'lucide-react';
-import { Switch } from '@/components/ui/switch';
 import ApiService from '@/services/api';
-import { BankData } from '@/intefaces/interfaz';
 import { useAuth } from '@/context/AuthContext';
+import DatosBancariosForm from '@/components/admin/DatosBancariosForm';
+import MercadoPagoForm from '@/components/admin/MercadoPagoForm';
+import { ConfiguracionManagerSkeleton } from '@/components/skeletons';
 
 const ConfiguracionManager = () => {
-  const [password, setPassword] = useState("");
-  const { loginBanco, isBankAuthenticated: isAuthenticated, logoutBanco, bankData, setBankData } = useAuth();
-  const [cuit, setCuit] = useState("");
+  const { isBankAuthenticated, loginBanco, logoutBanco, loading: authLoading } = useAuth();
+  
+  // Estado para el login
+  const [cuit, setCuit] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [showTokenPassword, setShowTokenPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [initialLoading, setInitialLoading] = useState(true);
-  // Inicializar formData directamente desde bankData si existe
-  const [formData, setFormData] = useState(() => {
-    if (bankData) {
-      return {
-        cuit: bankData.cuit || '',
-        alias: bankData.alias || '',
-        cbu: bankData.cbu || '',
-        apellido: bankData.apellido || '',
-        nombre: bankData.nombre || '',
-        mpEstado: Boolean(bankData.mpEstado),
-        mpAccessToken: bankData.mpAccessToken || '',
-      };
-    }
-    return {
-      cuit: '',
-      alias: '',
-      cbu: '',
-      apellido: '',
-      nombre: '',
-      mpEstado: false,
-      mpAccessToken: '',
-    };
-  });
-
-
-
-  // Cargar datos al montar el componente
-  useEffect(() => {
-    const loadInitialData = async () => {
-      if (isAuthenticated && bankData) {
-        // Si ya tenemos bankData en el contexto, usarlo
-        setInitialLoading(false);
-      } else if (isAuthenticated) {
-        // Si estamos autenticados pero no tenemos bankData, intentar obtenerlo del servidor
-        try {
-          const response = await ApiService.getBancoData(); // Asume que tienes este endpoint
-          if (response.success && response.data) {
-            setBankData(response.data);
-          }
-        } catch (error) {
-          console.error('Error al cargar datos bancarios:', error);
-        } finally {
-          setInitialLoading(false);
-        }
-      } else {
-        setInitialLoading(false);
-      }
-    };
-
-    loadInitialData();
-  }, [isAuthenticated]);
-
-  // Actualizar formulario cuando cambien los datos bancarios
-  useEffect(() => {
-    if (bankData) {
-      setFormData({
-        cuit: bankData.cuit || '',
-        alias: bankData.alias || '',
-        cbu: bankData.cbu || '',
-        apellido: bankData.apellido || '',
-        nombre: bankData.nombre || '',
-        mpEstado: Boolean(bankData.mpEstado),
-        mpAccessToken: bankData.mpAccessToken || '',
-      });
-    }
-  }, [bankData]);
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      setLoading(true);
-      const response = await ApiService.loginBanco(cuit.trim(), password);
-      if (response.success) {
-        loginBanco(response.token, response.data);
-        toast.success(response.message || 'Autenticación exitosa');
-      } else {
-        toast.error(response.message || 'Contraseña incorrecta');
-      }
-    } catch (error) {
-      toast.error('Error al autenticar');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [loggingIn, setLoggingIn] = useState(false);
 
   const formatCuit = (value: string) => {
     const numbers = value.replace(/\D/g, '');
@@ -117,193 +34,133 @@ const ConfiguracionManager = () => {
     }
   };
 
-  const handleCuitLoginChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formatted = formatCuit(e.target.value);
-    setCuit(formatted);
+  const handleCuitChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCuit(formatCuit(e.target.value));
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-
-    if (name === 'cuit') {
-      const formatted = formatCuit(value);
-      setFormData(prev => ({ ...prev, [name]: formatted }));
-    } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!cuit.trim() || !password.trim()) {
+      toast.error('Complete todos los campos');
+      return;
     }
-  };
 
-  const handleChangeMP = async () => {
     try {
-      setLoading(true);
+      setLoggingIn(true);
+      const response = await ApiService.loginBanco(cuit.trim(), password);
       
-      console.log('Enviando datos MP:', {
-        mpEstado: formData.mpEstado,
-        mpAccessToken: formData.mpAccessToken
-      });
-      
-      const rsp = await ApiService.updateBancoMP(bankData.id, { 
-        mpEstado: formData.mpEstado, 
-        mpAccessToken: formData.mpAccessToken 
-      });
-      
-      console.log('Respuesta del servidor:', rsp);
-      
-      if (rsp.success) {
-        toast.success(rsp.message || 'Estado de Mercado Pago actualizado');
-        setBankData(rsp.data);
-      } else {
-        toast.error(rsp.message || 'Error al actualizar estado de Mercado Pago');
-      }
-    } catch (error) {
-      console.error('Error completo:', error);
-      toast.error(error.message || 'Error al guardar cambios');
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  const handleSave = async () => {
-    try {
-      setLoading(true);
-      const isDiferent =
-        formData.cuit !== bankData?.cuit ||
-        formData.alias !== bankData?.alias ||
-        formData.cbu !== bankData?.cbu ||
-        formData.apellido !== bankData?.apellido ||
-        formData.nombre !== bankData?.nombre ||
-        formData.mpAccessToken !== bankData?.mpAccessToken ||
-        formData.mpEstado !== !!bankData?.mpEstado;
-      
-      if (!isDiferent) {
-        toast.info('No hay cambios para guardar');
-        return;
-      }
-      
-      console.log('Enviando datos bancarios:', formData);
-      
-      const response = await ApiService.updateBanco(bankData.id, formData);
-      
-      console.log('Respuesta del servidor:', response);
-
       if (response.success) {
-        toast.success(response.message || 'Datos actualizados correctamente');
-        setBankData(response.data);
+        loginBanco(response.token, response.data);
+        toast.success(response.message || 'Autenticación exitosa');
+        // Limpiar formulario después del login exitoso
+        setCuit('');
+        setPassword('');
       } else {
-        toast.error(response.message || 'Error al actualizar datos');
+        toast.error(response.message || 'Credenciales incorrectas');
       }
     } catch (error) {
-      console.error('Error completo:', error);
-      toast.error('Error al guardar cambios');
+      console.error('Error en login:', error);
+      toast.error('Error al autenticar');
     } finally {
-      setLoading(false);
+      setLoggingIn(false);
     }
   };
 
-  if (initialLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Card className="w-full max-w-md">
-          <CardContent className="pt-6">
-            <div className="flex flex-col items-center gap-4">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-              <p className="text-sm text-muted-foreground">Cargando...</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
+  const handleLogout = () => {
+    logoutBanco();
+    toast.success('Sesión cerrada correctamente');
+  };
+
+  // Mostrar skeleton mientras se carga el estado de autenticación
+  if (authLoading) {
+    return <ConfiguracionManagerSkeleton />;
   }
 
-  if (initialLoading) {
+  // Formulario de login si no está autenticado
+  if (!isBankAuthenticated) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Card className="w-full max-w-md">
-          <CardContent className="pt-6">
-            <div className="flex flex-col items-center gap-4">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-              <p className="text-sm text-muted-foreground">Cargando...</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold">Configuración</h1>
+          <p className="text-muted-foreground">Gestionar datos bancarios y métodos de pago</p>
+        </div>
 
-  if (!isAuthenticated) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Lock className="h-5 w-5" />
-              Autenticación Requerida
-            </CardTitle>
-            <CardDescription>
-              Ingrese el cuit y la contraseña para acceder a la configuración bancaria.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div className="space-y-2">
-                <label className="mb-2 block text-sm font-medium text-foreground">CUIT</label>
-                <Input
-                  type="text"
-                  placeholder="XX-XXXXXXXX-X"
-                  value={cuit}
-                  onChange={handleCuitLoginChange}
-                  required
-                  maxLength={13}
-                  className="bg-background"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="password">Contraseña</Label>
-                <div className="relative">
+        <div className="flex items-center justify-center min-h-[50vh]">
+          <Card className="w-full max-w-md">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Lock className="h-5 w-5" />
+                Autenticación Requerida
+              </CardTitle>
+              <CardDescription>
+                Ingrese el CUIT y la contraseña para acceder a la configuración bancaria.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleLogin} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="cuit-login">CUIT</Label>
                   <Input
-                    id="password"
-                    name="password"
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Ingrese la contraseña"
+                    id="cuit-login"
+                    type="text"
+                    placeholder="XX-XXXXXXXX-X"
+                    value={cuit}
+                    onChange={handleCuitChange}
                     required
+                    maxLength={13}
                   />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-full px-3"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </Button>
                 </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="password-login">Contraseña</Label>
+                  <div className="relative">
+                    <Input
+                      id="password-login"
+                      type={showPassword ? 'text' : 'password'}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Ingrese la contraseña"
+                      required
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-full px-3"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
+                </div>
+
+                <Button type="submit" className="w-full" disabled={loggingIn}>
+                  {loggingIn ? 'Verificando...' : 'Acceder'}
+                </Button>
+              </form>
+
+              <div className="mt-6 p-4 bg-muted/50 rounded-lg">
+                <p className="text-xs text-muted-foreground mb-2">
+                  <strong>Credenciales de prueba:</strong>
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  CUIT: 20-12345678-9<br />
+                  Contraseña: admin
+                </p>
               </div>
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? 'Verificando...' : 'Acceder'}
-              </Button>
-            </form>
-            <div className="mt-6 p-4 bg-muted/50 rounded-lg">
-              <p className="text-xs text-muted-foreground mb-2">
-                <strong>Credenciales de prueba:</strong>
-              </p>
-              <p className="text-xs text-muted-foreground">
-                CUIT: 20-12345678-9<br />
-                Contraseña: admin
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
   }
 
+  // Vista principal con tabs cuando está autenticado
   return (
     <div className="space-y-6">
       <div>
@@ -324,160 +181,11 @@ const ConfiguracionManager = () => {
         </TabsList>
 
         <TabsContent value="bancarios">
-          <Card>
-            <CardHeader>
-              <CardTitle>Datos Bancarios</CardTitle>
-              <CardDescription>
-                Información de la cuenta para recibir pagos por transferencia
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="nombre">Nombre</Label>
-                  <Input
-                    id="nombre"
-                    name="nombre"
-                    value={formData.nombre}
-                    maxLength={50}
-                    onChange={handleInputChange}
-                    placeholder="Nombre del titular"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="apellido">Apellido</Label>
-                  <Input
-                    id="apellido"
-                    name="apellido"
-                    value={formData.apellido}
-                    maxLength={50}
-                    onChange={handleInputChange}
-                    placeholder="Apellido del titular"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="cuit">CUIT</Label>
-                <Input
-                  id="cuit"
-                  name="cuit"
-                  value={formData.cuit}
-                  maxLength={13}
-                  onChange={handleInputChange}
-                  placeholder="XX-XXXXXXXX-X"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="cbu">CBU</Label>
-                <Input
-                  id="cbu"
-                  name="cbu"
-                  value={formData.cbu}
-                  maxLength={50}
-                  onChange={handleInputChange}
-                  placeholder="XXXXXXXXXXXXXXXXXXXXXX"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="alias">Alias</Label>
-                <Input
-                  id="alias"
-                  name="alias"
-                  value={formData.alias}
-                  maxLength={50}
-                  onChange={handleInputChange}
-                  placeholder="alias.banco"
-                />
-              </div>
-
-              <div className="flex justify-end gap-2 pt-4">
-                <Button
-                  variant="outline"
-                  onClick={() => { logoutBanco(); toast.success('Cierre de sesión exitoso'); }}
-                >
-                  Cerrar
-                </Button>
-                <Button onClick={handleSave} disabled={loading}>
-                  {loading ? 'Guardando...' : 'Guardar Cambios'}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <DatosBancariosForm onLogout={handleLogout} />
         </TabsContent>
 
         <TabsContent value="mercadopago">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <CreditCard className="h-5 w-5" />
-                Mercado Pago
-              </CardTitle>
-              <CardDescription>
-                Activar o desactivar la integración con Mercado Pago
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label htmlFor="mp-estado">Estado de Mercado Pago</Label>
-                  <p className="text-sm text-muted-foreground">
-                    {formData.mpEstado
-                      ? "Mercado Pago está activado"
-                      : "Mercado Pago está desactivado"}
-                  </p>
-                </div>
-
-                <Switch
-                  id="mp-estado"
-                  checked={Boolean(formData.mpEstado)}
-                  onCheckedChange={(checked) =>
-                    setFormData((prev) => ({ ...prev, mpEstado: checked }))
-                  }
-                />
-              </div>
-
-              <div className="space-y-4">
-                <Label htmlFor="mp-token">Token Mercado Pago</Label>
-                <div className="relative">
-                  <Input
-                    id="mp-token"
-                    name="mpAccessToken"
-                    type={showTokenPassword ? "text" : "password"}
-                    value={formData.mpAccessToken}
-                    onChange={(e) => setFormData(prev => ({
-                      ...prev,
-                      mpAccessToken: e.target.value
-                    }))}
-                    placeholder="Ingrese su token de acceso"
-                    maxLength={70}
-                    className="pr-10"
-                    autoComplete="off"
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowTokenPassword(!showTokenPassword)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7 p-0"
-                  >
-                    {showTokenPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </Button>
-                </div>
-              </div>
-              <div className="flex justify-end pt-4">
-                <Button onClick={handleChangeMP} disabled={loading}>
-                  {loading ? 'Guardando...' : 'Guardar Cambios'}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <MercadoPagoForm />
         </TabsContent>
       </Tabs>
     </div>
