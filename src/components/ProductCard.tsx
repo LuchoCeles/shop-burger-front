@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { Product, Tamaños, Guarniciones, CartItemAdicional } from "../intefaces/interfaz";
 import ProductConfigModal from "./ProductConfigModal";
 
-const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
+const ProductCard: React.FC<{ product: Product , disabled?: boolean}> = ({ product, disabled }) => {
   const { addToCart } = useCart();
   const [showConfigModal, setShowConfigModal] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -130,7 +130,7 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
         <Button
           className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
           onClick={handleAddToCart}
-          disabled={product.stock === 0}
+          disabled={product.stock === 0 || disabled}
         >
           <ShoppingCart className="mr-2 h-4 w-4" />
           Agregar al carrito

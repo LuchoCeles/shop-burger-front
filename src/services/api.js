@@ -282,6 +282,26 @@ class ApiService {
     return rsp.json();
   }
 
+  // Horarios endpoints
+  async getHorarios() {
+    const rsp = await this.GET('api/horario/');
+    return rsp.json();
+  }
+
+  async createHorario(horarioData) {
+    const rsp = await this.POST('api/horario/', horarioData);
+    return rsp.json();
+  }
+
+  async updateHorario(id, horarioData) {
+    const rsp = await this.PATCH(`api/horario/${id}`, horarioData);
+    return rsp.json();
+  }
+
+  async deleteHorario(id) {
+    const rsp = await this.DELETE(`api/horario/${id}`);
+    return rsp.json();
+  }
 }
 
 export default new ApiService();
