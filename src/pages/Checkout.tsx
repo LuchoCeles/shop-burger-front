@@ -8,11 +8,14 @@ import { Textarea } from '../components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { toast } from 'sonner';
 import Navbar from '../components/Navbar';
+import StoreClosedModal from '../components/StoreClosedModal';
 import { Cliente, BankData, Category } from '@/intefaces/interfaz';
 import { useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CheckoutSkeleton } from '../components/skeletons';
+import { useStoreStatus } from '../hooks/useStoreStatus';
+import { AlertCircle } from 'lucide-react';
 
 const Numero_Whatsapp = import.meta.env.VITE_NUM_WHATSAPP;
 
@@ -34,11 +37,19 @@ const Checkout = () => {
   const [orderId, setOrderId] = useState<number | null>(null);
   const [mpReady, setMpReady] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
+  const [showClosedModal, setShowClosedModal] = useState(false);
   const location = useLocation();
 
-  // ---------------------------
-  // Restaurar pedido MP pendiente o limpiar aprobado
-  // ---------------------------
+  // Hook para verificar el estado de la tienda
+  const { isOpen, nextOpenTime, currentDay, loading: statusLoading } = useStoreStatus();
+
+  // Mostrar modal si la tienda está cerrada
+  useEffect(() => {
+    if (!statusLoading && !isOpen) {
+      setShowClosedModal(true);
+    }
+  }, [isOpen, statusLoading]);
+
   useEffect(() => {
     const mpStatus = sessionStorage.getItem("mp_status");
 
@@ -52,9 +63,6 @@ const Checkout = () => {
     }
   }, []);
 
-  // ---------------------------
-  // Cleanup: salir del checkout sin pagar
-  // ---------------------------
   useEffect(() => {
     return () => {
       const mpStatus = sessionStorage.getItem("mp_status");
@@ -65,9 +73,6 @@ const Checkout = () => {
     };
   }, [location.pathname]);
 
-  // ---------------------------
-  // Fetch inicial
-  // ---------------------------
   useEffect(() => {
     fetchBankData();
   }, []);
@@ -88,9 +93,6 @@ const Checkout = () => {
     }
   };
 
-  // ---------------------------
-  // Handle submit
-  // ---------------------------
   const cargarPedido = () => {
     const pedido = {
       cliente: {
@@ -117,6 +119,13 @@ const Checkout = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Verificar si la tienda está cerrada
+    if (!isOpen) {
+      toast.error('La tienda está cerrada. No se pueden realizar pedidos.');
+      setShowClosedModal(true);
+      return;
+    }
 
     if (tipoEntrega === 'Domicilio' && (!cliente.telefono || !cliente.direccion)) {
       toast.error('Completa teléfono y dirección');
@@ -168,9 +177,6 @@ const Checkout = () => {
     return;
   }
 
-  // ---------------------------
-  // Funciones de pago
-  // ---------------------------
   const pagarConEfectivo = () => {
     const whatsappMessage = encodeURIComponent(
       `¡Hola! Tengo que pagar en efectivo mi pedido #${orderId}.`
@@ -185,9 +191,6 @@ const Checkout = () => {
     return `https://wa.me/${Numero_Whatsapp}?text=${whatsappMessage}`;
   }
 
-  // ---------------------------
-  // Pago → abrir link y limpiar
-  // ---------------------------
   const Payment = () => {
     let url = "";
 
@@ -207,7 +210,6 @@ const Checkout = () => {
       window.open(url, "_blank");
     }
 
-    // Limpiar todo
     clearCartMp();
   };
 
@@ -220,9 +222,6 @@ const Checkout = () => {
     setSubmitting(false);
   };
 
-  // ---------------------------
-  // UI: carrito vacío
-  // ---------------------------
   if (cart.length === 0) {
     return (
       <div className="min-h-screen bg-background">
@@ -237,9 +236,6 @@ const Checkout = () => {
     );
   }
 
-  // ---------------------------
-  // Loading screen
-  // ---------------------------
   if (initialLoading) {
     return (
       <div className="min-h-screen bg-background">
@@ -254,12 +250,37 @@ const Checkout = () => {
     );
   }
 
-  // ---------------------------
-  // Render principal
-  // ---------------------------
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
+
+      {/* Modal de tienda cerrada */}
+      <StoreClosedModal
+        isOpen={showClosedModal}
+        onClose={() => {
+          setShowClosedModal(false);
+          navigate('/');
+        }}
+        nextOpenTime={nextOpenTime}
+        currentDay={currentDay}
+        showCloseButton={true}
+      />
+
+      {/* Banner de advertencia si está cerrada */}
+      {!statusLoading && !isOpen && (
+        <div className="bg-destructive text-destructive-foreground py-4 px-4">
+          <div className="container mx-auto max-w-4xl flex items-center gap-3">
+            <AlertCircle className="h-5 w-5 flex-shrink-0" />
+            <div>
+              <p className="font-medium">La tienda está cerrada</p>
+              <p className="text-sm opacity-90">
+                No puedes completar pedidos en este momento. {nextOpenTime && `Volvemos ${nextOpenTime}`}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="container mx-auto max-w-4xl px-4 py-8">
         <h1 className="mb-8 text-3xl font-bold text-foreground">
           Finalizar Compra
@@ -271,7 +292,7 @@ const Checkout = () => {
               <CardTitle className="text-foreground">Datos de entrega</CardTitle>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-4">
                 <Tabs
                   value={tipoEntrega}
                   onValueChange={(v) => {
@@ -320,7 +341,7 @@ const Checkout = () => {
                           type="tel"
                           placeholder="+54 9 11 1234-5678"
                           value={cliente.telefono}
-                          disabled={submitting}
+                          disabled={submitting || !isOpen}
                           onChange={(e) =>
                             setCliente({ ...cliente, telefono: e.target.value })
                           }
@@ -337,7 +358,7 @@ const Checkout = () => {
                           type="text"
                           placeholder="Calle 123, Ciudad"
                           value={cliente.direccion}
-                          disabled={submitting}
+                          disabled={submitting || !isOpen}
                           onChange={(e) =>
                             setCliente({ ...cliente, direccion: e.target.value })
                           }
@@ -361,7 +382,7 @@ const Checkout = () => {
                         type="radio"
                         name="metodoDePago"
                         value="Efectivo"
-                        disabled={submitting}
+                        disabled={submitting || !isOpen}
                         checked={metodoDePago === 'Efectivo'}
                         onChange={(e) => setMetodoDePago(e.target.value as 'Efectivo')}
                         className="h-4 w-4 text-primary"
@@ -375,7 +396,7 @@ const Checkout = () => {
                         name="metodoDePago"
                         value="Transferencia"
                         checked={metodoDePago === 'Transferencia'}
-                        disabled={submitting}
+                        disabled={submitting || !isOpen}
                         onChange={(e) => setMetodoDePago(e.target.value as 'Transferencia')}
                         className="h-4 w-4 text-primary"
                       />
@@ -388,7 +409,7 @@ const Checkout = () => {
                           type="radio"
                           name="metodoDePago"
                           value="Mercado Pago"
-                          disabled={submitting}
+                          disabled={submitting || !isOpen}
                           checked={metodoDePago === 'Mercado Pago'}
                           onChange={(e) => setMetodoDePago(e.target.value as 'Mercado Pago')}
                           className="h-4 w-4 text-primary"
@@ -407,37 +428,39 @@ const Checkout = () => {
                     placeholder="Agregar instrucciones de entrega o notas adicionales..."
                     value={descripcion}
                     onChange={(e) => setDescripcion(e.target.value)}
-                    disabled={submitting}
+                    disabled={submitting || !isOpen}
                     className="bg-background"
                   />
                 </div>
 
                 <Button
-                  type={!mpReady ? "submit" : "button"}
-                  className={`w-full text-primary-foreground hover:bg-primary/90 ${mpReady ? "bg-[rgb(99,159,236)] hover:bg-[rgb(127,180,248)]" : "bg-primary"
+                  type={!mpReady ? "button" : "button"}
+                  className={`w-full text-primary-foreground ${mpReady ? "bg-[rgb(99,159,236)] hover:bg-[rgb(127,180,248)]" : "bg-primary hover:bg-primary/90"
                     }`}
-                  disabled={submitting}
-                  onClick={() => {
+                  disabled={submitting || !isOpen}
+                  onClick={(e) => {
                     if (mpReady) {
                       Payment();
+                    } else {
+                      handleSubmit(e);
                     }
                   }}
                 >
-                  {mpReady
-                    ? "Pagar"
-                    : submitting
-                      ? "Cargando..."
-                      : "Confirmar Pedido"}
+                  {!isOpen
+                    ? "Tienda Cerrada"
+                    : mpReady
+                      ? "Pagar"
+                      : submitting
+                        ? "Cargando..."
+                        : "Confirmar Pedido"}
                 </Button>
 
 
-              </form>
+              </div>
             </CardContent>
           </Card>
 
-          {/* --------------------------- */}
-          {/* RESUMEN DEL PEDIDO */}
-          {/* --------------------------- */}
+          {/* Resumen del pedido (sin cambios) */}
           <Card className="bg-card">
             <CardHeader>
               <CardTitle className="text-foreground">Resumen del pedido</CardTitle>
@@ -470,7 +493,6 @@ const Checkout = () => {
 
                           return (
                             <div key={item.cartId} className="grid grid-cols-[56px_1fr_auto] gap-x-4 gap-y-1 items-start">
-                              {/* IMG */}
                               <div className="row-span-4">
                                 <div className="h-14 w-14 overflow-hidden rounded-md bg-muted">
                                   {item.productoOriginal.url_imagen ? (
@@ -485,13 +507,11 @@ const Checkout = () => {
                                 </div>
                               </div>
 
-                              {/* NOMBRE */}
                               <p className="text-xl font-medium text-foreground">
                                 {item.productoOriginal.nombre}
                               </p>
                               <div></div>
 
-                              {/* GUARNICIÓN (si hay) */}
                               {item.guarnicionSeleccionada && (
                                 <>
                                   <p className="text-sm text-muted-foreground">
@@ -502,7 +522,6 @@ const Checkout = () => {
                                 </>
                               )}
 
-                              {/* TAMAÑO */}
                               <p className="text-base text-muted-foreground">
                                 {item.tamSeleccionado?.nombre ?? "Sin tamaño"} x{item.cantidad}
                               </p>
@@ -510,7 +529,6 @@ const Checkout = () => {
                                 ${item.tamSeleccionado?.precioFinal?.toFixed(2) ?? "0.00"}
                               </p>
 
-                              {/* ADICIONALES (si hay) */}
                               {adicionalesFiltrados.length > 0 && (
                                 <>
                                   <ul className="ml-4 list-disc text-sm text-muted-foreground space-y-0.5">
