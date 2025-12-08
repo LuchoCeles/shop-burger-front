@@ -117,24 +117,43 @@ const HorariosManager = () => {
     setTempRangos(newRangos);
   };
 
-  const formatHora = (hora) => {
-    if (!hora) return null;
-    return hora.length === 5 ? `${hora}:00` : hora;
-  }
+  const rangosSonIguales = (a: HorarioRango[], b: HorarioRango[]) => {
+    if (a.length !== b.length) return false;
+
+    return a.every((r, i) => {
+      const other = b[i];
+      return (
+        r.id === other.id &&
+        r.inicio === other.inicio &&
+        r.fin === other.fin &&
+        r.estado === other.estado
+      );
+    });
+  };
 
   const handleSubmit = async () => {
-    if (editingDia === null) return;
+    if (!editingDia) return;
+
+    // 🔥 comparar rangos actuales vs rangos originales
+    const sinCambios = rangosSonIguales(tempRangos, editingDia.rangos);
+
+    if (sinCambios) {
+      toast.info("No hay cambios para guardar");
+      setShowDialog(false);
+      setEditingDia(null);
+      setTempRangos([]);
+      return;
+    }
 
     setLoading(true);
 
     try {
-
       const payload = {
         idDia: editingDia.id,
         rangos: tempRangos.map(r => ({
           idHorario: r?.id,
-          horarioApertura: formatHora(r.inicio),
-          horarioCierre: formatHora(r.fin),
+          horarioApertura: r.inicio,
+          horarioCierre: r.fin,
           estado: r.estado
         })),
       };
@@ -158,7 +177,7 @@ const HorariosManager = () => {
       setLoading(false);
     }
   };
-
+  
   const handleToggleDiaAbierto = async (diaId: number) => {
     const horarioDia = horarios.find(h => h.diaSemana === diaId);
 
