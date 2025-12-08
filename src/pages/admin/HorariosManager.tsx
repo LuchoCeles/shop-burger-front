@@ -118,7 +118,7 @@ const HorariosManager = () => {
   };
 
   const formatHora = (hora) => {
-    if(!hora) return null;
+    if (!hora) return null;
     return hora.length === 5 ? `${hora}:00` : hora;
   }
 
@@ -128,12 +128,11 @@ const HorariosManager = () => {
     setLoading(true);
 
     try {
-      const esUpdate = !!editingDia?.id;
 
       const payload = {
         idDia: editingDia.id,
         rangos: tempRangos.map(r => ({
-          ...(esUpdate && r.id ? { idHorario: r.id } : {}),
+          idHorario: r?.id,
           horarioApertura: formatHora(r.inicio),
           horarioCierre: formatHora(r.fin),
           estado: r.estado
@@ -144,13 +143,6 @@ const HorariosManager = () => {
         const rsp = await ApiService.updateHorario(editingDia.id, payload.rangos);
         if (rsp.success) {
           toast.success("Horario actualizado");
-        } else {
-          toast.error("Error guardando horario");
-        }
-      } else {
-        const rsp = await ApiService.createHorario(payload);
-        if (rsp.success) {
-          toast.success("Horario creado");
         } else {
           toast.error("Error guardando horario");
         }
