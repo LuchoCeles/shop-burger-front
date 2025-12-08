@@ -10,16 +10,6 @@ import {
   DialogTitle,
   DialogFooter,
 } from "../../components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "../../components/ui/alert-dialog";
 import { toast } from "sonner";
 import { HorariosManagerSkeleton } from "../../components/skeletons";
 import { Switch } from "../../components/ui/switch";
@@ -53,7 +43,7 @@ interface HorarioDia {
 const HorariosManager = () => {
   const [horarios, setHorarios] = useState<HorarioDia[]>([]);
   const [showDialog, setShowDialog] = useState(false);
-  const [editingDia, setEditingDia] = useState<number | null>(null);
+  const [editingDia, setEditingDia] = useState<HorarioDia | null>(null);
   const [tempRangos, setTempRangos] = useState<HorarioRango[]>([]);
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
@@ -92,10 +82,14 @@ const HorariosManager = () => {
 
   const handleEditDia = (diaId: number) => {
     const horarioDia = horarios.find(h => h.diaSemana === diaId);
-    setEditingDia(diaId);
-    setTempRangos(horarioDia?.rangos || []);
+
+    if (!horarioDia) return;
+
+    setEditingDia(horarioDia);   // 👈 guardo todo el objeto (incluye ID real)
+    setTempRangos(horarioDia.rangos || []);
     setShowDialog(true);
   };
+
 
   const handleAddRango = () => {
     setTempRangos([...tempRangos, {
@@ -129,24 +123,29 @@ const HorariosManager = () => {
     setLoading(true);
 
     try {
-      const horarioDia = horarios.find(h => h.diaSemana === editingDia);
-      
       const payload = {
-        diaSemana: editingDia,
-        abierto: tempRangos.length > 0,
+        idDia: editingDia.id,
         rangos: tempRangos.map(r => ({
-          inicio: r.inicio,
-          fin: r.fin,
+          horarioApertura: r.inicio,
+          horarioCierre: r.fin,
           estado: r.estado
         }))
       };
 
-      if (horarioDia?.id) {
-        await ApiService.updateHorario(horarioDia.id, payload);
-        toast.success("Horario actualizado");
+      if (editingDia?.id) {
+        const rsp = await ApiService.updateHorario(editingDia.id, payload.rangos);
+        if (rsp.success) {
+          toast.success("Horario actualizado");
+        } else {
+          toast.error("Error guardando horario");
+        }
       } else {
-        await ApiService.createHorario(payload);
-        toast.success("Horario creado");
+        const rsp = await ApiService.createHorario(payload);
+        if (rsp.success) {
+          toast.success("Horario creado");
+        } else {
+          toast.error("Error guardando horario");
+        }
       }
 
       setShowDialog(false);
@@ -162,7 +161,7 @@ const HorariosManager = () => {
 
   const handleToggleDiaAbierto = async (diaId: number) => {
     const horarioDia = horarios.find(h => h.diaSemana === diaId);
-    
+
     if (!horarioDia?.id) {
       toast.error("Primero configura los horarios de este día");
       return;
@@ -209,9 +208,8 @@ const HorariosManager = () => {
             >
               <div className="flex items-center gap-4 flex-1">
                 <div className="flex items-center gap-3">
-                  <div className={`flex h-10 w-10 items-center justify-center rounded-full ${
-                    horarioDia.abierto ? 'bg-green-500/10 text-green-500' : 'bg-muted text-muted-foreground'
-                  }`}>
+                  <div className={`flex h-10 w-10 items-center justify-center rounded-full ${horarioDia.abierto ? 'bg-green-500/10 text-green-500' : 'bg-muted text-muted-foreground'
+                    }`}>
                     {horarioDia.abierto ? (
                       <CheckCircle className="h-5 w-5" />
                     ) : (
@@ -248,7 +246,7 @@ const HorariosManager = () => {
                     </Label>
                   </div>
                 )}
-                
+
                 <Button
                   variant="outline"
                   size="sm"
@@ -267,7 +265,7 @@ const HorariosManager = () => {
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              Configurar {DIAS_SEMANA.find(d => d.id === editingDia)?.nombre}
+              Configurar {DIAS_SEMANA.find(d => d.id === editingDia?.diaSemana)?.nombre}
             </DialogTitle>
           </DialogHeader>
 
