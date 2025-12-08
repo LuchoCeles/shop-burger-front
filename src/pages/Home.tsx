@@ -132,7 +132,7 @@ const Home = () => {
         </div>
       )}
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8 select-none">
         <section className="mb-12">
           <div className="mb-8 text-center">
             <h1 className="mb-4 text-4xl font-bold text-foreground md:text-5xl">
@@ -217,7 +217,7 @@ const Home = () => {
         </section>
       </main>
 
-      <footer className="border-t border-border bg-card py-8">
+      <footer className="border-t border-border bg-card py-8 select-none">
         <div className="container mx-auto px-4">
           <div className="flex flex-col items-center justify-between gap-4 md:flex-row md:items-start">
             <div className="text-sm text-muted-foreground">
@@ -228,6 +228,7 @@ const Home = () => {
                 href="https://wa.me/"
                 target="_blank"
                 rel="noopener noreferrer"
+                draggable={false}
                 className="flex items-center gap-2 text-muted-foreground transition-colors hover:text-primary"
               >
                 <MessageCircle className="h-5 w-5" />
@@ -237,6 +238,7 @@ const Home = () => {
                 href="https://instagram.com/"
                 target="_blank"
                 rel="noopener noreferrer"
+                draggable={false}
                 className="flex items-center gap-2 text-muted-foreground transition-colors hover:text-primary"
               >
                 <Instagram className="h-5 w-5" />
@@ -246,6 +248,7 @@ const Home = () => {
                 href="https://facebook.com/"
                 target="_blank"
                 rel="noopener noreferrer"
+                draggable={false}
                 className="flex items-center gap-2 text-muted-foreground transition-colors hover:text-primary"
               >
                 <Facebook className="h-5 w-5" />

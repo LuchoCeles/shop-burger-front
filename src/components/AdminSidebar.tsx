@@ -80,13 +80,14 @@ export function AdminSidebar() {
   return (
     <Sidebar collapsible="icon" className="bg-secondary">
       <SidebarHeader className="bg-secondary">
-        <div className="flex h-16 items-center px-4 border-b border-border">
+        <div className="flex flex-row h-16 justify-between items-center px-4 border-b border-border">
           <h2 className={cn(
             "font-bold text-foreground transition-all duration-300",
             isCollapsed ? "text-sm text-left" : "text-xl"
           )}>
             {isCollapsed ? 'AP' : 'Admin Panel'}
           </h2>
+          {!isCollapsed && <button className='bg-secondary px-2 hover:bg-primary/90 rounded-full border-2 text-gray-500 hover:text-white'>X</button>}
         </div>
       </SidebarHeader>
 
