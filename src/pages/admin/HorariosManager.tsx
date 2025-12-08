@@ -81,11 +81,11 @@ const HorariosManager = () => {
   }
 
   const handleEditDia = (diaId: number) => {
-    const horarioDia = horarios.find(h => h.diaSemana === diaId);
+    const horarioDia = horarios.find(h => h.id === diaId);
 
     if (!horarioDia) return;
 
-    setEditingDia(horarioDia);   // 👈 guardo todo el objeto (incluye ID real)
+    setEditingDia(horarioDia);
     setTempRangos(horarioDia.rangos || []);
     setShowDialog(true);
   };

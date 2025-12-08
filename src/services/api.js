@@ -284,24 +284,20 @@ class ApiService {
 
   // Horarios endpoints
   async getHorarios() {
-    const rsp = await this.GET('api/horario/');
+    const rsp = await this.GET('api/dias/');
     return rsp.json();
   }
 
   async createHorario(horarioData) {
-    const rsp = await this.POST('api/horario/', horarioData);
+    const rsp = await this.POST('api/dias/', horarioData);
     return rsp.json();
   }
 
   async updateHorario(id, horarioData) {
-    const rsp = await this.PATCH(`api/horario/${id}`, { rangos: horarioData });
+    const rsp = await this.PATCH(`api/dias/${id}`, { rangos: horarioData });
     return rsp.json();
   }
-
-  async deleteHorario(id) {
-    const rsp = await this.DELETE(`api/horario/${id}`);
-    return rsp.json();
-  }
+  
 }
 
 export default new ApiService();
