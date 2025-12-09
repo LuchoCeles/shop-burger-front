@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { Product, Tamaños, Guarniciones, CartItemAdicional } from "../intefaces/interfaz";
 import ProductConfigModal from "./ProductConfigModal";
 
-const ProductCard: React.FC<{ product: Product , disabled?: boolean}> = ({ product, disabled }) => {
+const ProductCard: React.FC<{ product: Product, disabled?: boolean }> = ({ product, disabled }) => {
   const { addToCart } = useCart();
   const [showConfigModal, setShowConfigModal] = useState(false);
   const [expanded, setExpanded] = useState(false);
