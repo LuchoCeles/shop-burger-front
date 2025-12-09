@@ -86,9 +86,6 @@ const DatosBancariosForm: React.FC<DatosBancariosFormProps> = ({ onLogout }) => 
       
       const dataToSend = {
         ...formData,
-        // Mantener los datos de MP sin cambios
-        mpEstado: bankData.mpEstado,
-        mpAccessToken: bankData.mpAccessToken,
       };
 
       const response = await ApiService.updateBanco(bankData.id, dataToSend);
