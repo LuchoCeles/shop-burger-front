@@ -50,7 +50,7 @@ export function AdminSidebar() {
 
   const renderMenuItem = (item: { icon: any; label: string; path: string }, nested = false) => {
     const Icon = item.icon;
-    const isActive = location.pathname === item.path;
+    const isActive = decodeURIComponent(location.pathname) === item.path;
     return (
       <SidebarMenuItem key={item.path}>
         <SidebarMenuButton asChild isActive={isActive}>
