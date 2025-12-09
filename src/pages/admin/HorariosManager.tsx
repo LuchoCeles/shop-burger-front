@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Plus, Trash2, Clock, CheckCircle, XCircle } from "lucide-react";
 import ApiService from "../../services/api";
 import { Button } from "../../components/ui/button";
@@ -15,28 +15,19 @@ import { HorariosManagerSkeleton } from "../../components/skeletons";
 import { Switch } from "../../components/ui/switch";
 import { Label } from "../../components/ui/label";
 
-const DIAS_SEMANA = [
-  { id: 1, nombre: 'Lunes', corto: 'Lun' },
-  { id: 2, nombre: 'Martes', corto: 'Mar' },
-  { id: 3, nombre: 'Miércoles', corto: 'Mié' },
-  { id: 4, nombre: 'Jueves', corto: 'Jue' },
-  { id: 5, nombre: 'Viernes', corto: 'Vie' },
-  { id: 6, nombre: 'Sábado', corto: 'Sáb' },
-  { id: 0, nombre: 'Domingo', corto: 'Dom' }
-];
-
+// Interfaces según estructura del backend
 interface HorarioRango {
   id?: number;
   inicio: string;
   fin: string;
-  estado: boolean;
+  estado: number; // 1 o 0
   tempId?: string;
 }
 
 interface HorarioDia {
-  id?: number;
-  diaSemana: number;
-  abierto: boolean;
+  id: number;
+  nombre: string;
+  estado: number; // 1 o 0
   rangos: HorarioRango[];
 }
 
@@ -47,6 +38,9 @@ const HorariosManager = () => {
   const [tempRangos, setTempRangos] = useState<HorarioRango[]>([]);
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
+  
+  // Guardar snapshot de rangos originales para comparar
+  const originalRangosRef = useRef<HorarioRango[]>([]);
 
   useEffect(() => {
     loadHorarios();
@@ -57,22 +51,10 @@ const HorariosManager = () => {
       const res = await ApiService.getHorarios();
       if (res.success && Array.isArray(res.data)) {
         setHorarios(res.data);
-      } else {
-        setHorarios(DIAS_SEMANA.map(dia => ({
-          diaSemana: dia.id,
-          abierto: false,
-          rangos: []
-        })));
+        setInitialLoading(false);
       }
-      setInitialLoading(false);
-    } catch (err) {
+    } catch {
       toast.error("No se pudieron cargar los horarios");
-      setHorarios(DIAS_SEMANA.map(dia => ({
-        diaSemana: dia.id,
-        abierto: false,
-        rangos: []
-      })));
-      setInitialLoading(false);
     }
   };
 
@@ -82,51 +64,58 @@ const HorariosManager = () => {
 
   const handleEditDia = (diaId: number) => {
     const horarioDia = horarios.find(h => h.id === diaId);
-
     if (!horarioDia) return;
 
     setEditingDia(horarioDia);
-    setTempRangos(horarioDia.rangos || []);
+    // Clonar profundo para evitar mutaciones
+    const rangosClone = horarioDia.rangos.map(r => ({ ...r }));
+    setTempRangos(rangosClone);
+    originalRangosRef.current = horarioDia.rangos.map(r => ({ ...r }));
     setShowDialog(true);
   };
-
 
   const handleAddRango = () => {
     setTempRangos([...tempRangos, {
       tempId: `temp-${Date.now()}`,
       inicio: "11:00",
       fin: "15:00",
-      estado: true
+      estado: 1
     }]);
   };
 
   const handleRemoveRango = (index: number) => {
-    const newRangos = tempRangos.filter((_, i) => i !== index);
-    setTempRangos(newRangos);
+    setTempRangos(tempRangos.filter((_, i) => i !== index));
   };
 
   const handleUpdateRango = (index: number, field: 'inicio' | 'fin', value: string) => {
     const newRangos = [...tempRangos];
-    newRangos[index][field] = value;
+    newRangos[index] = { ...newRangos[index], [field]: value };
     setTempRangos(newRangos);
   };
 
   const handleToggleRangoEstado = (index: number) => {
     const newRangos = [...tempRangos];
-    newRangos[index].estado = !newRangos[index].estado;
+    newRangos[index] = { 
+      ...newRangos[index], 
+      estado: newRangos[index].estado === 1 ? 0 : 1 
+    };
     setTempRangos(newRangos);
   };
 
-  const rangosSonIguales = (a: HorarioRango[], b: HorarioRango[]) => {
-    if (a.length !== b.length) return false;
+  // Comparar si hubo cambios
+  const hasChanges = (): boolean => {
+    const original = originalRangosRef.current;
+    
+    if (original.length !== tempRangos.length) return true;
 
-    return a.every((r, i) => {
-      const other = b[i];
+    return tempRangos.some((rango, i) => {
+      const orig = original[i];
+      if (!orig) return true;
       return (
-        r.id === other.id &&
-        r.inicio === other.inicio &&
-        r.fin === other.fin &&
-        r.estado === other.estado
+        rango.id !== orig.id ||
+        rango.inicio !== orig.inicio ||
+        rango.fin !== orig.fin ||
+        rango.estado !== orig.estado
       );
     });
   };
@@ -134,76 +123,45 @@ const HorariosManager = () => {
   const handleSubmit = async () => {
     if (!editingDia) return;
 
-    // 🔥 comparar rangos actuales vs rangos originales
-    const sinCambios = rangosSonIguales(tempRangos, editingDia.rangos);
-
-    if (sinCambios) {
+    // Verificar si hay cambios
+    if (!hasChanges()) {
       toast.info("No hay cambios para guardar");
-      setShowDialog(false);
-      setEditingDia(null);
-      setTempRangos([]);
+      closeDialog();
       return;
     }
 
     setLoading(true);
 
     try {
-      const payload = {
-        idDia: editingDia.id,
-        rangos: tempRangos.map(r => ({
-          idHorario: r?.id,
-          horarioApertura: r.inicio,
-          horarioCierre: r.fin,
-          estado: r.estado
-        })),
-      };
+      const payload = tempRangos.map(r => ({
+        idHorario: r.id || null,
+        horarioApertura: r.inicio,
+        horarioCierre: r.fin,
+        estado: r.estado === 1
+      }));
 
-      if (editingDia?.id) {
-        const rsp = await ApiService.updateHorario(editingDia.id, payload.rangos);
-        if (rsp.success) {
-          toast.success("Horario actualizado");
-        } else {
-          toast.error("Error guardando horario");
-        }
+      const rsp = await ApiService.updateHorario(editingDia.id, payload);
+      
+      if (rsp.success) {
+        toast.success("Horario actualizado");
+        loadHorarios();
+      } else {
+        toast.error("Error guardando horario");
       }
 
-      setShowDialog(false);
-      setEditingDia(null);
-      setTempRangos([]);
-      loadHorarios();
-    } catch (err) {
+      closeDialog();
+    } catch {
       toast.error("Error guardando horario");
     } finally {
       setLoading(false);
     }
   };
-  
-  const handleToggleDiaAbierto = async (diaId: number) => {
-    const horarioDia = horarios.find(h => h.diaSemana === diaId);
 
-    if (!horarioDia?.id) {
-      toast.error("Primero configura los horarios de este día");
-      return;
-    }
-
-    try {
-      await ApiService.updateHorario(horarioDia.id, {
-        ...horarioDia,
-        abierto: !horarioDia.abierto
-      });
-      toast.success("Estado actualizado");
-      loadHorarios();
-    } catch {
-      toast.error("No se pudo actualizar el estado");
-    }
-  };
-
-  const getDiaData = (diaId: number) => {
-    return horarios.find(h => h.diaSemana === diaId) || {
-      diaSemana: diaId,
-      abierto: false,
-      rangos: []
-    };
+  const closeDialog = () => {
+    setShowDialog(false);
+    setEditingDia(null);
+    setTempRangos([]);
+    originalRangosRef.current = [];
   };
 
   return (
@@ -216,60 +174,49 @@ const HorariosManager = () => {
       </div>
 
       <div className="grid gap-4">
-        {DIAS_SEMANA.map((dia) => {
-          const horarioDia = getDiaData(dia.id);
-          const rangosActivos = horarioDia.rangos.filter(r => r.estado);
+        {horarios.map((horarioDia) => {
+          const rangosActivos = horarioDia.rangos.filter(r => r.estado === 1);
+          const isOpen = horarioDia.estado === 1 && rangosActivos.length > 0;
 
           return (
             <div
-              key={dia.id}
+              key={horarioDia.id}
               className="flex flex-col gap-4 rounded-lg border border-border bg-card p-4 md:flex-row md:items-center md:justify-between"
             >
               <div className="flex items-center gap-4 flex-1">
                 <div className="flex items-center gap-3">
-                  <div className={`flex h-10 w-10 items-center justify-center rounded-full ${horarioDia.abierto ? 'bg-green-500/10 text-green-500' : 'bg-muted text-muted-foreground'
-                    }`}>
-                    {horarioDia.abierto ? (
+                  <div className={`flex h-10 w-10 items-center justify-center rounded-full ${
+                    isOpen ? 'bg-green-500/10 text-green-500' : 'bg-muted text-muted-foreground'
+                  }`}>
+                    {isOpen ? (
                       <CheckCircle className="h-5 w-5" />
                     ) : (
                       <XCircle className="h-5 w-5" />
                     )}
                   </div>
                   <div>
-                    <h3 className="font-semibold text-foreground">{dia.nombre}</h3>
+                    <h3 className="font-semibold text-foreground">{horarioDia.nombre}</h3>
                     {rangosActivos.length > 0 ? (
                       <div className="flex flex-wrap gap-2 mt-1">
                         {rangosActivos.map((rango, idx) => (
-                          <span key={idx} className="text-sm text-muted-foreground">
+                          <span key={rango.id || idx} className="text-sm text-muted-foreground">
                             {rango.inicio} - {rango.fin}
                             {idx < rangosActivos.length - 1 && ','}
                           </span>
                         ))}
                       </div>
                     ) : (
-                      <p className="text-sm text-muted-foreground">Cerrado</p>
+                      <p className="text-sm text-muted-foreground">Sin horarios configurados</p>
                     )}
                   </div>
                 </div>
               </div>
 
               <div className="flex items-center gap-2">
-                {horarioDia.id && (
-                  <div className="flex items-center gap-2 mr-2">
-                    <Switch
-                      checked={horarioDia.abierto}
-                      onCheckedChange={() => handleToggleDiaAbierto(dia.id)}
-                    />
-                    <Label className="text-sm">
-                      {horarioDia.abierto ? 'Abierto' : 'Cerrado'}
-                    </Label>
-                  </div>
-                )}
-
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => handleEditDia(dia.id)}
+                  onClick={() => handleEditDia(horarioDia.id)}
                 >
                   <Clock className="h-4 w-4 mr-2" />
                   Configurar
@@ -280,11 +227,11 @@ const HorariosManager = () => {
         })}
       </div>
 
-      <Dialog open={showDialog} onOpenChange={setShowDialog}>
+      <Dialog open={showDialog} onOpenChange={(open) => !open && closeDialog()}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              Configurar {DIAS_SEMANA.find(d => d.id === editingDia?.diaSemana)?.nombre}
+              Configurar {editingDia?.nombre}
             </DialogTitle>
           </DialogHeader>
 
@@ -324,11 +271,11 @@ const HorariosManager = () => {
                         <Label className="text-sm font-medium">Rango {index + 1}</Label>
                         <div className="flex items-center gap-2">
                           <Switch
-                            checked={rango.estado}
+                            checked={rango.estado === 1}
                             onCheckedChange={() => handleToggleRangoEstado(index)}
                           />
                           <Label className="text-xs">
-                            {rango.estado ? 'Activo' : 'Inactivo'}
+                            {rango.estado === 1 ? 'Activo' : 'Inactivo'}
                           </Label>
                           <Button
                             type="button"
@@ -365,11 +312,7 @@ const HorariosManager = () => {
               <Button
                 variant="outline"
                 type="button"
-                onClick={() => {
-                  setShowDialog(false);
-                  setEditingDia(null);
-                  setTempRangos([]);
-                }}
+                onClick={closeDialog}
               >
                 Cancelar
               </Button>
