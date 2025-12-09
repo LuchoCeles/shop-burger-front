@@ -80,7 +80,7 @@ const Checkout = () => {
   const fetchBankData = async () => {
     try {
       const [bankDataRes, categoriesRes] = await Promise.all([
-        ApiService.getBancos(),
+        ApiService.getBancoPublic(),
         ApiService.getCategories(),
       ]);
       setBankData(bankDataRes.data);

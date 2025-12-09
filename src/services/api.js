@@ -262,6 +262,11 @@ class ApiService {
   }
 
   // Bancos endpoints
+  async getBancoPublic() {
+    const rsp = await this.GET('admin/api/');
+    return rsp.json();
+  }
+
   async getBancos() {
     const rsp = await this.GET('admin/banco/');
     return rsp.json();
