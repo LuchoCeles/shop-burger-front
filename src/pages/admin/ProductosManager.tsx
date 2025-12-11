@@ -71,9 +71,13 @@ const ProductosManager = () => {
   }, []);
 
   useEffect(() => {
-    // Solo limpiar si la categoría cambió Y ya había una categoría previa seleccionada
-    // Esto evita limpiar cuando se carga el modal de edición
-    if (previousCategoria && previousCategoria !== formData.idCategoria) {
+    // Solo limpiar si:
+    // - Ya había una categoría previa seleccionada
+    // - La categoría cambió
+    // - NO estamos en modo edición con precios ya cargados
+    if (previousCategoria &&
+      previousCategoria !== formData.idCategoria &&
+      !editingProduct) {
       setPreciosPorTam([]);
       setPreciosGuardados({});
     }
@@ -111,9 +115,7 @@ const ProductosManager = () => {
     setLoading(true);
 
     if (categorias.length === 0) {
-      toast.error(
-        "Debes crear al menos una categoría antes de crear productos"
-      );
+      toast.error("Debes crear al menos una categoría antes de crear productos");
       setLoading(false);
       return;
     }
@@ -180,13 +182,12 @@ const ProductosManager = () => {
     setEditingProduct(product);
 
     const categoriaId = product.idCategoria?.toString() || "";
-    setPreviousCategoria(categoriaId); // Establecer la categoría anterior ANTES de setFormData
 
     setFormData({
       nombre: product.nombre,
       descripcion: product.descripcion || "",
       stock: product.stock?.toString() || "",
-      idCategoria: product.idCategoria?.toString() || "",
+      idCategoria: categoriaId,
       descuento: product.descuento?.toString() || "",
       isPromocion: product.descuento ? true : false,
     });
@@ -208,6 +209,8 @@ const ProductosManager = () => {
     } else {
       setPreciosGuardados({});
     }
+
+    setPreviousCategoria(categoriaId);
 
     setShowDialog(true);
   };
@@ -309,7 +312,6 @@ const ProductosManager = () => {
     }
   };
 
-  // Calcular precio con descuento
   const calcularPrecioConDescuento = (precio: string) => {
     const precioNum = parseFloat(precio);
     const descuentoNum = parseFloat(formData.descuento) || 0;
