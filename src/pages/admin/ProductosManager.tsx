@@ -379,12 +379,13 @@ const ProductosManager = () => {
           .map((product) => (
             <div
               key={product.id}
-              className="overflow-hidden rounded-lg border border-border bg-card flex flex-col"
+              className={`overflow-hidden rounded-lg border border-border bg-gradient-to-b from-black  via-black  ${(product.estado)?"to-[#00290b]":"to-[#290003]"} flex flex-col transition-colors duration-500`}
             >
               {product.url_imagen && (
                 <img
                   src={product.url_imagen}
                   alt={product.nombre}
+                  draggable={false}
                   className="h-48 w-full object-contain bg-muted"
                 />
               )}

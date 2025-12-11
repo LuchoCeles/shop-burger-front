@@ -79,7 +79,7 @@ const ProductCard: React.FC<{ product: Product, disabled?: boolean }> = ({ produ
   })();
 
   return (
-    <Card className="group flex flex-col border-border bg-card transition-all hover:shadow-xl hover:shadow-primary/10 min-h-[460px]">
+    <Card className="select-none group flex flex-col border-border bg-card transition-all hover:shadow-xl hover:shadow-primary/10 min-h-[460px]">
 
       {/* Imagen */}
       <div className="relative aspect-square overflow-hidden bg-muted rounded-t-xl">
@@ -87,6 +87,7 @@ const ProductCard: React.FC<{ product: Product, disabled?: boolean }> = ({ produ
           <img
             src={product.url_imagen}
             alt={product.nombre}
+            draggable={false}
             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
           />
         ) : (

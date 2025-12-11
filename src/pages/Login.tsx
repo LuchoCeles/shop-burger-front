@@ -95,7 +95,7 @@ const Login = () => {
             <p className="text-xs text-muted-foreground mb-2">
               <strong>Credenciales de prueba:</strong>
             </p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground select-text">
               Nombre: admin<br />
               Contraseña: admin123
             </p>
