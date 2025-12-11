@@ -1,4 +1,4 @@
-import { ShoppingCart, User } from 'lucide-react';
+import { ShoppingCart, User, DoorOpen, KeyRound, Key } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
@@ -23,12 +23,13 @@ const Navbar = () => {
             </Link>
 
             <div className="flex items-center gap-4">
+              <div className="btn-container">
               <Button
                 variant="ghost"
                 size="icon"
                 className="relative"
                 onClick={() => setShowCart(true)}
-              >
+                >
                 <ShoppingCart className="h-5 w-5" />
                 {itemCount > 0 && (
                   <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
@@ -36,23 +37,34 @@ const Navbar = () => {
                   </span>
                 )}
               </Button>
+              <span className="tooltip">Carrito</span>
+              </div>
 
               {isAuthenticated ? (
                 <div className="flex items-center gap-2">
-                  <Link to="/admin">
-                    <Button variant="ghost" size="icon">
-                      <User className="h-5 w-5" />
-                    </Button>
+                  <Link to="/admin" >
+                    <div className="btn-container">
+                      <Button variant="ghost" size="icon">
+                        <User className="h-5 w-5" />
+                      </Button>
+                      <span className="tooltip">Panel de administración</span>
+                    </div>
                   </Link>
+                  <div className="btn-container">
                   <Button variant="ghost" onClick={logout} className="text-sm">
-                    Salir
+                    <DoorOpen className="h-5 w-5" />
                   </Button>
+                  <span className="tooltip">Cerrar Sesión</span>
+                  </div>
                 </div>
               ) : (
                 <Link to="/login">
-                  <Button variant="outline" size="sm" className="bg-card hover:bg-card/80">
-                    Admin
+                  <div className="btn-container">
+                  <Button variant="ghost" size="icon">
+                      <KeyRound className="h-5 w-5" />
                   </Button>
+                  <span className="tooltip">Iniciar Sesión</span>
+                  </div>
                 </Link>
               )}
             </div>
