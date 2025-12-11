@@ -58,7 +58,7 @@ const ProductosManager = () => {
   const [imagenOriginal, setImagenOriginal] = useState<File | null>(null);
   const [imagenParaEditar, setImagenParaEditar] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
-  const [productToDelete, setProductToDelete] = useState<number | null>(null);
+  const [previousCategoria, setPreviousCategoria] = useState("");
   const [adicionalesDialogOpen, setAdicionalesDialogOpen] = useState(false);
   const [guarnicionesDialogOpen, setGuarnicionesDialogOpen] = useState(false);
   const [selectedProductForAdicionales, setSelectedProductForAdicionales] = useState<Product | null>(null);
@@ -71,8 +71,13 @@ const ProductosManager = () => {
   }, []);
 
   useEffect(() => {
-    setPreciosPorTam([]);
-    setPreciosGuardados({});
+    // Solo limpiar si la categoría cambió Y ya había una categoría previa seleccionada
+    // Esto evita limpiar cuando se carga el modal de edición
+    if (previousCategoria && previousCategoria !== formData.idCategoria) {
+      setPreciosPorTam([]);
+      setPreciosGuardados({});
+    }
+    setPreviousCategoria(formData.idCategoria);
   }, [formData.idCategoria]);
 
   const loadData = async () => {
@@ -152,11 +157,13 @@ const ProductosManager = () => {
       }
 
       if (editingProduct) {
-        await ApiService.updateProduct(editingProduct.id, formDataToSend);
-        toast.success("Producto actualizado");
+        const rsp = await ApiService.updateProduct(editingProduct.id, formDataToSend);
+        if (rsp.success) toast.success("Producto actualizado");
+        else toast.error(rsp.message || "Error al actualizar producto");
       } else {
-        await ApiService.createProduct(formDataToSend);
-        toast.success("Producto creado");
+        const rsp = await ApiService.createProduct(formDataToSend);
+        if (rsp.success) toast.success("Producto creado");
+        else toast.error(rsp.message || "Error al crear producto");
       }
 
       setShowDialog(false);
@@ -169,22 +176,12 @@ const ProductosManager = () => {
     }
   };
 
-  const handleDelete = async () => {
-    if (!productToDelete) return;
-
-    try {
-      await ApiService.deleteProducto(productToDelete);
-      toast.success("Producto eliminado");
-      loadData();
-    } catch (error) {
-      toast.error(error.message || "Error al eliminar");
-    } finally {
-      setProductToDelete(null);
-    }
-  };
-
   const handleEdit = (product: Product) => {
     setEditingProduct(product);
+
+    const categoriaId = product.idCategoria?.toString() || "";
+    setPreviousCategoria(categoriaId); // Establecer la categoría anterior ANTES de setFormData
+
     setFormData({
       nombre: product.nombre,
       descripcion: product.descripcion || "",
@@ -217,6 +214,7 @@ const ProductosManager = () => {
 
   const resetForm = () => {
     setEditingProduct(null);
+    setPreviousCategoria(""); // Limpiar la categoría anterior
     setFormData({
       nombre: "",
       descripcion: "",
@@ -696,33 +694,6 @@ const ProductosManager = () => {
         onSave={handleImageSave}
         onCancel={handleImageCancel}
       />
-      <AlertDialog
-        open={!!productToDelete}
-        onOpenChange={() => setProductToDelete(null)}
-      >
-        <AlertDialogContent className="bg-card">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-foreground">
-              ¿Eliminar este producto?
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-muted-foreground">
-              Esta acción no se puede deshacer. El producto será eliminado
-              permanentemente.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="bg-background text-foreground hover:bg-accent">
-              Cancelar
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Eliminar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
 
       {selectedProductForAdicionales && (
         <AsignarAdicionalesDialog
