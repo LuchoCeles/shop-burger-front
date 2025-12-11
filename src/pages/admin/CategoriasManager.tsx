@@ -104,7 +104,7 @@ const CategoriasManager = () => {
     if (!categoryToDelete) return;
 
     try {
-      const data = await ApiService.deleteCategoria(categoryToDelete);
+      const data = await ApiService.deleteCategory(categoryToDelete);
       if (!data.success) {
         toast.error(data.message || "Error al eliminar");
         return;
