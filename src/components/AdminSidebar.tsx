@@ -138,7 +138,7 @@ export function AdminSidebar() {
                     <SidebarMenuButton 
                         tooltip={isCollapsed ? "Gestión Items" : undefined}
                         isActive={isInProductSection}
-                        // Opcional: Estilo para el padre si un hijo está activo (suave)
+                        // Estilo si un hijo es activo
                         className={cn(
                             "transition-colors duration-150",
                             isInProductSection && !productMenuOpen 
@@ -167,7 +167,7 @@ export function AdminSidebar() {
                                     asChild 
                                     isActive={isSubActive} 
                                     size="md"
-                                    // APLICACIÓN DE ESTILOS SOLICITADOS A SUB-ITEMS (Punto 2)
+                                    // Estilos aplicados segun SubActivacion
                                     className={cn(
                                         "transition-colors duration-150",
                                         isSubActive 
@@ -206,18 +206,18 @@ export function AdminSidebar() {
         <SidebarMenu>
             <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip="Ir a la tienda">
-                    <Button variant="ghost" onClick={() => navigate('/')} className="w-full justify-center pl-0 hover:bg-sidebar-accent">
-                         <Home className="size-5 mr-2" />
-                         {!isCollapsed && <span>Volver a Tienda</span>}
+                    <Button variant="ghost" onClick={() => navigate('/')} className="w-full justify-center pl-0 hover:bg-sidebar-accent  hover:bg-white/90 hover:text-black transition-colors duration-150 mx-auto text-center">
+                         <Home className="size-5" />
+                         {!isCollapsed && <span className='ml-2'>Volver a la Tienda</span>}
                     </Button>
                 </SidebarMenuButton>
             </SidebarMenuItem>
             
             <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip="Cerrar Sesión">
-                    <Button variant="outline" onClick={logout} className="w-full justify-center pl-0">
-                        <LogOut className="size-5 mr-2" />
-                        {!isCollapsed && <span>Cerrar Sesión</span>}
+                    <Button variant="outline" onClick={logout} className="w-full justify-center pl-0 hover:bg-white/90 hover:text-black transition-colors duration-150 mx-auto text-center">
+                        <LogOut className={`size-5`} />
+                        {!isCollapsed && <span className='ml-2'>Cerrar Sesión</span>}
                     </Button>
                 </SidebarMenuButton>
             </SidebarMenuItem>
