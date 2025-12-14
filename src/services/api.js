@@ -64,6 +64,47 @@ class ApiService {
     return await fetch(this.baseURL + url, config);
   }
 
+  async PUT(endpoint, data, isFormData = false) {
+        let options = {};
+        let bodyContent;
+
+        if (isFormData) {
+            bodyContent = data; 
+        } else {
+            // ... (lógica de cabeceras para JSON)
+            options.headers = {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            };
+            bodyContent = JSON.stringify(data);
+        }
+
+        // Si es FormData, solo enviamos Authorization
+        const headersToSend = options.headers || {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        };
+
+        // Construcción limpia de la URL
+        const base = this.baseURL.replace(/\/+$/, ''); 
+        const endpointClean = endpoint.startsWith('/') ? endpoint.substring(1) : endpoint;
+        const fullUrl = `${base}/${endpointClean}`; 
+
+        const response = await fetch(fullUrl, {
+            method: 'PUT',
+            headers: headersToSend,
+            body: bodyContent,
+        });
+
+        if (!response.ok) {
+            // Manejo del error
+            const errorText = await response.text();
+            console.error('Error Response Text:', errorText);
+            throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
+        }
+        
+        return response;
+    }
+
   async DELETE(url, data) {
     const objString = '?' + new URLSearchParams(data).toString();
 
@@ -302,6 +343,31 @@ class ApiService {
     const rsp = await this.PATCH(`api/dias/${id}`, { rangos: horarioData });
     return rsp.json();
   }
+
+  // Configuracion endpoints
+  
+  /**
+   * Obtiene toda la configuración de la página (principal, enlaces, direcciones, teléfonos).
+   * RUTA: GET /api/configuracion
+   */
+  async getConfiguracion() {
+    // Es una ruta pública, pero el método base GET añade el token por si acaso.
+    const rsp = await this.GET('api/configuracion');
+    return rsp.json();
+  }
+
+  //Configuracion de pagina
+
+  /**
+   * Actualiza la configuración completa, incluyendo campos de texto, arrays JSON, 
+   * y opcionalmente archivos (logoFile, faviconFile).
+   * RUTA: PUT /api/configuracion
+   * @param {FormData} formData - Datos de la configuración, debe ser FormData.
+   */
+  async updateConfiguracion(formData) {
+  const rsp = await this.PUT('api/configuracion', formData, true);
+  return rsp.json();
+}
   
 }
 
