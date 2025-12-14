@@ -3,10 +3,20 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from './ui/alert-dialog';
 import { ScrollArea } from './ui/scroll-area';
 import { Tabs, TabsList, TabsTrigger } from './ui/tabs';
 import { Badge } from './ui/badge';
-import { Search, ShoppingCart, X } from 'lucide-react';
+import { Search, ShoppingCart, Minus, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import ApiService from '@/services/api';
 import { Product, Category, Cliente } from '@/intefaces/interfaz';
@@ -21,7 +31,7 @@ interface ManualOrderModalProps {
 }
 
 const ManualOrderModal = ({ open, onOpenChange, onOrderCreated }: ManualOrderModalProps) => {
-  const { cart, total, clearCart, removeFromCart } = useCart();
+  const { cart, total, clearCart, removeFromCart, updateQuantity } = useCart();
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
@@ -213,17 +223,24 @@ const ManualOrderModal = ({ open, onOpenChange, onOrderCreated }: ManualOrderMod
     }
   };
 
+  const [showCloseConfirm, setShowCloseConfirm] = useState(false);
+
   const handleClose = () => {
     if (cart.length > 0) {
-      const confirm = window.confirm('Tienes productos en el carrito. ¿Estás seguro de cancelar?');
-      if (!confirm) return;
-      clearCart();
+      setShowCloseConfirm(true);
+      return;
     }
+    performClose();
+  };
+
+  const performClose = () => {
+    clearCart();
     setStep('products');
     setCliente({ telefono: '', direccion: '' });
     setDescripcion('');
     setSelectedCategory(null);
     setSearchQuery('');
+    setShowCloseConfirm(false);
     onOpenChange(false);
   };
 
@@ -421,48 +438,97 @@ const ManualOrderModal = ({ open, onOpenChange, onOrderCreated }: ManualOrderMod
                   </div>
 
                   <div className="space-y-3 max-h-[400px] overflow-y-auto border rounded-lg p-4">
-                    {cart.map((item) => (
-                      <div key={item.cartId} className="flex gap-3 pb-3 border-b last:border-0">
-                        <div className="h-16 w-16 rounded-md overflow-hidden bg-muted flex-shrink-0">
-                          {item.productoOriginal.url_imagen ? (
-                            <img
-                              src={item.productoOriginal.url_imagen}
-                              alt={item.productoOriginal.nombre}
-                              className="h-full w-full object-cover"
-                            />
-                          ) : (
-                            <div className="flex h-full w-full items-center justify-center text-2xl">
-                              🍽️
+                    {cart.map((item) => {
+                      const stock = item.productoOriginal.stock;
+                      const isMaxStock = stock !== undefined && item.cantidad >= stock;
+                      const precioBase = (item.tamSeleccionado?.precioFinal || 0) + 
+                        (item.adicionalesSeleccionados?.reduce((sum, adic) => sum + (adic.precio * adic.cantidad), 0) || 0);
+
+                      return (
+                        <div key={item.cartId} className="flex flex-col gap-2 pb-3 border-b last:border-0">
+                          <div className="flex gap-3">
+                            <div className="h-16 w-16 rounded-md overflow-hidden bg-muted flex-shrink-0">
+                              {item.productoOriginal.url_imagen ? (
+                                <img
+                                  src={item.productoOriginal.url_imagen}
+                                  alt={item.productoOriginal.nombre}
+                                  className="h-full w-full object-cover"
+                                />
+                              ) : (
+                                <div className="flex h-full w-full items-center justify-center text-2xl">
+                                  🍽️
+                                </div>
+                              )}
                             </div>
-                          )}
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-sm truncate">{item.productoOriginal.nombre}</p>
+                              <p className="text-sm font-semibold text-primary">${precioBase.toFixed(2)}</p>
+                              {item.tamSeleccionado && (
+                                <p className="text-xs text-muted-foreground">
+                                  Tamaño: {item.tamSeleccionado.nombre}
+                                </p>
+                              )}
+                              {item.guarnicionSeleccionada && (
+                                <p className="text-xs text-muted-foreground">
+                                  Guarnición: {item.guarnicionSeleccionada.nombre}
+                                </p>
+                              )}
+                              {item.adicionalesSeleccionados?.filter(a => a.cantidad > 0).length > 0 && (
+                                <div className="flex flex-wrap gap-1 mt-1">
+                                  {item.adicionalesSeleccionados.filter(a => a.cantidad > 0).map((adic, idx) => (
+                                    <span key={idx} className="text-xs px-1.5 py-0.5 rounded bg-primary/10 text-foreground">
+                                      {adic.nombre} × {adic.cantidad}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Controles de cantidad */}
+                          <div className="flex items-center justify-between pl-[76px]">
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                className="h-7 w-7"
+                                onClick={() => {
+                                  if (item.cantidad > 1) {
+                                    updateQuantity(item.cartId, item.cantidad - 1);
+                                  } else {
+                                    removeFromCart(item.cartId);
+                                  }
+                                }}
+                              >
+                                <Minus className="h-3 w-3" />
+                              </Button>
+                              <span className="w-6 text-center font-semibold text-sm">{item.cantidad}</span>
+                              <Button
+                                variant={isMaxStock ? 'secondary' : 'outline'}
+                                size="icon"
+                                className="h-7 w-7"
+                                onClick={() => {
+                                  if (!isMaxStock) {
+                                    updateQuantity(item.cartId, item.cantidad + 1);
+                                  }
+                                }}
+                                disabled={isMaxStock}
+                              >
+                                <Plus className="h-3 w-3" />
+                              </Button>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7 text-destructive hover:bg-destructive/10"
+                              onClick={() => removeFromCart(item.cartId)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-sm truncate">{item.productoOriginal.nombre}</p>
-                          <p className="text-xs text-muted-foreground">Cantidad: {item.cantidad}</p>
-                          {item.tamSeleccionado && (
-                            <p className="text-xs text-muted-foreground">
-                              Tamaño: {item.tamSeleccionado.nombre}
-                            </p>
-                          )}
-                          {item.guarnicionSeleccionada && (
-                            <p className="text-xs text-muted-foreground">
-                              Guarnición: {item.guarnicionSeleccionada.nombre}
-                            </p>
-                          )}
-                        </div>
-                        <div className="flex flex-col items-end gap-1">
-                          <p className="font-semibold text-sm">${item.tamSeleccionado?.precioFinal || item.productoOriginal.precio}</p>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6"
-                            onClick={() => removeFromCart(item.cartId)}
-                          >
-                            <X className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
 
                   <div className="rounded-lg bg-primary/10 p-4">
@@ -495,6 +561,24 @@ const ManualOrderModal = ({ open, onOpenChange, onOrderCreated }: ManualOrderMod
           </div>
         </DialogFooter>
       </DialogContent>
+
+      {/* Alert de confirmación para cerrar con ítems en carrito */}
+      <AlertDialog open={showCloseConfirm} onOpenChange={setShowCloseConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Cancelar pedido?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tienes {cart.length} producto(s) en el carrito. Si cierras ahora, perderás todos los productos agregados.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Continuar editando</AlertDialogCancel>
+            <AlertDialogAction onClick={performClose} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Descartar y cerrar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   );
 };

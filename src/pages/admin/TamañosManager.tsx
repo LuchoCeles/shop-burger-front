@@ -43,6 +43,9 @@ export default function TamañosManager() {
     nombre: '',
   });
   const [initialLoading, setInitialLoading] = useState(true);
+  const [estadoFiltro, setEstadoFiltro] = useState<'todos' | 'activos' | 'inactivos'>('todos');
+  const [categoriaFiltro, setCategoriaFiltro] = useState<string>('todos');
+  const [nombreError, setNombreError] = useState<string>('');
   const maxLength = 25;
 
   useEffect(() => {
@@ -67,8 +70,47 @@ export default function TamañosManager() {
     return <TamañosManagerSkeleton />;
   }
 
+  // Filtrar tamaños por estado y categoría
+  const tamañosFiltrados = tamaño.filter((t) => {
+    const estadoMatch = estadoFiltro === 'todos' 
+      ? true 
+      : estadoFiltro === 'activos' 
+        ? t.estado 
+        : !t.estado;
+    const categoriaMatch = categoriaFiltro === 'todos' 
+      ? true 
+      : t.idCategoria?.toString() === categoriaFiltro;
+    return estadoMatch && categoriaMatch;
+  });
+
+  // Validar si el nombre ya existe en la categoría seleccionada
+  const validarNombreDuplicado = (nombre: string, categoriaId: string) => {
+    if (!nombre.trim() || !categoriaId) {
+      setNombreError('');
+      return false;
+    }
+    
+    const existente = tamaño.find(
+      t => t.nombre.toLowerCase().trim() === nombre.toLowerCase().trim() 
+        && t.idCategoria?.toString() === categoriaId
+        && t.id !== selectedTamaño?.id // Excluir el item actual si estamos editando
+    );
+    
+    if (existente) {
+      setNombreError(`Ya existe un tamaño "${nombre}" en esta categoría`);
+      return true;
+    }
+    setNombreError('');
+    return false;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validar nombre duplicado antes de enviar
+    if (validarNombreDuplicado(formData.nombre, formData.idCategoria)) {
+      return;
+    }
 
     try {
       if (selectedTamaño) {
@@ -129,6 +171,7 @@ export default function TamañosManager() {
       nombre: ''
     });
     setSelectedTamaño(null);
+    setNombreError('');
   };
 
   const openCreateDialog = () => {
@@ -140,14 +183,39 @@ export default function TamañosManager() {
     <div className="space-y-4 md:space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-bold text-foreground md:text-3xl">Tamaños</h1>
-        <Button onClick={openCreateDialog} className="w-full sm:w-auto">
-          <Plus className="mr-2 h-4 w-4" />
-          Nuevo Tamaño
-        </Button>
+        <div className="flex gap-2 w-full sm:w-auto flex-wrap">
+          <Select value={estadoFiltro} onValueChange={(v) => setEstadoFiltro(v as 'todos' | 'activos' | 'inactivos')}>
+            <SelectTrigger className="bg-background w-full sm:w-32">
+              <SelectValue placeholder="Estado" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todos">Todos</SelectItem>
+              <SelectItem value="activos">Activos</SelectItem>
+              <SelectItem value="inactivos">Inactivos</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={categoriaFiltro} onValueChange={setCategoriaFiltro}>
+            <SelectTrigger className="bg-background w-full sm:w-40">
+              <SelectValue placeholder="Categoría" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todos">Todas</SelectItem>
+              {categorias.map((cat) => (
+                <SelectItem key={cat.id} value={cat.id.toString()}>
+                  {cat.nombre}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button onClick={openCreateDialog} className="w-full sm:w-auto">
+            <Plus className="mr-2 h-4 w-4" />
+            Nuevo Tamaño
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-        {tamaño.map((tamaño) => (
+        {tamañosFiltrados.map((tamaño) => (
           <div
             key={tamaño.id}
             className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4"
@@ -209,10 +277,10 @@ export default function TamañosManager() {
         ))}
       </div>
 
-      {tamaño.length === 0 && (
+      {tamañosFiltrados.length === 0 && (
         <div className="text-center py-12 text-muted-foreground">
-          <p>No hay tamaños creados</p>
-          <p className="text-sm mt-1">Crea tu primer tamaño para comenzar</p>
+          <p>{tamaño.length === 0 ? 'No hay tamaños creados' : 'No hay tamaños con los filtros seleccionados'}</p>
+          {tamaño.length === 0 && <p className="text-sm mt-1">Crea tu primer tamaño para comenzar</p>}
         </div>
       )}
 
@@ -237,11 +305,17 @@ export default function TamañosManager() {
                 autoComplete='off'
                 value={formData.nombre}
                 maxLength={maxLength}
-                onChange={(e) =>
-                  setFormData({ ...formData, nombre: e.target.value })
-                }
+                onChange={(e) => {
+                  const newNombre = e.target.value;
+                  setFormData({ ...formData, nombre: newNombre });
+                  validarNombreDuplicado(newNombre, formData.idCategoria);
+                }}
                 required
+                className={nombreError ? 'border-destructive' : ''}
               />
+              {nombreError && (
+                <p className="text-sm text-destructive mt-1">{nombreError}</p>
+              )}
             </div>
             <div>
               <label className="mb-2 block text-sm font-medium text-foreground">
@@ -249,9 +323,10 @@ export default function TamañosManager() {
               </label>
               <Select
                 value={formData.idCategoria}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, idCategoria: value })
-                }
+                onValueChange={(value) => {
+                  setFormData({ ...formData, idCategoria: value });
+                  validarNombreDuplicado(formData.nombre, value);
+                }}
               >
                 <SelectTrigger className="bg-background">
                   <SelectValue placeholder="Selecciona una categoría" />

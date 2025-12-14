@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Hamburger , LayoutDashboard, Package, FolderKanban, ShoppingBag, Settings, LogOut, Plus, Home, Timer, ChevronDown, UtensilsCrossed, Ruler, X } from 'lucide-react';
+import { UtensilsCrossed as HamburgerIcon, LayoutDashboard, Package, FolderKanban, ShoppingBag, Settings, LogOut, Plus, Home, Timer, ChevronDown, UtensilsCrossed, Ruler, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { Button } from './ui/button';
 import {
@@ -102,7 +102,7 @@ export function AdminSidebar() {
               isCollapsed ? "justify-center w-full" : "px-2"
             )}>
                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                  <Hamburger className="size-4" />
+                  <HamburgerIcon className="size-4" />
                </div>
                {!isCollapsed && (
                   <span className="font-bold truncate">Gourmet</span>

@@ -21,6 +21,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "../../components/ui/alert-dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../components/ui/select";
 import { toast } from "sonner";
 import { CategoriasManagerSkeleton } from "../../components/skeletons";
 
@@ -33,6 +40,7 @@ const CategoriasManager = () => {
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const [categoryToDelete, setCategoryToDelete] = useState<number | null>(null);
+  const [estadoFiltro, setEstadoFiltro] = useState<'todos' | 'activos' | 'inactivos'>('todos');
   const MAX_CHARS = 30;
 
   useEffect(() => {
@@ -56,6 +64,12 @@ const CategoriasManager = () => {
   if (initialLoading) {
     return <CategoriasManagerSkeleton />;
   }
+
+  const categoriasFiltradas = categorias.filter((c) => {
+    if (estadoFiltro === 'todos') return true;
+    if (estadoFiltro === 'activos') return c.estado;
+    return !c.estado;
+  });
 
   const handleNombreChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.value.length <= MAX_CHARS) {
@@ -150,21 +164,33 @@ const CategoriasManager = () => {
         <h1 className="text-2xl font-bold text-foreground md:text-3xl">
           Categorías
         </h1>
-        <Button
-          onClick={() => {
-            setEditingCategory(null);
-            setNombre("");
-            setShowDialog(true);
-          }}
-          className="bg-primary text-primary-foreground hover:bg-primary/90 w-full sm:w-auto"
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Nueva Categoría
-        </Button>
+        <div className="flex gap-2 w-full sm:w-auto">
+          <Select value={estadoFiltro} onValueChange={(v) => setEstadoFiltro(v as 'todos' | 'activos' | 'inactivos')}>
+            <SelectTrigger className="bg-background w-full sm:w-32">
+              <SelectValue placeholder="Estado" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todos">Todos</SelectItem>
+              <SelectItem value="activos">Activos</SelectItem>
+              <SelectItem value="inactivos">Inactivos</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button
+            onClick={() => {
+              setEditingCategory(null);
+              setNombre("");
+              setShowDialog(true);
+            }}
+            className="bg-primary text-primary-foreground hover:bg-primary/90 w-full sm:w-auto"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Nueva Categoría
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
-        {categorias.map((cat) => (
+        {categoriasFiltradas.map((cat) => (
           <div
             key={cat.id}
             className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4"
