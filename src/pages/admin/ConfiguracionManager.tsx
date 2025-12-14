@@ -10,6 +10,7 @@ import ApiService from '@/services/api';
 import { useAuth } from '@/context/AuthContext';
 import DatosBancariosForm from '@/components/admin/DatosBancariosForm';
 import MercadoPagoForm from '@/components/admin/MercadoPagoForm';
+import EnviosManager from '@/components/admin/EnviosManager';
 import { ConfiguracionManagerSkeleton } from '@/components/skeletons';
 
 const ConfiguracionManager = () => {
@@ -169,7 +170,7 @@ const ConfiguracionManager = () => {
       </div>
 
       <Tabs defaultValue="bancarios" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="bancarios" className="flex items-center gap-2">
             <Landmark className="h-4 w-4" />
             Datos Bancarios
@@ -177,6 +178,10 @@ const ConfiguracionManager = () => {
           <TabsTrigger value="mercadopago" className="flex items-center gap-2">
             <CreditCard className="h-4 w-4" />
             Mercado Pago
+          </TabsTrigger>
+          <TabsTrigger value="envios" className="flex items-center gap-2">
+            <CreditCard className="h-4 w-4" />
+            Envios
           </TabsTrigger>
         </TabsList>
 
@@ -186,6 +191,10 @@ const ConfiguracionManager = () => {
 
         <TabsContent value="mercadopago">
           <MercadoPagoForm />
+        </TabsContent>
+
+        <TabsContent value="envios">
+          <EnviosManager />
         </TabsContent>
       </Tabs>
     </div>

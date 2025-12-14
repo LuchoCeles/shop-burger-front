@@ -102,6 +102,12 @@ export interface Orders {
   }[];
 }
 
+export interface Envios{
+  id: number;
+  precio: number;
+  estado: boolean;
+}
+
 export interface Guarniciones {
   id?: number;
   idGxP?: number;
@@ -119,6 +125,7 @@ export interface Tamaños {
   precioFinal?: number;
   estado?: boolean;
 }
+
 /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   +                                                                                              +
   +                                         MODELOS CARRITO                                      +

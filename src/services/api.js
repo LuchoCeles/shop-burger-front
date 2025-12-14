@@ -302,6 +302,17 @@ class ApiService {
     const rsp = await this.PATCH(`api/dias/${id}`, { rangos: horarioData });
     return rsp.json();
   }
+
+  // Envios endpoints
+  async getEnvios() {
+    const rsp = await this.GET('api/envios/');
+    return rsp.json();
+  }
+
+  async updateEnvio(id, envioData) {
+    const rsp = await this.PATCH(`api/envios/${id}`, envioData);
+    return rsp.json();
+  }
   
 }
 
