@@ -97,8 +97,7 @@ const DatosBancariosForm: React.FC<DatosBancariosFormProps> = ({ onLogout }) => 
         toast.error(response.message || 'Error al actualizar datos');
       }
     } catch (error) {
-      console.error('Error al guardar datos bancarios:', error);
-      toast.error('Error al guardar cambios');
+      toast.error(error.message || 'Error al guardar cambios');
     } finally {
       setSaving(false);
     }

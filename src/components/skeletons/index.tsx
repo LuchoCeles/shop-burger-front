@@ -1,5 +1,6 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Truck, Landmark, CreditCard } from "lucide-react";
 
 // ==================== HOME PAGE SKELETONS ====================
 
@@ -363,12 +364,12 @@ export const HorarioRowSkeleton = () => (
 
 export const HorariosManagerSkeleton = () => (
   <div className="space-y-6">
-      <div className="flex flex-col gap-4">
-        <h1 className="text-2xl font-bold md:text-3xl">Horarios de Apertura</h1>
-        <p className="text-sm text-muted-foreground">
-          Configura los días y horarios en que la tienda estará disponible para recibir pedidos.
-        </p>
-      </div>
+    <div className="flex flex-col gap-4">
+      <h1 className="text-2xl font-bold md:text-3xl">Horarios de Apertura</h1>
+      <p className="text-sm text-muted-foreground">
+        Configura los días y horarios en que la tienda estará disponible para recibir pedidos.
+      </p>
+    </div>
 
     <div className="space-y-4">
       {[...Array(7)].map((_, i) => (
@@ -401,4 +402,131 @@ export const ConfiguracionManagerSkeleton = () => (
       </CardContent>
     </Card>
   </div>
+);
+
+export const EnviosManagerSkeleton = () => (
+  <Card className="bg-card">
+    <CardHeader className="space-y-2">
+      <CardTitle className="flex items-center gap-2">
+        <Truck className="h-5 w-5" />
+        Configuración de Envío
+      </CardTitle>
+      <CardDescription>
+        Establecer el precio y disponibilidad del servicio de envío
+      </CardDescription>
+    </CardHeader>
+
+    <CardContent className="space-y-6">
+      {/* Estado del envío */}
+      <div className="flex items-center justify-between">
+        <div className="space-y-1">
+          <Skeleton className="h-4 w-32" />
+          <Skeleton className="h-3 w-56" />
+        </div>
+
+        {/* Switch */}
+        <Skeleton className="h-6 w-11 rounded-full" />
+      </div>
+
+      {/* Precio */}
+      <div className="space-y-2">
+        <Skeleton className="h-4 w-36" />
+        <Skeleton className="h-10 w-full rounded-md" />
+        <Skeleton className="h-3 w-48" />
+      </div>
+
+      {/* Botón guardar */}
+      <div className="flex justify-end pt-4">
+        <Skeleton className="h-10 w-36 rounded-md" />
+      </div>
+    </CardContent>
+  </Card>
+);
+
+export const DatosBancariosSkeleton = () => (
+  <Card className="bg-card">
+    <CardHeader className="space-y-2">
+      <CardTitle className="flex items-center gap-2">
+        <Landmark className="h-5 w-5" />
+        Datos Bancarios
+      </CardTitle>
+      <CardDescription>
+        Información de la cuenta para recibir pagos por transferencia
+      </CardDescription>
+    </CardHeader>
+
+    <CardContent className="space-y-4">
+      {/* Nombre / Apellido */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {[...Array(2)].map((_, i) => (
+          <div key={i} className="space-y-2">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+        ))}
+      </div>
+
+      {/* CUIT */}
+      <div className="space-y-2">
+        <Skeleton className="h-4 w-20" />
+        <Skeleton className="h-10 w-full" />
+      </div>
+
+      {/* CBU */}
+      <div className="space-y-2">
+        <Skeleton className="h-4 w-20" />
+        <Skeleton className="h-10 w-full" />
+      </div>
+
+      {/* Alias */}
+      <div className="space-y-2">
+        <Skeleton className="h-4 w-20" />
+        <Skeleton className="h-10 w-full" />
+      </div>
+
+      {/* Botones */}
+      <div className="flex justify-end gap-2 pt-4">
+        <Skeleton className="h-10 w-32" />
+        <Skeleton className="h-10 w-36" />
+      </div>
+    </CardContent>
+  </Card>
+);
+
+export const MercadoPagoSkeleton = () => (
+  <Card className="bg-card">
+    <CardHeader className="space-y-2">
+      <CardTitle className="flex items-center gap-2">
+        <CreditCard className="h-5 w-5" />
+        Mercado Pago
+      </CardTitle>
+      <CardDescription>
+        Activar o desactivar la integración con Mercado Pago
+      </CardDescription>
+    </CardHeader>
+
+    <CardContent className="space-y-4">
+      {/* Estado Mercado Pago */}
+      <div className="flex items-center justify-between">
+        <div className="space-y-1">
+          <Skeleton className="h-4 w-40" />
+          <Skeleton className="h-3 w-56" />
+        </div>
+
+        {/* Switch */}
+        <Skeleton className="h-6 w-11 rounded-full" />
+      </div>
+
+      {/* Token */}
+      <div className="space-y-2">
+        <Skeleton className="h-4 w-32" />
+        <Skeleton className="h-10 w-full" />
+      </div>
+
+      {/* Botón guardar */}
+      <div className="flex justify-end pt-4">
+        <Skeleton className="h-10 w-36" />
+      </div>
+    </CardContent>
+  </Card>
 );
