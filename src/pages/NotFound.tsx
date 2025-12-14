@@ -11,7 +11,7 @@ const NotFound = () => {
   }, [location.pathname]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
+    <div className="flex min-h-screen items-center justify-center bg-background select-none">
       <div className="text-center px-4 animate-fade-in">
         <div className="mb-8 inline-flex items-center justify-center w-24 h-24 rounded-full bg-gourmet-dark border-2 border-primary/20">
           <UtensilsCrossed className="w-12 h-12 text-primary animate-pulse" />
@@ -25,7 +25,7 @@ const NotFound = () => {
           ¿Qué tal si vuelves a la carta principal?
         </p>
         
-        <Link to="/">
+        <Link to="/" draggable={false}>
           <Button size="lg" className="gap-2">
             <Home className="w-5 h-5" />
             Volver al Menú

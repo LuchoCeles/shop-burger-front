@@ -58,7 +58,7 @@ const ProductosManager = () => {
   const [imagenOriginal, setImagenOriginal] = useState<File | null>(null);
   const [imagenParaEditar, setImagenParaEditar] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
-  const [productToDelete, setProductToDelete] = useState<number | null>(null);
+  const [previousCategoria, setPreviousCategoria] = useState("");
   const [adicionalesDialogOpen, setAdicionalesDialogOpen] = useState(false);
   const [guarnicionesDialogOpen, setGuarnicionesDialogOpen] = useState(false);
   const [selectedProductForAdicionales, setSelectedProductForAdicionales] = useState<Product | null>(null);
@@ -71,8 +71,17 @@ const ProductosManager = () => {
   }, []);
 
   useEffect(() => {
-    setPreciosPorTam([]);
-    setPreciosGuardados({});
+    // Solo limpiar si:
+    // - Ya había una categoría previa seleccionada
+    // - La categoría cambió
+    // - NO estamos en modo edición con precios ya cargados
+    if (previousCategoria &&
+      previousCategoria !== formData.idCategoria &&
+      !editingProduct) {
+      setPreciosPorTam([]);
+      setPreciosGuardados({});
+    }
+    setPreviousCategoria(formData.idCategoria);
   }, [formData.idCategoria]);
 
   const loadData = async () => {
@@ -106,9 +115,7 @@ const ProductosManager = () => {
     setLoading(true);
 
     if (categorias.length === 0) {
-      toast.error(
-        "Debes crear al menos una categoría antes de crear productos"
-      );
+      toast.error("Debes crear al menos una categoría antes de crear productos");
       setLoading(false);
       return;
     }
@@ -152,11 +159,13 @@ const ProductosManager = () => {
       }
 
       if (editingProduct) {
-        await ApiService.updateProduct(editingProduct.id, formDataToSend);
-        toast.success("Producto actualizado");
+        const rsp = await ApiService.updateProduct(editingProduct.id, formDataToSend);
+        if (rsp.success) toast.success("Producto actualizado");
+        else toast.error(rsp.message || "Error al actualizar producto");
       } else {
-        await ApiService.createProduct(formDataToSend);
-        toast.success("Producto creado");
+        const rsp = await ApiService.createProduct(formDataToSend);
+        if (rsp.success) toast.success("Producto creado");
+        else toast.error(rsp.message || "Error al crear producto");
       }
 
       setShowDialog(false);
@@ -169,27 +178,16 @@ const ProductosManager = () => {
     }
   };
 
-  const handleDelete = async () => {
-    if (!productToDelete) return;
-
-    try {
-      await ApiService.deleteProducto(productToDelete);
-      toast.success("Producto eliminado");
-      loadData();
-    } catch (error) {
-      toast.error(error.message || "Error al eliminar");
-    } finally {
-      setProductToDelete(null);
-    }
-  };
-
   const handleEdit = (product: Product) => {
     setEditingProduct(product);
+
+    const categoriaId = product.idCategoria?.toString() || "";
+
     setFormData({
       nombre: product.nombre,
       descripcion: product.descripcion || "",
       stock: product.stock?.toString() || "",
-      idCategoria: product.idCategoria?.toString() || "",
+      idCategoria: categoriaId,
       descuento: product.descuento?.toString() || "",
       isPromocion: product.descuento ? true : false,
     });
@@ -212,11 +210,14 @@ const ProductosManager = () => {
       setPreciosGuardados({});
     }
 
+    setPreviousCategoria(categoriaId);
+
     setShowDialog(true);
   };
 
   const resetForm = () => {
     setEditingProduct(null);
+    setPreviousCategoria(""); // Limpiar la categoría anterior
     setFormData({
       nombre: "",
       descripcion: "",
@@ -311,7 +312,6 @@ const ProductosManager = () => {
     }
   };
 
-  // Calcular precio con descuento
   const calcularPrecioConDescuento = (precio: string) => {
     const precioNum = parseFloat(precio);
     const descuentoNum = parseFloat(formData.descuento) || 0;
@@ -379,12 +379,13 @@ const ProductosManager = () => {
           .map((product) => (
             <div
               key={product.id}
-              className="overflow-hidden rounded-lg border border-border bg-card flex flex-col"
+              className={`overflow-hidden rounded-lg border border-border bg-gradient-to-b from-black  via-black  ${(product.estado)?"to-[#00290b]":"to-[#290003]"} flex flex-col transition-colors duration-500`}
             >
               {product.url_imagen && (
                 <img
                   src={product.url_imagen}
                   alt={product.nombre}
+                  draggable={false}
                   className="h-48 w-full object-contain bg-muted"
                 />
               )}
@@ -696,33 +697,6 @@ const ProductosManager = () => {
         onSave={handleImageSave}
         onCancel={handleImageCancel}
       />
-      <AlertDialog
-        open={!!productToDelete}
-        onOpenChange={() => setProductToDelete(null)}
-      >
-        <AlertDialogContent className="bg-card">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-foreground">
-              ¿Eliminar este producto?
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-muted-foreground">
-              Esta acción no se puede deshacer. El producto será eliminado
-              permanentemente.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="bg-background text-foreground hover:bg-accent">
-              Cancelar
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Eliminar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
 
       {selectedProductForAdicionales && (
         <AsignarAdicionalesDialog

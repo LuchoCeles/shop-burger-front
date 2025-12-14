@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { Product, Tamaños, Guarniciones, CartItemAdicional } from "../intefaces/interfaz";
 import ProductConfigModal from "./ProductConfigModal";
 
-const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
+const ProductCard: React.FC<{ product: Product, disabled?: boolean }> = ({ product, disabled }) => {
   const { addToCart } = useCart();
   const [showConfigModal, setShowConfigModal] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -79,7 +79,7 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
   })();
 
   return (
-    <Card className="group flex flex-col border-border bg-card transition-all hover:shadow-xl hover:shadow-primary/10 min-h-[460px]">
+    <Card className="select-none group flex flex-col border-border bg-card transition-all hover:shadow-xl hover:shadow-primary/10 min-h-[460px]">
 
       {/* Imagen */}
       <div className="relative aspect-square overflow-hidden bg-muted rounded-t-xl">
@@ -87,6 +87,7 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
           <img
             src={product.url_imagen}
             alt={product.nombre}
+            draggable={false}
             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
           />
         ) : (
@@ -130,7 +131,7 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
         <Button
           className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
           onClick={handleAddToCart}
-          disabled={product.stock === 0}
+          disabled={product.stock === 0 || disabled}
         >
           <ShoppingCart className="mr-2 h-4 w-4" />
           Agregar al carrito

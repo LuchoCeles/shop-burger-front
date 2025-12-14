@@ -262,6 +262,11 @@ class ApiService {
   }
 
   // Bancos endpoints
+  async getBancoPublic() {
+    const rsp = await this.GET('admin/api/');
+    return rsp.json();
+  }
+
   async getBancos() {
     const rsp = await this.GET('admin/banco/');
     return rsp.json();
@@ -277,11 +282,38 @@ class ApiService {
     return rsp.json();
   }
 
-  async updateBancoMP(id, mpEstado) {
-    const rsp = await this.PATCH(`admin/banco/${id}/stateMP`, { mpEstado: mpEstado }, false, localStorage.getItem('bancoToken'));
+  async updateBancoMP(id, data) {
+    const rsp = await this.PATCH(`admin/banco/${id}/stateMP`, { mpEstado: data.mpEstado, mpAccessToken: data.mpAccessToken }, false, localStorage.getItem('bancoToken'));
     return rsp.json();
   }
 
+  // Horarios endpoints
+  async getHorarios() {
+    const rsp = await this.GET('api/dias/');
+    return rsp.json();
+  }
+
+  async createHorario(horarioData) {
+    const rsp = await this.POST('api/dias/', horarioData);
+    return rsp.json();
+  }
+
+  async updateHorario(id, horarioData) {
+    const rsp = await this.PATCH(`api/dias/${id}`, { rangos: horarioData });
+    return rsp.json();
+  }
+
+  // Envios endpoints
+  async getEnvios() {
+    const rsp = await this.GET('api/envios/');
+    return rsp.json();
+  }
+
+  async updateEnvio(id, envioData) {
+    const rsp = await this.PATCH(`api/envios/${id}`, envioData);
+    return rsp.json();
+  }
+  
 }
 
 export default new ApiService();
