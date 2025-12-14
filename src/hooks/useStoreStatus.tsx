@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import ApiService from '../services/api';
 
 // Interfaces según estructura del backend
@@ -32,7 +32,8 @@ const jsToBackendDay = (jsDay: number): number => {
 
 const DIAS_NOMBRES = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 
-export const useStoreStatus = () => {
+export const useStoreStatus = (options?: { ignoreClosed?: boolean }) => {
+
   const [status, setStatus] = useState<StoreStatus>({
     isOpen: true,
     nextOpenTime: null,
@@ -70,7 +71,7 @@ export const useStoreStatus = () => {
 
       const [startHour, startMin] = rango.inicio.split(':').map(Number);
       const [endHour, endMin] = rango.fin.split(':').map(Number);
-      
+
       const startTime = startHour * 60 + startMin;
       let endTime = endHour * 60 + endMin;
 
@@ -102,10 +103,11 @@ export const useStoreStatus = () => {
     };
   }, []);
 
+
   const findNextOpenTime = (horariosData: HorarioDia[], currentBackendDay: number, currentMinutes: number): string | null => {
     // Buscar en el día actual si hay rangos futuros
     const todaySchedule = horariosData.find(h => h.id === currentBackendDay);
-    
+
     if (todaySchedule?.estado === 1) {
       const futureRangos = todaySchedule.rangos
         .filter(r => r.estado === 1)
@@ -150,7 +152,7 @@ export const useStoreStatus = () => {
     try {
       setStatus(prev => ({ ...prev, loading: true, error: null }));
       const response = await ApiService.getHorarios();
-      
+
       if (response.success && Array.isArray(response.data)) {
         setHorarios(response.data);
         const newStatus = checkIfOpen(response.data);
@@ -194,7 +196,14 @@ export const useStoreStatus = () => {
     return () => clearInterval(interval);
   }, [horarios, checkIfOpen]);
 
-  return { ...status, refresh: loadHorarios };
+  const finalStatus = useMemo(() => {
+    if (options?.ignoreClosed) {
+      return { ...status, isOpen: true };
+    }
+    return status;
+  }, [status, options?.ignoreClosed]);
+
+  return { ...finalStatus, refresh: loadHorarios };
 };
 
 export default useStoreStatus;

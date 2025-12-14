@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import ApiService from '../../services/api';
 import { Orders } from 'src/intefaces/interfaz';
 import { useSocket } from '../../context/SocketContext';
+import { useAuth } from '@/context/AuthContext';
+import useStoreStatus from '@/hooks/useStoreStatus';
 import {
   Select,
   SelectContent,
@@ -39,6 +41,10 @@ const PedidosManager = () => {
   const [estadoManual, setEstadoManual] = useState<Record<number, string>>({});
   const [showManualOrderModal, setShowManualOrderModal] = useState(false);
 
+  // Uso el hook para forzar tienda abierta para admin
+  const { isAuthenticated } = useAuth();
+  const { isOpen } = useStoreStatus({ ignoreClosed: isAuthenticated });
+  const canCreateOrder = isAuthenticated || isOpen;
 
   useEffect(() => {
     loadPedidos();
@@ -362,7 +368,7 @@ const PedidosManager = () => {
     <div>
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-3xl font-bold text-foreground">Pedidos</h1>
-        <Button onClick={() => setShowManualOrderModal(true)} className="gap-2">
+        <Button onClick={() => setShowManualOrderModal(true)} className="gap-2" disabled={!canCreateOrder}>
           <Plus className="h-4 w-4" />
           Nuevo Pedido
         </Button>

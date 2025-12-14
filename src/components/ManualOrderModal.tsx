@@ -23,6 +23,8 @@ import { Product, Category, Cliente } from '@/intefaces/interfaz';
 import ProductCard from './ProductCard';
 import { useCart } from '@/context/CartContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAuth } from '@/context/AuthContext';
+import useStoreStatus from '@/hooks/useStoreStatus';
 
 interface ManualOrderModalProps {
   open: boolean;
@@ -39,6 +41,11 @@ const ManualOrderModal = ({ open, onOpenChange, onOrderCreated }: ManualOrderMod
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
+  // Forzar abierto si el usuario está autenticado (admin)
+  const { isAuthenticated } = useAuth();
+  const { isOpen } = useStoreStatus({ ignoreClosed: isAuthenticated });
+
+
   // Datos del cliente
   const [cliente, setCliente] = useState<Cliente>({
     telefono: '',
@@ -50,6 +57,13 @@ const ManualOrderModal = ({ open, onOpenChange, onOrderCreated }: ManualOrderMod
 
   // Step: 'products' o 'checkout'
   const [step, setStep] = useState<'products' | 'checkout'>('products');
+
+  useEffect(() => {
+    if (!isOpen && !isAuthenticated) {
+      toast.error('La tienda está cerrada');
+      onOpenChange(false);
+    }
+  }, [isOpen, isAuthenticated]);
 
   useEffect(() => {
     if (open) {
@@ -441,7 +455,7 @@ const ManualOrderModal = ({ open, onOpenChange, onOrderCreated }: ManualOrderMod
                     {cart.map((item) => {
                       const stock = item.productoOriginal.stock;
                       const isMaxStock = stock !== undefined && item.cantidad >= stock;
-                      const precioBase = (item.tamSeleccionado?.precioFinal || 0) + 
+                      const precioBase = (item.tamSeleccionado?.precioFinal || 0) +
                         (item.adicionalesSeleccionados?.reduce((sum, adic) => sum + (adic.precio * adic.cantidad), 0) || 0);
 
                       return (
