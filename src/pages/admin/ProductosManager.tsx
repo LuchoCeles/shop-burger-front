@@ -64,6 +64,7 @@ const ProductosManager = () => {
   const [selectedProductForAdicionales, setSelectedProductForAdicionales] = useState<Product | null>(null);
   const [selectedProductForGuarniciones, setSelectedProductForGuarniciones] = useState<Product | null>(null);
   const [categoriaFiltro, setCategoriaFiltro] = useState("todos");
+  const [estadoFiltro, setEstadoFiltro] = useState<'todos' | 'activos' | 'inactivos'>('todos');
   const [initialLoading, setInitialLoading] = useState(true);
 
   useEffect(() => {
@@ -337,7 +338,19 @@ const ProductosManager = () => {
           Productos
         </h1>
 
-        <div className="flex gap-2 w-full sm:w-auto">
+        <div className="flex gap-2 w-full sm:w-auto flex-wrap">
+          {/* FILTRO DE ESTADO */}
+          <Select value={estadoFiltro} onValueChange={(v) => setEstadoFiltro(v as 'todos' | 'activos' | 'inactivos')}>
+            <SelectTrigger className="bg-background w-full sm:w-32">
+              <SelectValue placeholder="Estado" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todos">Todos</SelectItem>
+              <SelectItem value="activos">Activos</SelectItem>
+              <SelectItem value="inactivos">Inactivos</SelectItem>
+            </SelectContent>
+          </Select>
+
           {/* FILTRO DE CATEGORÍAS */}
           <Select
             value={categoriaFiltro}
@@ -371,11 +384,11 @@ const ProductosManager = () => {
 
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {productos
-          .filter((p) =>
-            categoriaFiltro === "todos"
-              ? true
-              : p.idCategoria?.toString() === categoriaFiltro
-          )
+          .filter((p) => {
+            const categoriaMatch = categoriaFiltro === "todos" ? true : p.idCategoria?.toString() === categoriaFiltro;
+            const estadoMatch = estadoFiltro === 'todos' ? true : estadoFiltro === 'activos' ? p.estado : !p.estado;
+            return categoriaMatch && estadoMatch;
+          })
           .map((product) => (
             <div
               key={product.id}

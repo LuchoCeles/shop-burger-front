@@ -77,7 +77,7 @@ export interface Orders {
     telefono: string;
     direccion: string;
   }
-  Pago?: {
+  pago?: {
     id: number;
     estado: string;
     metodoDePago?: string;
