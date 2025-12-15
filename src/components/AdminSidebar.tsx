@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { UtensilsCrossed as HamburgerIcon, LayoutDashboard, Package, FolderKanban, ShoppingBag, Settings, LogOut, Plus, Home, Timer, ChevronDown, UtensilsCrossed, Ruler, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { Button } from './ui/button';
+import { useConfiguracion } from '@/context/ConfiguracionContext';
 import {
   Sidebar,
   SidebarContent,
@@ -44,6 +45,9 @@ export function AdminSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const { logout, user } = useAuth();
+  const { config, loading, error } = useConfiguracion();
+  const logoUrl = config?.url_logo || '/default-logo.png';
+  const nombreLocal = config?.nombreLocal || 'Admin';
 
   const isCollapsed = state === 'collapsed' && !isMobile;
 
@@ -101,11 +105,11 @@ export function AdminSidebar() {
               "flex items-center gap-2 overflow-hidden transition-all",
               isCollapsed ? "justify-center w-full" : "px-2"
             )}>
-               <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                  <HamburgerIcon className="size-4" />
+               <div className="flex aspect-square size-8 items-center justify-center rounded-lg text-primary-foreground">
+                  <img className="size-4" src={logoUrl} />
                </div>
                {!isCollapsed && (
-                  <span className="font-bold truncate">Gourmet</span>
+                  <span className="font-bold truncate">{nombreLocal}</span>
                )}
             </div>
 
