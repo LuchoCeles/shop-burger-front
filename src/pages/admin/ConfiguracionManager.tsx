@@ -5,11 +5,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { Lock, Eye, EyeOff, CreditCard, Landmark } from 'lucide-react';
+import { Lock, Eye, EyeOff, CreditCard, Landmark, Globe } from 'lucide-react';
 import ApiService from '@/services/api';
 import { useAuth } from '@/context/AuthContext';
 import DatosBancariosForm from '@/components/admin/DatosBancariosForm';
 import MercadoPagoForm from '@/components/admin/MercadoPagoForm';
+import ConfiguracionPaginaForm from '@/components/admin/ConfiguracionPaginaForm';
 import EnviosManager from '@/components/admin/EnviosManager';
 import { ConfiguracionManagerSkeleton } from '@/components/skeletons';
 
@@ -84,7 +85,7 @@ const ConfiguracionManager = () => {
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold">Configuración</h1>
-          <p className="text-muted-foreground">Gestionar datos bancarios y métodos de pago</p>
+          <p className="text-muted-foreground">Gestionar datos bancarios, pagos y sitio web</p>
         </div>
 
         <div className="flex items-center justify-center min-h-[50vh]">
@@ -95,7 +96,7 @@ const ConfiguracionManager = () => {
                 Autenticación Requerida
               </CardTitle>
               <CardDescription>
-                Ingrese el CUIT y la contraseña para acceder a la configuración bancaria.
+                Ingrese el CUIT y la contraseña para acceder a la configuración del sistema.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -164,13 +165,23 @@ const ConfiguracionManager = () => {
   // Vista principal con tabs cuando está autenticado
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Configuración</h1>
-        <p className="text-muted-foreground">Gestionar datos bancarios y métodos de pago</p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold">Configuración</h1>
+          <p className="text-muted-foreground">Gestionar datos bancarios, métodos de pago y sitio web</p>
+        </div>
+        <Button variant="outline" size="sm" onClick={handleLogout}>
+            Cerrar Sesión Segura
+        </Button>
       </div>
 
-      <Tabs defaultValue="bancarios" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+
+      <Tabs defaultValue="pagina" className="w-full">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="pagina" className="flex items-center gap-2">
+            <Globe className="h-4 w-4" />
+            Sitio Web
+          </TabsTrigger>
           <TabsTrigger value="bancarios" className="flex items-center gap-2">
             <Landmark className="h-4 w-4" />
             Datos Bancarios
@@ -185,8 +196,13 @@ const ConfiguracionManager = () => {
           </TabsTrigger>
         </TabsList>
 
+        {/* Pestañas */}
+        <TabsContent value="pagina">
+          <ConfiguracionPaginaForm />
+        </TabsContent>
+
         <TabsContent value="bancarios">
-          <DatosBancariosForm onLogout={handleLogout} />
+          <DatosBancariosForm  onLogout={handleLogout}/>
         </TabsContent>
 
         <TabsContent value="mercadopago">
