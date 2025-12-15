@@ -49,7 +49,7 @@ const PedidosManager = () => {
       const inicial: Record<number, string> = {};
 
       pedidos.forEach(p => {
-        inicial[p.id] = p.Pago?.estado || "Pendiente";
+        inicial[p.id] = p.pago?.estado || "Pendiente";
       });
 
       setEstadoManual(inicial);
@@ -173,13 +173,13 @@ const PedidosManager = () => {
 
               <div className="flex flex-col gap-4 sm:flex-row sm:gap-6">
                 {/* SELECT 1 - Estado real (si es MP) */}
-                {pedido.Pago?.metodoDePago === "Mercado Pago" && (
+                {pedido.pago?.metodoDePago === "Mercado Pago" && (
                   <div className="flex items-center justify-between sm:justify-start gap-2 w-full">
-                    <span className={`font-medium ${getEstadoColor(pedido.Pago.estado.toLowerCase())}`}>
+                    <span className={`font-medium ${getEstadoColor(pedido.pago.estado.toLowerCase())}`}>
                       Estado:
                     </span>
 
-                    <Select value={pedido.Pago.estado} disabled>
+                    <Select value={pedido.pago.estado} disabled>
                       <SelectTrigger className="w-full sm:w-40 bg-background opacity-70 cursor-not-allowed">
                         <SelectValue placeholder="Estado de pago" />
                       </SelectTrigger>
@@ -203,11 +203,11 @@ const PedidosManager = () => {
                     value={estadoManual[pedido.id]}
                     onValueChange={(value) => {
                       setEstadoManual(prev => ({ ...prev, [pedido.id]: value }));
-                      handleEstadoPagoChange(pedido.Pago.id, value);
+                      handleEstadoPagoChange(pedido.pago.id, value);
                     }}
                     disabled={
                       ["Pagado", "Cancelado"].includes(estadoManual[pedido.id]) ||
-                      ["Pagado", "Rechazado", "Expirado"].includes(pedido.Pago?.estado)
+                      ["Pagado", "Rechazado", "Expirado"].includes(pedido.pago?.estado)
                     }
                   >
                     <SelectTrigger
@@ -254,7 +254,7 @@ const PedidosManager = () => {
 
             <div className="mb-4 grid gap-2 text-sm">
               <p className="text-foreground">
-                <span className="font-medium">Metodo De Pago:</span> {pedido.Pago?.metodoDePago || 'N/A'}
+                <span className="font-medium">Metodo De Pago:</span> {pedido.pago?.metodoDePago || 'N/A'}
               </p>
               <p className="text-foreground">
                 <span className="font-medium">Teléfono:</span> {pedido.cliente.telefono || 'N/A'}
@@ -270,55 +270,84 @@ const PedidosManager = () => {
             <div className="border-t border-border pt-4">
               <p className="mb-3 text-lg font-semibold text-foreground">Productos del Pedido:</p>
               <div className="space-y-3">
-                {pedido.productos?.map((prod, idx: number) => (
-                  <div key={idx} className="rounded-md border border-border bg-muted/30 p-4">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <p className="text-base font-semibold text-foreground">
-                          {prod.nombre}
-                        </p>
-                        <div className="mt-2 space-y-1.5">
-                          <p className="text-xs font-medium text-muted-foreground">
-                            Guarnición seleccionada:
-                          </p>
-                          {prod.guarnicion && (
-                            <div className="flex items-center gap-2 rounded-sm bg-background/50 px-2 py-1">
-                              <p className="text-sm text-foreground">
-                                {prod.guarnicion.nombre}
+                {pedido.productos?.map((prod, idx: number) => {
+                  const hasGuarnicion = prod.guarnicion && prod.guarnicion.nombre;
+                  const hasAdicionales = prod.adicionales && prod.adicionales.length > 0;
+                  const hasExtras = hasGuarnicion || hasAdicionales;
+
+                  return (
+                    <div key={idx} className="rounded-md border border-border bg-muted/30 p-4">
+                      <div className={`flex items-start ${hasExtras ? 'justify-between' : 'justify-center text-center'}`}>
+                        {hasExtras ? (
+                          <>
+                            <div className="flex-1">
+                              <p className="text-base font-semibold text-foreground">
+                                {prod.nombre}
                               </p>
+                              <div className="mt-2 space-y-1.5">
+                                {hasGuarnicion && (
+                                  <>
+                                    <p className="text-xs font-medium text-muted-foreground">
+                                      Guarnición seleccionada:
+                                    </p>
+                                    <div className="flex items-center gap-2 rounded-sm bg-background/50 px-2 py-1">
+                                      <p className="text-sm text-foreground">
+                                        {prod.guarnicion!.nombre}
+                                      </p>
+                                    </div>
+                                  </>
+                                )}
+                                {hasAdicionales && (
+                                  <>
+                                    <p className="text-xs font-medium text-muted-foreground">Adicionales:</p>
+                                    {prod.adicionales!.map((ad, adIdx) => (
+                                      <div
+                                        key={adIdx}
+                                        className="flex items-center gap-2 rounded-sm bg-background/50 px-2 py-1"
+                                      >
+                                        <span className="text-sm text-foreground">+ {ad.nombre}</span>
+                                        <span className="text-sm text-foreground">x{ad.cantidad}</span>
+                                        <span className="ml-auto text-sm font-semibold text-primary">
+                                          ${ad.precio * ad.cantidad}
+                                        </span>
+                                      </div>
+                                    ))}
+                                  </>
+                                )}
+                              </div>
                             </div>
-                          )}
-                          <p className="text-xs font-medium text-muted-foreground">Adicionales:</p>
-                          {prod.adicionales.map((ad, adIdx) => (
-                            <div
-                              key={adIdx}
-                              className="flex items-center gap-2 rounded-sm bg-background/50 px-2 py-1"
-                            >
-                              <span className="text-sm text-foreground">+ {ad.nombre}</span>
-
-                              <span className="text-sm text-foreground">
-                                x{ad.cantidad}
-                              </span>
-
-                              <span className="ml-auto text-sm font-semibold text-primary">
-                                ${ad.precio * ad.cantidad}
-                              </span>
+                            <div className="ml-4 text-right">
+                              <p className="text-sm font-medium text-muted-foreground">Cantidad</p>
+                              <p className="text-2xl font-bold text-foreground">{prod.cantidad}</p>
+                              <p className="mt-1 text-lg font-bold text-primary">${prod.precio * prod.cantidad}</p>
                             </div>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="ml-4 text-right">
-                        <p className="text-sm font-medium text-muted-foreground">Cantidad</p>
-                        <p className="text-2xl font-bold text-foreground">{prod.cantidad}</p>
-                        <p className="mt-1 text-lg font-bold text-primary">${prod.precio * prod.cantidad}</p>
+                          </>
+                        ) : (
+                          <div className="flex flex-col items-center gap-2 w-full">
+                            <p className="text-base font-semibold text-foreground">{prod.nombre}</p>
+                            <div className="flex items-center gap-4">
+                              <span className="text-sm text-muted-foreground">Cantidad: {prod.cantidad}</span>
+                              <span className="text-lg font-bold text-primary">${prod.precio * prod.cantidad}</span>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
-              <div className="mt-6 rounded-md bg-primary/10 p-4">
+
+              {/* Envío */}
+              {pedido.envio !== undefined && pedido.envio !== null && pedido.envio > 0 && (
+                <div className="mt-4 flex justify-between items-center px-4 py-2 rounded-md bg-muted/50">
+                  <span className="text-sm font-medium text-foreground">Costo de envío:</span>
+                  <span className="text-lg font-semibold text-primary">${pedido.envio}</span>
+                </div>
+              )}
+
+              <div className="mt-4 rounded-md bg-primary/10 p-4">
                 <p className="text-right text-2xl font-bold text-primary">
-                  Total: ${pedido.precioTotal}
+                  Total: ${pedido.precioTotal + (pedido.envio || 0)}
                 </p>
               </div>
             </div>

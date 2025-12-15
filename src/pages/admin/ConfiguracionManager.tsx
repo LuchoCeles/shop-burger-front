@@ -11,6 +11,7 @@ import { useAuth } from '@/context/AuthContext';
 import DatosBancariosForm from '@/components/admin/DatosBancariosForm';
 import MercadoPagoForm from '@/components/admin/MercadoPagoForm';
 import ConfiguracionPaginaForm from '@/components/admin/ConfiguracionPaginaForm';
+import EnviosManager from '@/components/admin/EnviosManager';
 import { ConfiguracionManagerSkeleton } from '@/components/skeletons';
 
 const ConfiguracionManager = () => {
@@ -174,9 +175,9 @@ const ConfiguracionManager = () => {
         </Button>
       </div>
 
+
       <Tabs defaultValue="pagina" className="w-full">
-        {/* Actualizado el grid a 3 columnas */}
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="pagina" className="flex items-center gap-2">
             <Globe className="h-4 w-4" />
             Sitio Web
@@ -189,9 +190,13 @@ const ConfiguracionManager = () => {
             <CreditCard className="h-4 w-4" />
             Mercado Pago
           </TabsTrigger>
+          <TabsTrigger value="envios" className="flex items-center gap-2">
+            <CreditCard className="h-4 w-4" />
+            Envios
+          </TabsTrigger>
         </TabsList>
 
-        {/* Nueva Pestaña */}
+        {/* Pestañas */}
         <TabsContent value="pagina">
           <ConfiguracionPaginaForm />
         </TabsContent>
@@ -202,6 +207,10 @@ const ConfiguracionManager = () => {
 
         <TabsContent value="mercadopago">
           <MercadoPagoForm />
+        </TabsContent>
+
+        <TabsContent value="envios">
+          <EnviosManager />
         </TabsContent>
       </Tabs>
     </div>

@@ -368,6 +368,16 @@ class ApiService {
   const rsp = await this.PUT('api/configuracion', formData, true);
   return rsp.json();
 }
+  // Envios endpoints
+  async getEnvios() {
+    const rsp = await this.GET('api/envios/');
+    return rsp.json();
+  }
+
+  async updateEnvio(id, envioData) {
+    const rsp = await this.PATCH(`api/envios/${id}`, envioData);
+    return rsp.json();
+  }
   
 }
 

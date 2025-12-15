@@ -18,6 +18,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import ApiService from '@/services/api';
@@ -37,6 +44,7 @@ export default function AdicionalesManager() {
     maxCantidad: '',
   });
   const [initialLoading, setInitialLoading] = useState(true);
+  const [estadoFiltro, setEstadoFiltro] = useState<'todos' | 'activos' | 'inactivos'>('todos');
   const maxLength = 25;
 
   useEffect(() => {
@@ -56,6 +64,12 @@ export default function AdicionalesManager() {
   if (initialLoading) {
     return <AdicionalesManagerSkeleton />;
   }
+
+  const adicionalesFiltrados = adicionales.filter((a) => {
+    if (estadoFiltro === 'todos') return true;
+    if (estadoFiltro === 'activos') return a.estado;
+    return !a.estado;
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -138,14 +152,26 @@ export default function AdicionalesManager() {
     <div className="space-y-4 md:space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-bold text-foreground md:text-3xl">Adicionales</h1>
-        <Button onClick={openCreateDialog} className="w-full sm:w-auto">
-          <Plus className="mr-2 h-4 w-4" />
-          Nuevo Adicional
-        </Button>
+        <div className="flex gap-2 w-full sm:w-auto">
+          <Select value={estadoFiltro} onValueChange={(v) => setEstadoFiltro(v as 'todos' | 'activos' | 'inactivos')}>
+            <SelectTrigger className="bg-background w-full sm:w-32">
+              <SelectValue placeholder="Estado" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todos">Todos</SelectItem>
+              <SelectItem value="activos">Activos</SelectItem>
+              <SelectItem value="inactivos">Inactivos</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button onClick={openCreateDialog} className="w-full sm:w-auto">
+            <Plus className="mr-2 h-4 w-4" />
+            Nuevo Adicional
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-        {adicionales.map((adicional) => (
+        {adicionalesFiltrados.map((adicional) => (
           <div
             key={adicional.id}
             className="border border-border rounded-lg p-4 bg-card space-y-3"
@@ -203,10 +229,10 @@ export default function AdicionalesManager() {
         ))}
       </div>
 
-      {adicionales.length === 0 && (
+      {adicionalesFiltrados.length === 0 && (
         <div className="text-center py-12 text-muted-foreground">
-          <p>No hay adicionales creados</p>
-          <p className="text-sm mt-1">Crea tu primer adicional para comenzar</p>
+          <p>{adicionales.length === 0 ? 'No hay adicionales creados' : 'No hay adicionales con los filtros seleccionados'}</p>
+          {adicionales.length === 0 && <p className="text-sm mt-1">Crea tu primer adicional para comenzar</p>}
         </div>
       )}
 
