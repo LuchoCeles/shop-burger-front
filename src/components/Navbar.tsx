@@ -5,11 +5,15 @@ import { useAuth } from '../context/AuthContext';
 import { Button } from './ui/button';
 import { useState } from 'react';
 import CartModal from './CartModal';
+import { useConfiguracion } from '@/context/ConfiguracionContext';
 
 const Navbar = () => {
   const { itemCount } = useCart();
   const { isAuthenticated, logout } = useAuth();
   const [showCart, setShowCart] = useState(false);
+  const { config, loading, error } = useConfiguracion();
+  const logoUrl = config?.url_logo || '/default-logo.png';
+  const nombreLocal = config?.nombreLocal || 'Cargando';
 
   return (
     <>
@@ -17,8 +21,9 @@ const Navbar = () => {
         <div className="container mx-auto px-4">
           <div className="flex h-16 items-center justify-between">
             <Link to="/" className="flex items-center space-x-2" draggable={false}>
-              <div className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                Gourmet
+              <div className="flex items-center flex-row text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                <img src={logoUrl} alt={nombreLocal} className="h-10" />
+                {nombreLocal}
               </div>
             </Link>
 

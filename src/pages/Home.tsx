@@ -6,10 +6,11 @@ import StoreClosedModal from '../components/StoreClosedModal';
 import ApiService from '../services/api';
 import { toast } from 'sonner';
 import { Product, Category } from '../intefaces/interfaz';
-import { MessageCircle, Instagram, Facebook } from 'lucide-react';
+import { MessageCircle, Instagram, Facebook, Globe, Phone, LocationEdit} from 'lucide-react';
 import { CategoryCarouselSkeleton, ProductGridSkeleton } from '../components/skeletons';
 import { Skeleton } from '../components/ui/skeleton';
 import { useStoreStatus } from '../hooks/useStoreStatus';
+import { useConfiguracion } from '@/context/ConfiguracionContext';
 
 const Home = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -18,6 +19,15 @@ const Home = () => {
   const [initialLoading, setInitialLoading] = useState(true);
   const [loading, setLoading] = useState(true);
   const [showClosedModal, setShowClosedModal] = useState(false);
+  const { config, error } = useConfiguracion();
+  const logoUrl = config?.url_logo || '/default-logo.png';
+  const nombreLocal = config?.nombreLocal || 'Cargando...';
+  const slogan = config?.slogan || '...';
+  const telefonos = config?.telefonos || [];
+  const direcciones = config?.direcciones || [];
+  const otrasPaginas = config?.otrasPaginas || [];
+  const whatsapp = config?.whatsapp || "https://wa.me/";
+  const copyright = config?.copyright || "Derechos de autor";
 
   // Hook para verificar el estado de la tienda
   const { isOpen, nextOpenTime, currentDay, loading: statusLoading } = useStoreStatus();
@@ -138,11 +148,11 @@ const Home = () => {
             <h1 className="mb-4 text-4xl font-bold text-foreground md:text-5xl">
               Bienvenido a{' '}
               <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                Gourmet
+                {nombreLocal}
               </span>
             </h1>
             <p className="text-lg text-muted-foreground">
-              Descubre nuestra selección de productos premium
+              {slogan}
             </p>
           </div>
 
@@ -219,41 +229,72 @@ const Home = () => {
 
       <footer className="border-t border-border bg-card py-8 select-none">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col items-center justify-between gap-4 md:flex-row md:items-start">
-            <div className="text-sm text-muted-foreground">
-              <p>&copy; 2025 Gourmet. Todos los derechos reservados.</p>
+          <div className="flex flex-col w-full gap-4">
+            <div className="flex flex-row items-center justify-between gap-4 md:flex-row md:items-start">
+              <div className="flex flex-row items-center gap-9">
+                {
+                  telefonos.map((telefono,index)=>(
+                  <a
+                    key={index}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    draggable={false}
+                    className="flex items-center gap-2 text-muted-foreground transition-colors hover:text-primary"
+                  >
+                    <span className="text-sm flex flex-row"><Phone className="h-5 w-5" />{telefono.telefono}</span>
+                  </a>
+                  ))
+                }
+              </div>
+              <div className="flex flex-row items-center gap-9">
+                <a
+                  href={`https://wa.me/${whatsapp}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  draggable={false}
+                  className="flex items-center gap-2 text-muted-foreground transition-colors hover:text-primary"
+                >
+                  <MessageCircle className="h-5 w-5" />
+                  <span className="text-sm">WhatsApp</span>
+                </a>
+                {
+                  otrasPaginas.map((pagina,index)=>(
+                  <a
+                    key={index}
+                    href={pagina.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    draggable={false}
+                    className="flex items-center gap-2 text-muted-foreground transition-colors hover:text-primary"
+                  >
+                    {(pagina.nombre.toLocaleLowerCase()== "instagram") && <Instagram className="h-5 w-5" />}
+                    {(pagina.nombre.toLocaleLowerCase()== "facebook") && <Facebook className="h-5 w-5" />}
+                    {(pagina.nombre.toLocaleLowerCase()!= "facebook" && pagina.nombre.toLocaleLowerCase()!= "instagram") && <Globe className="h-5 w-5" />}
+                    <span className="text-sm">{pagina.nombre}</span>
+                  </a>
+                  ))
+                }
+              </div>
             </div>
-            <div className="flex items-center gap-9">
-              <a
-                href="https://wa.me/"
-                target="_blank"
-                rel="noopener noreferrer"
-                draggable={false}
-                className="flex items-center gap-2 text-muted-foreground transition-colors hover:text-primary"
-              >
-                <MessageCircle className="h-5 w-5" />
-                <span className="text-sm">WhatsApp</span>
-              </a>
-              <a
-                href="https://instagram.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-                draggable={false}
-                className="flex items-center gap-2 text-muted-foreground transition-colors hover:text-primary"
-              >
-                <Instagram className="h-5 w-5" />
-                <span className="text-sm">Instagram</span>
-              </a>
-              <a
-                href="https://facebook.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-                draggable={false}
-                className="flex items-center gap-2 text-muted-foreground transition-colors hover:text-primary"
-              >
-                <Facebook className="h-5 w-5" />
-                <span className="text-sm">Facebook</span>
-              </a>
+            <div className="flex flex-row items-center justify-between gap-4 md:flex-row md:items-start">
+              <div className="text-sm text-muted-foreground">
+                <p>{copyright}</p>
+              </div>
+              <div className="flex flex-row items-center gap-9">
+                {
+                  direcciones.map((direccion,index)=>(
+                  <a
+                    key={index}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    draggable={false}
+                    className="flex items-center gap-2 text-muted-foreground transition-colors hover:text-primary"
+                  >
+                    <span className="text-sm flex flex-row"><LocationEdit className="h-5 w-5" />{direccion.direccion}</span>
+                  </a>
+                  ))
+                }
+              </div>
             </div>
           </div>
         </div>
